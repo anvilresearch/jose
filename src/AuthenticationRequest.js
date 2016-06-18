@@ -199,17 +199,14 @@ class AuthenticationRequest {
   supportedResponseType () {
     let {client,params,provider} = this
     let supportedResponseTypes = provider.supported_response_types
-    let registeredResponseTypes = client.response_types
     let requestedResponseType = params.response_type
 
     // TODO
     // verify that the requested response types are permitted
     // by client registration
     //
-    // also, trim and split the value and assign responseTypes array
-    // to this for future reference
-
-    return supportedResponseTypes.indexOf(requestedResponseTyoe) === -1
+    // let registeredResponseTypes = client.response_types
+    return supportedResponseTypes.indexOf(requestedResponseType) !== -1
   }
 
   /**

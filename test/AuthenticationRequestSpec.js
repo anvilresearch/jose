@@ -154,7 +154,29 @@ describe('AuthenticationRequest', () => {
   /**
    * Supported Response Types
    */
-  describe('supportedResponseType', () => {})
+  describe('supportedResponseType', () => {
+    let res, host, provider
+
+    beforeEach(() => {
+      res = {}
+      host = {}
+      provider = { host, supported_response_types: ['code id_token'] }
+    })
+
+    it('should return true with a supported response type parameter', () => {
+      let params = { response_type: 'code id_token' }
+      let req = { method: 'GET', query: params }
+      let request = new AuthenticationRequest(req, res, provider)
+      request.supportedResponseType().should.equal(true)
+    })
+
+    it('should return false with an supported response type parameter', () => {
+      let params = { response_type: 'code id_token token' }
+      let req = { method: 'GET', query: params }
+      let request = new AuthenticationRequest(req, res, provider)
+      request.supportedResponseType().should.equal(false)
+    })
+  })
 
   /**
    * Supported Response Mode

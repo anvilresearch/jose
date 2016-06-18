@@ -585,10 +585,42 @@ describe('AuthenticationRequest', () => {
       })
     })
 
-    describe('with valid request', () => {})
+    describe('with valid request', () => {
+      let params, client, req, res, host, provider, request, promise
 
+      before(() => {
+        params = {
+          client_id: 'uuid',
+          redirect_uri: 'https://example.com/callback',
+          response_type: 'code',
+          scope: 'openid',
+          nonce: 'n0nc3'
+        }
+        req = { method: 'GET', query: params }
+        res = {}
+        host = {}
+        client = { redirect_uris: 'https://example.com/callback' }
+        provider = {
+          host,
+          supported_response_types: ['code', 'id_token token'],
+          supported_response_modes: ['query', 'fragment'],
+          getClient: sinon.stub().returns(Promise.resolve(client))
+        }
+        request = new AuthenticationRequest(req, res, provider)
+        promise = request.validate(request)
+      })
+
+      it('should return a promise', () => {
+        promise.should.be.instanceof(Promise)
+      })
+
+      it('should set client on the request', () => {
+        request.client.should.equal(client)
+      })
+    })
   })
 
+  describe('authorize', () => {})
   describe('allow', () => {})
   describe('deny', () => {})
   describe('includeAccessToken', () => {})

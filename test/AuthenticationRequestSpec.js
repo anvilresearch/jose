@@ -808,6 +808,28 @@ describe('AuthenticationRequest', () => {
     })
   })
 
-  describe('internalServerError', () => {})
+  describe('internalServerError', () => {
+    let status, send
+
+    beforeEach(() => {
+      send = sinon.spy()
+      status = sinon.stub().returns({send})
+
+      let req = { method: 'GET', query: {} }
+      let res = { status }
+      let provider = { host: {} }
+      let request = new AuthenticationRequest(req, res, provider)
+
+      request.internalServerError()
+    })
+
+    it('should respond 500', () => {
+      status.should.have.been.calledWith(500)
+    })
+
+    it('should respond Internal Server Error', () => {
+      send.should.have.been.calledWith('Internal Server Error')
+    })
+  })
 
 })

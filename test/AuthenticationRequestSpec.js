@@ -646,18 +646,17 @@ describe('AuthenticationRequest', () => {
     })
 
     describe('without consent', () => {
-      let params, client, req, res, host, provider, request, promise
+      let req, res, provider, request
 
       before(() => {
         sinon.stub(AuthenticationRequest.prototype, 'deny')
         req = { method: 'GET', query: { authorize: false } }
         res = {}
-        host = {}
         provider = {
-          host,
+          host: {}
         }
         request = new AuthenticationRequest(req, res, provider)
-        promise = request.authorize(request)
+        request.authorize(request)
       })
 
       after(() => {
@@ -671,7 +670,25 @@ describe('AuthenticationRequest', () => {
   })
 
   describe('allow', () => {})
-  describe('deny', () => {})
+
+  describe('deny', () => {
+    before(() => {
+      sinon.stub(AuthenticationRequest.prototype, 'redirect')
+      let request = new AuthenticationRequest({}, {}, { host: {} })
+      request.deny()
+    })
+
+    after(() => {
+      AuthenticationRequest.prototype.redirect.restore()
+    })
+
+    it('should respond "302 Redirect"', () => {
+      AuthenticationRequest.prototype.redirect.should.have.been.calledWith({
+        error: 'access_denied'
+      })
+    })
+  })
+
   describe('includeAccessToken', () => {})
   describe('includeAuthorizationCode', () => {})
   describe('includeIDToken', () => {})

@@ -746,7 +746,30 @@ describe('AuthenticationRequest', () => {
     })
   })
 
-  describe('forbidden', () => {})
+  describe('forbidden', () => {
+    let status, send
+
+    beforeEach(() => {
+      send = sinon.spy()
+      status = sinon.stub().returns({send})
+
+      let req = { method: 'GET', query: {} }
+      let res = { status }
+      let provider = { host: {} }
+      let request = new AuthenticationRequest(req, res, provider)
+
+      request.forbidden()
+    })
+
+    it('should respond 403', () => {
+      status.should.have.been.calledWith(403)
+    })
+
+    it('should respond Forbidden', () => {
+      send.should.have.been.calledWith('Forbidden')
+    })
+  })
+
   describe('badRequest', () => {})
   describe('internalServerError', () => {})
 

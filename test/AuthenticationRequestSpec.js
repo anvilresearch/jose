@@ -711,7 +711,41 @@ describe('AuthenticationRequest', () => {
     })
   })
 
-  describe('unauthorized', () => {})
+  describe('unauthorized', () => {
+    let status, send, set
+
+    beforeEach(() => {
+      set = sinon.spy()
+      send = sinon.spy()
+      status = sinon.stub().returns({send})
+
+      let req = { method: 'GET', query: {} }
+      let res = { set, status }
+      let provider = { host: {} }
+      let request = new AuthenticationRequest(req, res, provider)
+
+      request.unauthorized({
+        realm: 'a',
+        error: 'b',
+        error_description: 'c'
+      })
+    })
+
+    it('should respond 401', () => {
+      status.should.have.been.calledWith(401)
+    })
+
+    it('should respond Unauthorized', () => {
+      send.should.have.been.calledWith('Unauthorized')
+    })
+
+    it('should set WWW-Authenticate header', () => {
+      set.should.have.been.calledWith({
+        'WWW-Authenticate': 'Bearer realm=a, error=b, error_description=c'
+      })
+    })
+  })
+
   describe('forbidden', () => {})
   describe('badRequest', () => {})
   describe('internalServerError', () => {})

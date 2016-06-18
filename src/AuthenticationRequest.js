@@ -1,6 +1,11 @@
 'use strict'
 
 /**
+ * Dependencies
+ */
+const qs = require('qs')
+
+/**
  * Request Parameter Mapping
  */
 const PARAMS = { 'GET': 'query', 'POST': 'body' }

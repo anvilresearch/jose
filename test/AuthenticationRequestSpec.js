@@ -693,7 +693,24 @@ describe('AuthenticationRequest', () => {
   describe('includeAuthorizationCode', () => {})
   describe('includeIDToken', () => {})
   describe('includeSessionState', () => {})
-  describe('redirect', () => {})
+
+  describe('redirect', () => {
+    it('should redirect with an authorization response', () => {
+      let req = {
+        method: 'GET',
+        query: { redirect_uri: 'https://example.com/callback' }
+      }
+
+      let res = { redirect: sinon.spy() }
+      let provider = { host: {} }
+      let response = { foo: 'bar' }
+      let request = new AuthenticationRequest(req, res, provider)
+      request.redirect(response)
+      res.redirect.should.have.been
+        .calledWith('https://example.com/callback#foo=bar')
+    })
+  })
+
   describe('unauthorized', () => {})
   describe('forbidden', () => {})
   describe('badRequest', () => {})

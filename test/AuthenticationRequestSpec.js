@@ -543,12 +543,52 @@ describe('AuthenticationRequest', () => {
       })
     })
 
-    describe('with unsupported response mode', () => {})
+    describe('with unsupported response mode', () => {
+      let params, req, res, host, provider, request
+
+      before(() => {
+        sinon.stub(AuthenticationRequest.prototype, 'redirect')
+        params = {
+          client_id: 'uuid',
+          redirect_uri: 'https://example.com/callback',
+          response_type: 'code',
+          response_mode: 'unsupported',
+          scope: 'openid',
+          nonce: 'n0nc3'
+        }
+        req = { method: 'GET', query: params }
+        res = {}
+        host = {}
+        provider = {
+          host,
+          supported_response_types: ['code', 'id_token token'],
+          supported_response_modes: ['query', 'fragment'],
+          getClient: sinon.stub().returns(Promise.resolve({
+            redirect_uris: [
+              'https://example.com/callback'
+            ]
+          }))
+        }
+        request = new AuthenticationRequest(req, res, provider)
+        request.validate(request)
+      })
+
+      after(() => {
+        AuthenticationRequest.prototype.redirect.restore()
+      })
+
+      it('should respond "302 Redirect"', () => {
+        request.redirect.should.have.been.calledWith({
+          error: 'unsupported_response_mode',
+          error_description: 'Unsupported response mode'
+        })
+      })
+    })
+
     describe('with valid request', () => {})
 
   })
 
-  describe('authorize', () => {})
   describe('allow', () => {})
   describe('deny', () => {})
   describe('includeAccessToken', () => {})

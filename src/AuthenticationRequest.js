@@ -254,7 +254,7 @@ class AuthenticationRequest {
   authorize (request) {
     let {params} = request
 
-    if (params.authorize === 'true') {
+    if (params.authorize === true) {
       request.allow()
     } else {
       request.deny()

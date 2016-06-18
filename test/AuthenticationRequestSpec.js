@@ -620,7 +620,56 @@ describe('AuthenticationRequest', () => {
     })
   })
 
-  describe('authorize', () => {})
+  describe('authorize', () => {
+    describe('with consent', () => {
+      let params, client, req, res, host, provider, request, promise
+
+      before(() => {
+        sinon.stub(AuthenticationRequest.prototype, 'allow')
+        req = { method: 'GET', query: { authorize: true } }
+        res = {}
+        host = {}
+        provider = {
+          host,
+        }
+        request = new AuthenticationRequest(req, res, provider)
+        promise = request.authorize(request)
+      })
+
+      after(() => {
+        AuthenticationRequest.prototype.allow.restore()
+      })
+
+      it('should grant access', () => {
+        request.allow.should.have.been.called
+      })
+    })
+
+    describe('without consent', () => {
+      let params, client, req, res, host, provider, request, promise
+
+      before(() => {
+        sinon.stub(AuthenticationRequest.prototype, 'deny')
+        req = { method: 'GET', query: { authorize: false } }
+        res = {}
+        host = {}
+        provider = {
+          host,
+        }
+        request = new AuthenticationRequest(req, res, provider)
+        promise = request.authorize(request)
+      })
+
+      after(() => {
+        AuthenticationRequest.prototype.deny.restore()
+      })
+
+      it('should deny access', () => {
+        request.deny.should.have.been.called
+      })
+    })
+  })
+
   describe('allow', () => {})
   describe('deny', () => {})
   describe('includeAccessToken', () => {})

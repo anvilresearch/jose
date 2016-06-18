@@ -465,7 +465,44 @@ describe('AuthenticationRequest', () => {
       })
     })
 
-    describe('with missing required nonce', () => {})
+    describe('with missing required nonce', () => {
+      let params, req, res, host, provider, request
+
+      before(() => {
+        sinon.stub(AuthenticationRequest.prototype, 'redirect')
+        params = {
+          client_id: 'uuid',
+          redirect_uri: 'https://example.com/callback',
+          response_type: 'id_token token',
+          scope: 'openid profile'
+        }
+        req = { method: 'GET', query: params }
+        res = {}
+        host = {}
+        provider = {
+          host,
+          getClient: sinon.stub().returns(Promise.resolve({
+            redirect_uris: [
+              'https://example.com/callback'
+            ]
+          }))
+        }
+        request = new AuthenticationRequest(req, res, provider)
+        request.validate(request)
+      })
+
+      after(() => {
+        AuthenticationRequest.prototype.redirect.restore()
+      })
+
+      it('should respond "302 Redirect"', () => {
+        request.redirect.should.have.been.calledWith({
+          error: 'invalid_request',
+          error_description: 'Missing nonce'
+        })
+      })
+    })
+
     describe('with unsupported response type', () => {})
     describe('with unsupported response mode', () => {})
     describe('with valid request', () => {})

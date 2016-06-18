@@ -214,7 +214,32 @@ describe('AuthenticationRequest', () => {
   /**
    * Required Nonce Provided
    */
-  describe('requiredNonceProvided', () => {})
+  describe('requiredNonceProvided', () => {
+    it('should return true when nonce is not required', () => {
+      let req = { method: 'GET', query: { response_type: 'code' } }
+      let request = new AuthenticationRequest(req, {}, { host: {} })
+      request.requiredNonceProvided().should.equal(true)
+    })
+
+    it('should return true when nonce is required and provided', () => {
+      let req = {
+        method: 'GET',
+        query: {
+          response_type: 'id_token token',
+          nonce: 'n0nc3'
+        }
+      }
+
+      let request = new AuthenticationRequest(req, {}, { host: {} })
+      request.requiredNonceProvided().should.equal(true)
+    })
+
+    it('should return false when nonce is required and missing', () => {
+      let req = { method: 'GET', query: { response_type: 'id_token token' } }
+      let request = new AuthenticationRequest(req, {}, { host: {} })
+      request.requiredNonceProvided().should.equal(false)
+    })
+  })
 
   /**
    * Validate

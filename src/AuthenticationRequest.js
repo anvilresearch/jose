@@ -233,10 +233,14 @@ class AuthenticationRequest {
    */
   requiredNonceProvided () {
     let {params} = this
-    let {nonce, 'response_type': responseType} = params
+    let {nonce, response_type: responseType} = params
     let requiring = ['id_token', 'token']
 
-    return (!nonce && requiring.some(type => responseType.indexOf(type) !== -1))
+    if (!nonce && requiring.some(type => responseType.indexOf(type) !== -1)) {
+      return false
+    } else {
+      return true
+    }
   }
 
   /**

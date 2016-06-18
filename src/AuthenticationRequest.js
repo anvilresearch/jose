@@ -372,7 +372,7 @@ class AuthenticationRequest {
   /**
    * 403 Forbidden Response
    */
-  forbidden (error) {
+  forbidden () {
     let {res} = this
     res.status(403).send('Forbidden')
   }
@@ -396,6 +396,7 @@ class AuthenticationRequest {
    */
   internalServerError (err) {
     // TODO: Debug logging here
+    let {res} = this
     res.status(500).send('Internal Server Error')
   }
 

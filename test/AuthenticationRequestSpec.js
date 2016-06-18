@@ -770,7 +770,44 @@ describe('AuthenticationRequest', () => {
     })
   })
 
-  describe('badRequest', () => {})
+  describe('badRequest', () => {
+    let status, json, set, err
+
+    beforeEach(() => {
+      set = sinon.spy()
+      json = sinon.spy()
+      status = sinon.stub().returns({json})
+      err = { error: 'error_name', error_description: 'description' }
+
+      let req = { method: 'GET', query: {} }
+      let res = { set, status }
+      let provider = { host: {} }
+      let request = new AuthenticationRequest(req, res, provider)
+
+      request.badRequest(err)
+    })
+
+    it('should respond 400', () => {
+      status.should.have.been.calledWith(400)
+    })
+
+    it('should respond with JSON', () => {
+      json.should.have.been.calledWith(err)
+    })
+
+    it('should set Cache-Control header', () => {
+      set.should.have.been.calledWith(sinon.match({
+        'Cache-Control': 'no-store'
+      }))
+    })
+
+    it('should set Pragma header', () => {
+      set.should.have.been.calledWith(sinon.match({
+        'Pragma': 'no-cache'
+      }))
+    })
+  })
+
   describe('internalServerError', () => {})
 
 })

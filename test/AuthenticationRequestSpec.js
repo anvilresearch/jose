@@ -327,35 +327,35 @@ describe('AuthenticationRequest', () => {
       })
     })
 
-    describe('with mismatching redirect uri', () => {})
-    //describe('with mismatching redirect uri', () => {
-    //  let params, req, res, host, provider, request
+    describe('with mismatching redirect uri', () => {
+      let params, client, req, res, host, provider, request
 
-    //  before(() => {
-    //    sinon.stub(AuthenticationRequest.prototype, 'redirect')
-    //    params = { client_id: 'uuid', redirect_uri: 'https://example.com/callback' }
-    //    req = { method: 'GET', query: params }
-    //    res = {}
-    //    host = {}
-    //    provider = {
-    //      host,
-    //      getClient: sinon.stub().returns(Promise.resolve(null))
-    //    }
-    //    request = new AuthenticationRequest(req, res, provider)
-    //    request.validate(request)
-    //  })
+      before(() => {
+        sinon.stub(AuthenticationRequest.prototype, 'badRequest')
+        params = { client_id: 'uuid', redirect_uri: 'https://example.com/wrong' }
+        req = { method: 'GET', query: params }
+        res = {}
+        host = {}
+        client = { redirect_uris: ['https://example.com/callback'] }
+        provider = {
+          host,
+          getClient: sinon.stub().returns(Promise.resolve(client))
+        }
+        request = new AuthenticationRequest(req, res, provider)
+        request.validate(request)
+      })
 
-    //  after(() => {
-    //    AuthenticationRequest.prototype.redirect.restore()
-    //  })
+      after(() => {
+        AuthenticationRequest.prototype.badRequest.restore()
+      })
 
-    //  it('should respond "302 Redirect"', () => {
-    //    request.redirect.should.have.been.calledWith({
-    //      error: '...',
-    //      error_description: '... mismatching redirect uri'
-    //    })
-    //  })
-    //})
+      it('should respond "400 Bad Request"', () => {
+        request.badRequest.should.have.been.calledWith({
+          error: 'invalid_request',
+          error_description: 'Mismatching redirect uri'
+        })
+      })
+    })
 
     describe('with missing response_type parameter', () => {
       let params, req, res, host, provider, request

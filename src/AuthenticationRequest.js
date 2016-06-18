@@ -130,9 +130,12 @@ class AuthenticationRequest {
         request.client = client
 
         // REDIRECT_URI MUST MATCH
-        // TODO
-
-
+        if (client.redirect_uris.indexOf(params.redirect_uri) === -1) {
+          return request.badRequest({
+            error: 'invalid_request',
+            error_description: 'Mismatching redirect uri'
+          })
+        }
 
         // RESPONSE TYPE IS REQUIRED
         if (!params.response_type) {
@@ -165,7 +168,6 @@ class AuthenticationRequest {
             error_description: 'Missing nonce'
           })
         }
-
 
         // RESPONSE TYPE MUST BE SUPPORTED
         // TODO is this something the client can configure too?

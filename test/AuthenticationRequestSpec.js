@@ -170,7 +170,7 @@ describe('AuthenticationRequest', () => {
       request.supportedResponseType().should.equal(true)
     })
 
-    it('should return false with an supported response type parameter', () => {
+    it('should return false with an unsupported response type parameter', () => {
       let params = { response_type: 'code id_token token' }
       let req = { method: 'GET', query: params }
       let request = new AuthenticationRequest(req, res, provider)
@@ -181,7 +181,35 @@ describe('AuthenticationRequest', () => {
   /**
    * Supported Response Mode
    */
-  describe('supportedResponseMode', () => {})
+  describe('supportedResponseMode', () => {
+    let res, host, provider
+
+    beforeEach(() => {
+      res = {}
+      host = {}
+      provider = { host, supported_response_modes: ['query', 'fragment'] }
+    })
+
+    it('should return true with an undefined response mode parameter', () => {
+      let req = { method: 'GET', query: {} }
+      let request = new AuthenticationRequest(req, res, provider)
+      request.supportedResponseMode().should.equal(true)
+    })
+
+    it('should return true with a supported response mode parameter', () => {
+      let params = { response_mode: 'fragment' }
+      let req = { method: 'GET', query: params }
+      let request = new AuthenticationRequest(req, res, provider)
+      request.supportedResponseMode().should.equal(true)
+    })
+
+    it('should return false with an unsupported response mode parameter', () => {
+      let params = { response_mode: 'unsupported' }
+      let req = { method: 'GET', query: params }
+      let request = new AuthenticationRequest(req, res, provider)
+      request.supportedResponseMode().should.equal(false)
+    })
+  })
 
   /**
    * Required Nonce Provided

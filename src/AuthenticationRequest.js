@@ -219,10 +219,11 @@ class AuthenticationRequest {
     let supportedResponseModes = provider.supported_response_modes
     let requestedResponseMode = params.response_mode
 
-    return (
-      requestedResponseMode &&
-      supportedResponseModes.indexOf(requestedResponseMode) !== -1
-    )
+    if (!requestedResponseMode) {
+      return true
+    } else {
+      return supportedResponseModes.indexOf(requestedResponseMode) !== -1
+    }
   }
 
   /**

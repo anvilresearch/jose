@@ -31,13 +31,13 @@ const UserInfoRequest = require(path.join(cwd, 'src', 'UserInfoRequest'))
 /**
  * Tests
  */
-describe('Provider', () => {
+describe('OpenID Connect Provider', () => {
 
   /**
    * Schema
    */
   describe('schema', () => {
-    it('should reference the ProviderSchema', () => {
+    it('should reference the OpenID Connect Provider Schema', () => {
       Provider.schema.should.equal(ProviderSchema)
     })
 
@@ -69,7 +69,7 @@ describe('Provider', () => {
   /**
    * Authorize
    */
-  describe('authorize', () => {
+  describe('authorize endpoint', () => {
     let req, res, provider
 
     before(() => {
@@ -93,7 +93,7 @@ describe('Provider', () => {
   /**
    * Discover
    */
-  describe('discover', () => {
+  describe('discover endpoint', () => {
     let req, res, provider
 
     before(() => {
@@ -117,7 +117,7 @@ describe('Provider', () => {
   /**
    * JWKs
    */
-  describe('jwks', () => {
+  describe('jwks endpoint', () => {
     let req, res, provider
 
     before(() => {
@@ -141,7 +141,7 @@ describe('Provider', () => {
   /**
    * Register
    */
-  describe('register', () => {
+  describe('dynamic registration endpoint', () => {
     let req, res, provider
 
     before(() => {
@@ -165,7 +165,7 @@ describe('Provider', () => {
   /**
    * Token
    */
-  describe('token', () => {
+  describe('token endpoint', () => {
     let req, res, provider
 
     before(() => {
@@ -189,7 +189,7 @@ describe('Provider', () => {
   /**
    * UserInfo
    */
-  describe('userinfo', () => {
+  describe('userinfo endpoint', () => {
     let req, res, provider
 
     before(() => {

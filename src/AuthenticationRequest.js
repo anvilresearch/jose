@@ -3,7 +3,7 @@
 /**
  * Dependencies
  */
-const qs = require('qs')
+const OIDCRequest = require('./OIDCRequest')
 
 /**
  * Request Parameter Mapping
@@ -17,10 +17,8 @@ const MODES = { 'query': '?', 'fragment': '#' }
 
 /**
  * AuthenticationRequest
- *
- * Encapsulates all logic for the OpenID Connect /authorize endpoint.
  */
-class AuthenticationRequest {
+class AuthenticationRequest extends OIDCRequest {
 
   /**
    * Request Handler
@@ -50,10 +48,7 @@ class AuthenticationRequest {
    * @param {Provider} provider
    */
   constructor (req, res, provider) {
-    this.req = req
-    this.res = res
-    this.provider = provider
-    this.host = provider.host
+    super(req, res, provider)
     this.params = req[PARAMS[req.method]] || {}
     this.responseTypes = AuthenticationRequest.parseResponseTypes(this.params)
     this.responseMode = AuthenticationRequest.parseResponseMode(this.params)
@@ -344,62 +339,6 @@ class AuthenticationRequest {
   includeSessionState (response) {
     // ...
   }
-
-  /**
-   * 302 Redirect Response
-   */
-  redirect (data) {
-    let { res, params: { redirect_uri: uri }, responseMode } = this
-    let response = qs.stringify(data)
-    res.redirect(`${uri}${responseMode}${response}`)
-  }
-
-  /**
-   * 401 Unauthorized Response
-   */
-  unauthorized (err) {
-    let { res } = this
-    let { realm, error, error_description: description } = err
-
-    res.set({
-      'WWW-Authenticate':
-      `Bearer realm=${realm}, error=${error}, error_description=${description}`
-    })
-
-    res.status(401).send('Unauthorized')
-  }
-
-  /**
-   * 403 Forbidden Response
-   */
-  forbidden () {
-    let {res} = this
-    res.status(403).send('Forbidden')
-  }
-
-  /**
-   * 400 Bad Request Response
-   */
-  badRequest (error) {
-    let {res} = this
-
-    res.set({
-      'Cache-Control': 'no-store',
-      'Pragma': 'no-cache'
-    })
-
-    res.status(400).json(error)
-  }
-
-  /**
-   * Internal Server Error
-   */
-  internalServerError (err) {
-    // TODO: Debug logging here
-    let {res} = this
-    res.status(500).send('Internal Server Error')
-  }
-
 }
 
 /**

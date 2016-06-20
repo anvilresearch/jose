@@ -90,6 +90,72 @@ describe('OIDCRequest', () => {
   })
 
   /**
+   * Get Response Types
+   */
+  describe('getResponseTypes', () => {
+    it('should create an array of response types', () => {
+      let req = {}
+      let res = {}
+      let provider = { host: {} }
+
+      let request = new OIDCRequest(req, res, provider)
+      request.params = { response_type: 'code id_token token' }
+
+      OIDCRequest.getResponseTypes(request).should.eql([
+        'code',
+        'id_token',
+        'token'
+      ])
+    })
+  })
+
+  /**
+   * Get Response Mode
+   */
+  describe('getResponseMode', () => {
+    it('should return "?" for "query" response mode', () => {
+      OIDCRequest.getResponseMode({
+        params: {
+          response_mode: 'query'
+        }
+      }).should.equal('?')
+    })
+
+    it('should return "#" for "fragment" response mode', () => {
+      OIDCRequest.getResponseMode({
+        params: {
+          response_mode: 'fragment'
+        }
+      }).should.equal('#')
+    })
+
+    it('should return "?" for "code" response type', () => {
+      OIDCRequest.getResponseMode({
+        params: {
+          response_type: 'code'
+        }
+      }).should.equal('?')
+    })
+
+    it('should return "?" for "none" response type', () => {
+      OIDCRequest.getResponseMode({
+        params: {
+          response_type: 'none'
+        }
+      }).should.equal('?')
+    })
+
+    it('should return "#" for other response types', () => {
+      OIDCRequest.getResponseMode({
+        params: {
+          response_type: 'id_token token'
+        }
+      }).should.equal('#')
+    })
+  })
+
+
+  /**
    * Redirect
    */
   describe('redirect', () => {

@@ -11,6 +11,11 @@ const qs = require('qs')
 const PARAMS = { 'GET': 'query', 'POST': 'body' }
 
 /**
+ * Response Mode Mapping
+ */
+const MODES = { 'query': '?', 'fragment': '#' }
+
+/**
  * OIDCRequest
  *
  * @class
@@ -45,10 +50,46 @@ class OIDCRequest {
 
   /**
    * Get Params
+   *
+   * @param {OIDCRequest} request
+   * @returns {Object}
    */
   static getParams (request) {
     let {req,res,provider} = request
     return req[PARAMS[req.method]] || {}
+  }
+
+  /**
+   * Get Response Types
+   *
+   * @param {OIDCRequest} request
+   * @returns {Array}
+   */
+  static getResponseTypes (request) {
+    let { params: { response_type: type } } = request
+    return (typeof type === 'string') ? type.split(' ') : []
+  }
+
+  /**
+   * Get Response Mode
+   *
+   * @param {OIDCRequest} request
+   * @returns {string}
+   */
+  static getResponseMode (request) {
+    let mode
+    let { params } = request || {}
+    let { response_mode: responseMode, response_type: responseType } = params
+
+    if (responseMode) {
+      mode = MODES[responseMode]
+    } else if (responseType === 'code' || responseType === 'none') {
+      mode = '?'
+    } else {
+      mode = '#'
+    }
+
+    return mode
   }
 
   /**

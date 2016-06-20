@@ -24,10 +24,11 @@ const AuthenticationRequest = require(path.join(cwd, 'src', 'AuthenticationReque
 /**
  * Tests
  */
-
-
 describe('AuthenticationRequest', () => {
 
+  /**
+   * Handle
+   */
   describe('handle', () => {})
 
   /**
@@ -79,55 +80,6 @@ describe('AuthenticationRequest', () => {
 
       let request = new AuthenticationRequest(req, res, provider)
       request.responseMode.should.eql('?')
-    })
-  })
-
-  /**
-   * Parse Response Types
-   */
-  describe('parseResponseTypes', () => {
-    it('should create an array of response types', () => {
-      let params = { response_type: 'code id_token token' }
-      AuthenticationRequest.parseResponseTypes(params).should.eql([
-        'code',
-        'id_token',
-        'token'
-      ])
-    })
-  })
-
-  /**
-   * Parse Response Mode
-   */
-  describe('parseResponseMode', () => {
-    it('should return "?" for "query" response mode', () => {
-      AuthenticationRequest.parseResponseMode({
-        response_mode: 'query'
-      }).should.equal('?')
-    })
-
-    it('should return "#" for "fragment" response mode', () => {
-      AuthenticationRequest.parseResponseMode({
-        response_mode: 'fragment'
-      }).should.equal('#')
-    })
-
-    it('should return "?" for "code" response type', () => {
-      AuthenticationRequest.parseResponseMode({
-        response_type: 'code'
-      }).should.equal('?')
-    })
-
-    it('should return "?" for "none" response type', () => {
-      AuthenticationRequest.parseResponseMode({
-        response_type: 'none'
-      }).should.equal('?')
-    })
-
-    it('should return "#" for other response types', () => {
-      AuthenticationRequest.parseResponseMode({
-        response_type: 'id_token token'
-      }).should.equal('#')
     })
   })
 

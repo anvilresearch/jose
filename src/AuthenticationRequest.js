@@ -6,16 +6,6 @@
 const OIDCRequest = require('./OIDCRequest')
 
 /**
- * Request Parameter Mapping
- */
-const PARAMS = { 'GET': 'query', 'POST': 'body' }
-
-/**
- * Response Mode Mapping
- */
-const MODES = { 'query': '?', 'fragment': '#' }
-
-/**
  * AuthenticationRequest
  */
 class AuthenticationRequest extends OIDCRequest {
@@ -49,41 +39,9 @@ class AuthenticationRequest extends OIDCRequest {
    */
   constructor (req, res, provider) {
     super(req, res, provider)
-    this.params = req[PARAMS[req.method]] || {}
-    this.responseTypes = AuthenticationRequest.parseResponseTypes(this.params)
-    this.responseMode = AuthenticationRequest.parseResponseMode(this.params)
-  }
-
-  /**
-   * Parse Response Types
-   *
-   * @param {Object} params
-   * @returns {Array}
-   */
-  static parseResponseTypes (params) {
-    let { response_type: type } = params
-    return (typeof type === 'string') ? type.split(' ') : []
-  }
-
-  /**
-   * Parse Response Mode
-   *
-   * @param {Object} params
-   * @returns {string}
-   */
-  static parseResponseMode (params) {
-    let mode
-    let { response_mode: responseMode, response_type: responseType } = params
-
-    if (responseMode) {
-      mode = MODES[responseMode]
-    } else if (responseType === 'code' || responseType === 'none') {
-      mode = '?'
-    } else {
-      mode = '#'
-    }
-
-    return mode
+    this.params = AuthenticationRequest.getParams(this)
+    this.responseTypes = AuthenticationRequest.getResponseTypes(this)
+    this.responseMode = AuthenticationRequest.getResponseMode(this)
   }
 
   /**

@@ -6,6 +6,11 @@
 const qs = require('qs')
 
 /**
+ * Request Parameter Mapping
+ */
+const PARAMS = { 'GET': 'query', 'POST': 'body' }
+
+/**
  * OIDCRequest
  *
  * @class
@@ -36,6 +41,14 @@ class OIDCRequest {
     this.res = res
     this.provider = provider
     this.host = provider.host
+  }
+
+  /**
+   * Get Params
+   */
+  static getParams (request) {
+    let {req,res,provider} = request
+    return req[PARAMS[req.method]] || {}
   }
 
   /**

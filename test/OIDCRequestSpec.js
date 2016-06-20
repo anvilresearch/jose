@@ -24,10 +24,11 @@ const OIDCRequest = require(path.join(cwd, 'src', 'OIDCRequest'))
 /**
  * Tests
  */
-
-
 describe('OIDCRequest', () => {
 
+  /**
+   * Handle
+   */
   describe('handle', () => {
     it('should throw an error')
   })
@@ -67,7 +68,30 @@ describe('OIDCRequest', () => {
     })
   })
 
+  /**
+   * Get Params
+   */
+  describe('getParams', () => {
+    it('should return GET request parameters', () => {
+      let req = { method: 'GET', query: {} }
+      let res = {}
+      let provider = { host: {} }
+      let request = new OIDCRequest(req, res, provider)
+      OIDCRequest.getParams(request).should.equal(req.query)
+    })
 
+    it('should return POST request parameters', () => {
+      let req = { method: 'POST', body: {} }
+      let res = {}
+      let provider = { host: {} }
+      let request = new OIDCRequest(req, res, provider)
+      OIDCRequest.getParams(request).should.equal(req.body)
+    })
+  })
+
+  /**
+   * Redirect
+   */
   describe('redirect', () => {
     it('should redirect with an authorization response', () => {
       let req = {
@@ -88,6 +112,9 @@ describe('OIDCRequest', () => {
     })
   })
 
+  /**
+   * Unauthorized
+   */
   describe('unauthorized', () => {
     let status, send, set
 
@@ -123,6 +150,9 @@ describe('OIDCRequest', () => {
     })
   })
 
+  /**
+   * Forbidden
+   */
   describe('forbidden', () => {
     let status, send
 
@@ -147,6 +177,9 @@ describe('OIDCRequest', () => {
     })
   })
 
+  /**
+   * Bad Request
+   */
   describe('badRequest', () => {
     let status, json, set, err
 
@@ -185,6 +218,9 @@ describe('OIDCRequest', () => {
     })
   })
 
+  /**
+   * Internal Server Error
+   */
   describe('internalServerError', () => {
     let status, send
 

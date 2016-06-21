@@ -16,12 +16,12 @@ const PARAMS = { 'GET': 'query', 'POST': 'body' }
 const MODES = { 'query': '?', 'fragment': '#' }
 
 /**
- * OIDCRequest
+ * BaseRequest
  *
  * @class
  * Abstract class for implementing OpenID Connect request handlers.
  */
-class OIDCRequest {
+class BaseRequest {
 
   /**
    * Request Handler
@@ -31,7 +31,7 @@ class OIDCRequest {
    * @param {Provider} provider
    */
   static handle (req, res, provider) {
-    throw new Error('Handle must be implemented by OIDCRequest subclass')
+    throw new Error('Handle must be implemented by BaseRequest subclass')
   }
 
   /**
@@ -51,7 +51,7 @@ class OIDCRequest {
   /**
    * Get Params
    *
-   * @param {OIDCRequest} request
+   * @param {BaseRequest} request
    * @returns {Object}
    */
   static getParams (request) {
@@ -62,7 +62,7 @@ class OIDCRequest {
   /**
    * Get Response Types
    *
-   * @param {OIDCRequest} request
+   * @param {BaseRequest} request
    * @returns {Array}
    */
   static getResponseTypes (request) {
@@ -73,7 +73,7 @@ class OIDCRequest {
   /**
    * Get Response Mode
    *
-   * @param {OIDCRequest} request
+   * @param {BaseRequest} request
    * @returns {string}
    */
   static getResponseMode (request) {
@@ -152,5 +152,5 @@ class OIDCRequest {
 /**
  * Export
  */
-module.exports = OIDCRequest
+module.exports = BaseRequest
 

@@ -3,12 +3,12 @@
 /**
  * Dependencies
  */
-const OIDCRequest = require('./OIDCRequest')
+const BaseRequest = require('./BaseRequest')
 
 /**
  * AuthenticationRequest
  */
-class AuthenticationRequest extends OIDCRequest {
+class AuthenticationRequest extends BaseRequest {
 
   /**
    * Request Handler

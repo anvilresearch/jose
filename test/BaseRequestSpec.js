@@ -19,12 +19,12 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const OIDCRequest = require(path.join(cwd, 'src', 'OIDCRequest'))
+const BaseRequest = require(path.join(cwd, 'src', 'BaseRequest'))
 
 /**
  * Tests
  */
-describe('OIDCRequest', () => {
+describe('BaseRequest', () => {
 
   /**
    * Handle
@@ -48,22 +48,22 @@ describe('OIDCRequest', () => {
     })
 
     it('should set "req"', () => {
-      let request = new OIDCRequest(req, res, provider)
+      let request = new BaseRequest(req, res, provider)
       request.req.should.equal(req)
     })
 
     it('should set "res"', () => {
-      let request = new OIDCRequest(req, res, provider)
+      let request = new BaseRequest(req, res, provider)
       request.res.should.equal(res)
     })
 
     it('should set "provider"', () => {
-      let request = new OIDCRequest(req, res, provider)
+      let request = new BaseRequest(req, res, provider)
       request.provider.should.equal(provider)
     })
 
     it('should set "host"', () => {
-      let request = new OIDCRequest(req, res, provider)
+      let request = new BaseRequest(req, res, provider)
       request.host.should.equal(host)
     })
   })
@@ -76,16 +76,16 @@ describe('OIDCRequest', () => {
       let req = { method: 'GET', query: {} }
       let res = {}
       let provider = { host: {} }
-      let request = new OIDCRequest(req, res, provider)
-      OIDCRequest.getParams(request).should.equal(req.query)
+      let request = new BaseRequest(req, res, provider)
+      BaseRequest.getParams(request).should.equal(req.query)
     })
 
     it('should return POST request parameters', () => {
       let req = { method: 'POST', body: {} }
       let res = {}
       let provider = { host: {} }
-      let request = new OIDCRequest(req, res, provider)
-      OIDCRequest.getParams(request).should.equal(req.body)
+      let request = new BaseRequest(req, res, provider)
+      BaseRequest.getParams(request).should.equal(req.body)
     })
   })
 
@@ -98,10 +98,10 @@ describe('OIDCRequest', () => {
       let res = {}
       let provider = { host: {} }
 
-      let request = new OIDCRequest(req, res, provider)
+      let request = new BaseRequest(req, res, provider)
       request.params = { response_type: 'code id_token token' }
 
-      OIDCRequest.getResponseTypes(request).should.eql([
+      BaseRequest.getResponseTypes(request).should.eql([
         'code',
         'id_token',
         'token'
@@ -114,7 +114,7 @@ describe('OIDCRequest', () => {
    */
   describe('getResponseMode', () => {
     it('should return "?" for "query" response mode', () => {
-      OIDCRequest.getResponseMode({
+      BaseRequest.getResponseMode({
         params: {
           response_mode: 'query'
         }
@@ -122,7 +122,7 @@ describe('OIDCRequest', () => {
     })
 
     it('should return "#" for "fragment" response mode', () => {
-      OIDCRequest.getResponseMode({
+      BaseRequest.getResponseMode({
         params: {
           response_mode: 'fragment'
         }
@@ -130,7 +130,7 @@ describe('OIDCRequest', () => {
     })
 
     it('should return "?" for "code" response type', () => {
-      OIDCRequest.getResponseMode({
+      BaseRequest.getResponseMode({
         params: {
           response_type: 'code'
         }
@@ -138,7 +138,7 @@ describe('OIDCRequest', () => {
     })
 
     it('should return "?" for "none" response type', () => {
-      OIDCRequest.getResponseMode({
+      BaseRequest.getResponseMode({
         params: {
           response_type: 'none'
         }
@@ -146,7 +146,7 @@ describe('OIDCRequest', () => {
     })
 
     it('should return "#" for other response types', () => {
-      OIDCRequest.getResponseMode({
+      BaseRequest.getResponseMode({
         params: {
           response_type: 'id_token token'
         }
@@ -168,7 +168,7 @@ describe('OIDCRequest', () => {
       let res = { redirect: sinon.spy() }
       let provider = { host: {} }
       let response = { foo: 'bar' }
-      let request = new OIDCRequest(req, res, provider)
+      let request = new BaseRequest(req, res, provider)
 
       request.params = req.query
       request.responseMode = '#'
@@ -192,7 +192,7 @@ describe('OIDCRequest', () => {
       let req = { method: 'GET', query: {} }
       let res = { set, status }
       let provider = { host: {} }
-      let request = new OIDCRequest(req, res, provider)
+      let request = new BaseRequest(req, res, provider)
 
       request.unauthorized({
         realm: 'a',
@@ -229,7 +229,7 @@ describe('OIDCRequest', () => {
       let req = { method: 'GET', query: {} }
       let res = { status }
       let provider = { host: {} }
-      let request = new OIDCRequest(req, res, provider)
+      let request = new BaseRequest(req, res, provider)
 
       request.forbidden()
     })
@@ -258,7 +258,7 @@ describe('OIDCRequest', () => {
       let req = { method: 'GET', query: {} }
       let res = { set, status }
       let provider = { host: {} }
-      let request = new OIDCRequest(req, res, provider)
+      let request = new BaseRequest(req, res, provider)
 
       request.badRequest(err)
     })
@@ -297,7 +297,7 @@ describe('OIDCRequest', () => {
       let req = { method: 'GET', query: {} }
       let res = { status }
       let provider = { host: {} }
-      let request = new OIDCRequest(req, res, provider)
+      let request = new BaseRequest(req, res, provider)
 
       request.internalServerError()
     })

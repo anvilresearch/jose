@@ -3,12 +3,12 @@
 /**
  * Dependencies
  */
-const OIDCRequest = require('./OIDCRequest')
+const BaseRequest = require('./BaseRequest')
 
 /**
  * DiscoveryRequest
  */
-class DiscoveryRequest extends OIDCRequest {
+class DiscoveryRequest extends BaseRequest {
 
   /**
    * Request Handler

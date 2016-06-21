@@ -3,12 +3,12 @@
 /**
  * Dependencies
  */
-const OIDCRequest = require('./OIDCRequest')
+const BaseRequest = require('./BaseRequest')
 
 /**
  * DynamicRegistrationRequest
  */
-class DynamicRegistrationRequest extends OIDCRequest {
+class DynamicRegistrationRequest extends BaseRequest {
 
   /**
    * Request Handler

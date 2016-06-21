@@ -202,7 +202,6 @@ describe('TokenRequest', () => {
         req = { method: 'POST', body: params }
         res = {}
         host = {}
-        provider = { host }
         provider = { host, supported_grant_types: ['refresh_token'] }
         request = new TokenRequest(req, res, provider)
         request.validate(request)
@@ -221,7 +220,332 @@ describe('TokenRequest', () => {
     })
   })
 
-  describe('authenticateClient', () => {})
+  describe('authenticateClient', () => {
+    describe('with "client_secret_basic" and "client_secret_post" credentials', () => {
+      let request
+
+      before(() => {
+        sinon.stub(TokenRequest.prototype, 'badRequest')
+
+        let params = {
+          grant_type: 'client_credentials',
+          client_secret: 's3cr3t'
+        }
+        let req = {
+          method: 'POST',
+          body: params,
+          headers: {
+            authorization: 'Basic base64str'
+          }
+        }
+        let res = {}
+        let host = {}
+        let provider = { host, supported_grant_types: ['client_credentials'] }
+
+        request = new TokenRequest(req, res, provider)
+        request.authenticateClient(request)
+      })
+
+      after(() => {
+        TokenRequest.prototype.badRequest.restore()
+      })
+
+      it('should respond "400 Bad Request"', () => {
+        request.badRequest.should.have.been.calledWith({
+          error: 'unauthorized_client',
+          error_description: 'Must use only one authentication method'
+        })
+      })
+    })
+
+    describe('with "client_secret_basic" and "client_secret_jwt" credentials', () => {
+      let request
+
+      before(() => {
+        sinon.stub(TokenRequest.prototype, 'badRequest')
+
+        let params = {
+          grant_type: 'client_credentials',
+          client_assertion_type: 'type'
+        }
+
+        let req = {
+          method: 'POST',
+          body: params,
+          headers: {
+            authorization: 'Basic base64str'
+          }
+        }
+
+        let res = {}
+        let host = {}
+        let provider = { host, supported_grant_types: ['client_credentials'] }
+
+        request = new TokenRequest(req, res, provider)
+        request.authenticateClient(request)
+      })
+
+      after(() => {
+        TokenRequest.prototype.badRequest.restore()
+      })
+
+      it('should respond "400 Bad Request"', () => {
+        request.badRequest.should.have.been.calledWith({
+          error: 'unauthorized_client',
+          error_description: 'Must use only one authentication method'
+        })
+      })
+    })
+
+    describe('with "client_secret_post" and "client_secret_jwt" credentials', () => {
+      let request
+
+      before(() => {
+        sinon.stub(TokenRequest.prototype, 'badRequest')
+
+        let params = {
+          grant_type: 'client_credentials',
+          client_secret: 's3cr3t',
+          client_assertion_type: 'type'
+        }
+
+        let req = {
+          method: 'POST',
+          body: params
+        }
+
+        let res = {}
+        let host = {}
+        let provider = { host, supported_grant_types: ['client_credentials'] }
+
+        request = new TokenRequest(req, res, provider)
+        request.authenticateClient(request)
+      })
+
+      after(() => {
+        TokenRequest.prototype.badRequest.restore()
+      })
+
+      it('should respond "400 Bad Request"', () => {
+        request.badRequest.should.have.been.calledWith({
+          error: 'unauthorized_client',
+          error_description: 'Must use only one authentication method'
+        })
+      })
+    })
+
+    describe('with invalid client assertion type', () => {
+      let request
+
+      before(() => {
+        sinon.stub(TokenRequest.prototype, 'badRequest')
+
+        let params = {
+          grant_type: 'client_credentials',
+          client_assertion_type: 'type'
+        }
+
+        let req = {
+          method: 'POST',
+          body: params
+        }
+
+        let res = {}
+        let host = {}
+        let provider = { host, supported_grant_types: ['client_credentials'] }
+
+        request = new TokenRequest(req, res, provider)
+        request.authenticateClient(request)
+      })
+
+      after(() => {
+        TokenRequest.prototype.badRequest.restore()
+      })
+
+      it('should respond "400 Bad Request"', () => {
+        request.badRequest.should.have.been.calledWith({
+          error: 'unauthorized_client',
+          error_description: 'Invalid client assertion type'
+        })
+      })
+
+    })
+
+    describe('with missing client assertion', () => {
+      let request
+
+      before(() => {
+        sinon.stub(TokenRequest.prototype, 'badRequest')
+
+        let params = {
+          grant_type: 'client_credentials',
+          client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+        }
+
+        let req = {
+          method: 'POST',
+          body: params
+        }
+
+        let res = {}
+        let host = {}
+        let provider = { host, supported_grant_types: ['client_credentials'] }
+
+        request = new TokenRequest(req, res, provider)
+        request.authenticateClient(request)
+      })
+
+      after(() => {
+        TokenRequest.prototype.badRequest.restore()
+      })
+
+      it('should respond "400 Bad Request"', () => {
+        request.badRequest.should.have.been.calledWith({
+          error: 'unauthorized_client',
+          error_description: 'Missing client assertion'
+        })
+      })
+    })
+
+    describe('with missing client credentials', () => {
+      let request
+
+      before(() => {
+        sinon.stub(TokenRequest.prototype, 'badRequest')
+
+        let params = {
+          grant_type: 'client_credentials'
+        }
+
+        let req = {
+          method: 'POST',
+          body: params
+        }
+
+        let res = {}
+        let host = {}
+        let provider = { host, supported_grant_types: ['client_credentials'] }
+
+        request = new TokenRequest(req, res, provider)
+        request.authenticateClient(request)
+      })
+
+      after(() => {
+        TokenRequest.prototype.badRequest.restore()
+      })
+
+      it('should respond "400 Bad Request"', () => {
+        request.badRequest.should.have.been.calledWith({
+          error: 'unauthorized_client',
+          error_description: 'Missing client credentials'
+        })
+      })
+    })
+
+    describe('with well formed "client_secret_basic" credentials', () => {
+      let request
+
+      before(() => {
+        sinon.stub(TokenRequest.prototype, 'clientSecretBasic')
+
+        let params = {
+          grant_type: 'client_credentials'
+        }
+
+        let req = {
+          method: 'POST',
+          body: params,
+          headers: {
+            authorization: 'Basic base64str'
+          }
+        }
+
+        let res = {}
+        let host = {}
+        let provider = { host, supported_grant_types: ['client_credentials'] }
+
+        request = new TokenRequest(req, res, provider)
+        request.authenticateClient(request)
+      })
+
+      after(() => {
+        TokenRequest.prototype.clientSecretBasic.restore()
+      })
+
+      it('should invoke "client_secret_basic" authentication', () => {
+        request.clientSecretBasic.should.have.been.calledWith(request)
+      })
+    })
+
+    describe('with well formed "client_secret_post" credentials', () => {
+      let request
+
+      before(() => {
+        sinon.stub(TokenRequest.prototype, 'clientSecretPost')
+
+        let params = {
+          grant_type: 'client_credentials',
+          client_id: 'uuid',
+          client_secret: 's3cr3t'
+        }
+
+        let req = {
+          method: 'POST',
+          body: params
+        }
+
+        let res = {}
+        let host = {}
+        let provider = { host, supported_grant_types: ['client_credentials'] }
+
+        request = new TokenRequest(req, res, provider)
+        request.authenticateClient(request)
+      })
+
+      after(() => {
+        TokenRequest.prototype.clientSecretPost.restore()
+      })
+
+      it('should invoke "client_secret_post" authentication', () => {
+        request.clientSecretPost.should.have.been.calledWith(request)
+      })
+    })
+
+    describe('with well formed "client_secret_jwt" credentials', () => {
+      let request
+
+      before(() => {
+        sinon.stub(TokenRequest.prototype, 'clientSecretJWT')
+
+        let params = {
+          grant_type: 'client_credentials',
+          client_assertion: 'jwt',
+          client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
+        }
+
+        let req = {
+          method: 'POST',
+          body: params
+        }
+
+        let res = {}
+        let host = {}
+        let provider = { host, supported_grant_types: ['client_credentials'] }
+
+        request = new TokenRequest(req, res, provider)
+        request.authenticateClient(request)
+      })
+
+      after(() => {
+        TokenRequest.prototype.clientSecretJWT.restore()
+      })
+
+      it('should invoke "client_secret_jwt" authentication', () => {
+        request.clientSecretJWT.should.have.been.calledWith(request)
+      })
+    })
+  })
+
   describe('clientSecretBasic', () => {})
   describe('clientSecretPost', () => {})
   describe('clientSecretJWT', () => {})

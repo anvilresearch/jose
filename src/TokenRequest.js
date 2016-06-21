@@ -106,7 +106,7 @@ class TokenRequest extends OIDCRequest {
 
     // Use HTTP Basic Authentication Method
     if (req.headers && req.headers.authorization) {
-      method = 'client_secret_basic'
+      method = 'clientSecretBasic'
     }
 
     // Use HTTP Post Authentication Method
@@ -119,7 +119,7 @@ class TokenRequest extends OIDCRequest {
         })
       }
 
-      method = 'client_secret_post'
+      method = 'clientSecretPost'
     }
 
     // Use Client JWT Authentication Method
@@ -150,7 +150,7 @@ class TokenRequest extends OIDCRequest {
         })
       }
 
-      method = 'client_secret_jwt'
+      method = 'clientSecretJWT'
     }
 
     // Missing authentication parameters

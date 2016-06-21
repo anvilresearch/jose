@@ -87,6 +87,17 @@ class TokenRequest extends OIDCRequest {
   }
 
   /**
+   * Supported Grant Type
+   */
+  supportedGrantType () {
+    let {params,provider} = this
+    let supportedGrantTypes = provider.supported_grant_types
+    let requestedGrantType = params.grant_type
+
+    return supportedGrantTypes.indexOf(requestedGrantType) !== -1
+  }
+
+  /**
    * Authenticate Client
    */
   authenticateClient (request) {

@@ -35,6 +35,18 @@ class TokenRequest extends OIDCRequest {
   constructor (req, res, provider) {
     super(req, res, provider)
     this.params = TokenRequest.getParams(this)
+    this.grantType = TokenRequest.getGrantType(this)
+  }
+
+  /**
+   * Get Grant Type
+   *
+   * @param {TokenRequest} request
+   * @return {string}
+   */
+  static getGrantType (request) {
+    let {params} = request
+    return params.grant_type
   }
 
   /**
@@ -345,17 +357,21 @@ class TokenRequest extends OIDCRequest {
     let {grantType} = request
 
     if (grantType === 'authorization_code') {
-      return authorizationCodeGrant(request)
+      return this.authorizationCodeGrant(request)
     }
 
     if (grantType === 'refresh_token') {
-      return refreshTokenGrant(request)
+      return this.refreshTokenGrant(request)
     }
 
     if (grantType === 'client_credentials') {
-      return clientCredentialsGrant(request)
+      return this.clientCredentialsGrant(request)
     }
 
+    // THIS IS SERIOUS TROUBLE
+    // REQUEST VALIDATION SHOULD FILTER OUT
+    // UNSUPPORTED GRANT TYPES BEFORE WE ARRIVE
+    // HERE.
     throw new Error('This should never happen')
   }
 

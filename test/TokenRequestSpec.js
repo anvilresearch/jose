@@ -35,26 +35,35 @@ describe('TokenRequest', () => {
    * Constructor
    */
   describe('constructor', () => {
-    let params, req, res, host, provider
+    let params, request
 
     before(() => {
-      params = { response_type: 'code' }
-      req = { method: 'GET', query: params }
-      res = {}
-      host = {}
-      provider = { host }
-    })
-
-    it('should set "params" from request query', () => {
-      let req = { method: 'GET', query: params }
-      let request = new TokenRequest(req, res, provider)
-      request.params.should.equal(params)
+      params = { grant_type: 'authorization_code' }
+      let req = { method: 'POST', body: params }
+      let res = {}
+      let provider = { host: {} }
+      request = new TokenRequest(req, res, provider)
     })
 
     it('should set "params" from request body', () => {
-      let req = { method: 'GET', query: params }
-      let request = new TokenRequest(req, res, provider)
       request.params.should.equal(params)
+    })
+
+    it('should set "grantType" from params', () => {
+      request.grantType.should.equal(params.grant_type)
+    })
+  })
+
+  /**
+   * Get Grant Type
+   */
+  describe('getGrantType', () => {
+    it('should return the "grant_type" parameter', () => {
+      TokenRequest.getGrantType({
+        params: {
+          grant_type: 'authorization_code'
+        }
+      }).should.equal('authorization_code')
     })
   })
 
@@ -934,7 +943,10 @@ describe('TokenRequest', () => {
   describe('clientSecretJWT', () => {})
   describe('privateKeyJWT', () => {})
   describe('none', () => {})
-  describe('grant', () => {})
+
+  describe('grant', () => {
+  })
+
   describe('authorizationCodeGrant', () => {})
   describe('refreshGrant', () => {})
   describe('clientCredentialsGrant', () => {})

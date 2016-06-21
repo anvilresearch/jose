@@ -1,0 +1,30 @@
+{
+  "name": "oidc",
+  "version": "1.0.0",
+  "description": "OpenID Connect Provider",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha test -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/anvilresearch/oidc.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://gitlab.com/anvilresearch/oidc/issues"
+  },
+  "homepage": "https://gitlab.com/anvilresearch/oidc#README",
+  "dependencies": {
+    "qs": "^6.2.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "sinon": "^1.17.4",
+    "sinon-chai": "^2.8.0"
+  }
+}

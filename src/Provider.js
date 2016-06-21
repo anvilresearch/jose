@@ -10,7 +10,7 @@ const providerSchema = require(path.join(cwd, 'src', 'schemas', 'ProviderSchema'
 const AuthenticationRequest = require(path.join(cwd, 'src', 'handlers', 'AuthenticationRequest'))
 const DiscoveryRequest = require(path.join(cwd, 'src', 'handlers', 'DiscoveryRequest'))
 const DynamicRegistrationRequest = require(path.join(cwd, 'src', 'handlers', 'DynamicRegistrationRequest'))
-const JWKsRequest = require(path.join(cwd, 'src', 'handlers', 'JWKsRequest'))
+const JWKSetRequest = require(path.join(cwd, 'src', 'handlers', 'JWKSetRequest'))
 const TokenRequest = require(path.join(cwd, 'src', 'handlers', 'TokenRequest'))
 const UserInfoRequest = require(path.join(cwd, 'src', 'handlers', 'UserInfoRequest'))
 
@@ -88,7 +88,7 @@ class Provider {
    * @param {HTTPResponse} res
    */
   jwks (req, res) {
-    JWKsRequest.handle(req, res, this)
+    JWKSetRequest.handle(req, res, this)
   }
 
   /**

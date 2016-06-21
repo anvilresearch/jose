@@ -24,7 +24,7 @@ const ProviderSchema = require(path.join(cwd, 'src', 'schemas', 'ProviderSchema'
 const AuthenticationRequest = require(path.join(cwd, 'src', 'handlers', 'AuthenticationRequest'))
 const DiscoveryRequest = require(path.join(cwd, 'src', 'handlers', 'DiscoveryRequest'))
 const DynamicRegistrationRequest = require(path.join(cwd, 'src', 'handlers', 'DynamicRegistrationRequest'))
-const JWKsRequest = require(path.join(cwd, 'src', 'handlers', 'JWKsRequest'))
+const JWKSetRequest = require(path.join(cwd, 'src', 'handlers', 'JWKSetRequest'))
 const TokenRequest = require(path.join(cwd, 'src', 'handlers', 'TokenRequest'))
 const UserInfoRequest = require(path.join(cwd, 'src', 'handlers', 'UserInfoRequest'))
 
@@ -123,17 +123,17 @@ describe('OpenID Connect Provider', () => {
     before(() => {
       req = {}
       res = {}
-      sinon.stub(JWKsRequest, 'handle')
+      sinon.stub(JWKSetRequest, 'handle')
       provider = new Provider({}, {}, {})
       provider.jwks(req, res, provider)
     })
 
     after(() => {
-      JWKsRequest.handle.restore()
+      JWKSetRequest.handle.restore()
     })
 
-    it('should invoke the JWKsRequest handler', () => {
-      JWKsRequest.handle.should.have.been
+    it('should invoke the JWKSetRequest handler', () => {
+      JWKSetRequest.handle.should.have.been
         .calledWith(req, res, provider)
     })
   })

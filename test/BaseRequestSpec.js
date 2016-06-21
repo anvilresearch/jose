@@ -19,7 +19,7 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const BaseRequest = require(path.join(cwd, 'src', 'BaseRequest'))
+const BaseRequest = require(path.join(cwd, 'src', 'handlers', 'BaseRequest'))
 
 /**
  * Tests

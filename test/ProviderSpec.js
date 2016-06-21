@@ -20,13 +20,13 @@ let expect = chai.expect
  * Code under test
  */
 const Provider = require(path.join(cwd, 'src', 'Provider'))
-const ProviderSchema = require(path.join(cwd, 'src', 'ProviderSchema'))
-const AuthenticationRequest = require(path.join(cwd, 'src', 'AuthenticationRequest'))
-const DiscoveryRequest = require(path.join(cwd, 'src', 'DiscoveryRequest'))
-const DynamicRegistrationRequest = require(path.join(cwd, 'src', 'DynamicRegistrationRequest'))
-const JWKsRequest = require(path.join(cwd, 'src', 'JWKsRequest'))
-const TokenRequest = require(path.join(cwd, 'src', 'TokenRequest'))
-const UserInfoRequest = require(path.join(cwd, 'src', 'UserInfoRequest'))
+const ProviderSchema = require(path.join(cwd, 'src', 'schemas', 'ProviderSchema'))
+const AuthenticationRequest = require(path.join(cwd, 'src', 'handlers', 'AuthenticationRequest'))
+const DiscoveryRequest = require(path.join(cwd, 'src', 'handlers', 'DiscoveryRequest'))
+const DynamicRegistrationRequest = require(path.join(cwd, 'src', 'handlers', 'DynamicRegistrationRequest'))
+const JWKsRequest = require(path.join(cwd, 'src', 'handlers', 'JWKsRequest'))
+const TokenRequest = require(path.join(cwd, 'src', 'handlers', 'TokenRequest'))
+const UserInfoRequest = require(path.join(cwd, 'src', 'handlers', 'UserInfoRequest'))
 
 /**
  * Tests

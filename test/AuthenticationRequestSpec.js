@@ -19,7 +19,7 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const AuthenticationRequest = require(path.join(cwd, 'src', 'AuthenticationRequest'))
+const AuthenticationRequest = require(path.join(cwd, 'src', 'handlers', 'AuthenticationRequest'))
 
 /**
  * Tests

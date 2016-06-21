@@ -16,7 +16,7 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const ProviderSchema = require(path.join(cwd, 'src', 'ProviderSchema'))
+const ProviderSchema = require(path.join(cwd, 'src', 'schemas', 'ProviderSchema'))
 
 /**
  * Tests

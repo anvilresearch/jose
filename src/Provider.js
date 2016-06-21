@@ -3,13 +3,16 @@
 /**
  * Dependencies
  */
-const providerSchema = require('./ProviderSchema')
-const AuthenticationRequest = require('./AuthenticationRequest')
-const DiscoveryRequest = require('./DiscoveryRequest')
-const DynamicRegistrationRequest = require('./DynamicRegistrationRequest')
-const JWKsRequest = require('./JWKsRequest')
-const TokenRequest = require('./TokenRequest')
-const UserInfoRequest = require('./UserInfoRequest')
+const cwd = process.cwd()
+const path = require('path')
+
+const providerSchema = require(path.join(cwd, 'src', 'schemas', 'ProviderSchema'))
+const AuthenticationRequest = require(path.join(cwd, 'src', 'handlers', 'AuthenticationRequest'))
+const DiscoveryRequest = require(path.join(cwd, 'src', 'handlers', 'DiscoveryRequest'))
+const DynamicRegistrationRequest = require(path.join(cwd, 'src', 'handlers', 'DynamicRegistrationRequest'))
+const JWKsRequest = require(path.join(cwd, 'src', 'handlers', 'JWKsRequest'))
+const TokenRequest = require(path.join(cwd, 'src', 'handlers', 'TokenRequest'))
+const UserInfoRequest = require(path.join(cwd, 'src', 'handlers', 'UserInfoRequest'))
 
 /**
  * OpenID Connect Provider

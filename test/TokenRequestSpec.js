@@ -19,7 +19,7 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const TokenRequest = require(path.join(cwd, 'src', 'TokenRequest'))
+const TokenRequest = require(path.join(cwd, 'src', 'handlers', 'TokenRequest'))
 
 /**
  * Tests

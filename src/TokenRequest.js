@@ -372,7 +372,7 @@ class TokenRequest extends OIDCRequest {
     // REQUEST VALIDATION SHOULD FILTER OUT
     // UNSUPPORTED GRANT TYPES BEFORE WE ARRIVE
     // HERE.
-    throw new Error('This should never happen')
+    throw new Error('Unsupported response type')
   }
 
   /**
@@ -391,7 +391,7 @@ class TokenRequest extends OIDCRequest {
    * @param {TokenRequest} request
    * @returns {Promise}
    */
-  refreshGrant (request) {
+  refreshTokenGrant (request) {
     AccessToken.refresh(request).then(this.tokenResponse)
   }
 

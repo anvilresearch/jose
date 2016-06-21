@@ -944,7 +944,96 @@ describe('TokenRequest', () => {
   describe('privateKeyJWT', () => {})
   describe('none', () => {})
 
+  /**
+   * Grant
+   */
   describe('grant', () => {
+    describe('with "authorization_code" grant type', () => {
+      let request
+
+      before(() => {
+        sinon.stub(TokenRequest.prototype, 'authorizationCodeGrant')
+
+        let req = { method: 'POST', body: { grant_type: 'authorization_code' } }
+        let res = {}
+        let provider = { host: {} }
+
+        request = new TokenRequest(req, res, provider)
+        request.grant(request)
+      })
+
+      after(() => {
+        TokenRequest.prototype.authorizationCodeGrant.restore()
+      })
+
+      it('should invoke authorizationCodeGrant', () => {
+        request.authorizationCodeGrant.should.have.been.calledWith(request)
+      })
+    })
+
+    describe('with "refresh_token" grant type', () => {
+      let request
+
+      before(() => {
+        sinon.stub(TokenRequest.prototype, 'refreshTokenGrant')
+
+        let req = { method: 'POST', body: { grant_type: 'refresh_token' } }
+        let res = {}
+        let provider = { host: {} }
+
+        request = new TokenRequest(req, res, provider)
+        request.grant(request)
+      })
+
+      after(() => {
+        TokenRequest.prototype.refreshTokenGrant.restore()
+      })
+
+      it('should invoke refreshTokenGrant', () => {
+        request.refreshTokenGrant.should.have.been.calledWith(request)
+      })
+    })
+
+    describe('with "client_credentials" grant type', () => {
+      let request
+
+      before(() => {
+        sinon.stub(TokenRequest.prototype, 'clientCredentialsGrant')
+
+        let req = { method: 'POST', body: { grant_type: 'client_credentials' } }
+        let res = {}
+        let provider = { host: {} }
+
+        request = new TokenRequest(req, res, provider)
+        request.grant(request)
+      })
+
+      after(() => {
+        TokenRequest.prototype.clientCredentialsGrant.restore()
+      })
+
+      it('should invoke clientCredentialsGrant', () => {
+        request.clientCredentialsGrant.should.have.been.calledWith(request)
+      })
+    })
+
+    describe('with unknown grant type', () => {
+      let request
+
+      before(() => {
+        let req = { method: 'POST', body: { grant_type: 'noyoudint' } }
+        let res = {}
+        let provider = { host: {} }
+
+        request = new TokenRequest(req, res, provider)
+      })
+
+      it('should throw and error', () => {
+        expect(() => {
+          request.grant(request)
+        }).to.throw('Unsupported response type')
+      })
+    })
   })
 
   describe('authorizationCodeGrant', () => {})
@@ -953,7 +1042,6 @@ describe('TokenRequest', () => {
   describe('verifyAuthorizationCode', () => {})
   describe('includeAccessToken', () => {})
   describe('includeRefreshToken', () => {})
-  describe('includeAuthorizationCode', () => {})
   describe('includeIDToken', () => {})
   describe('includeSessionState', () => {})
 })

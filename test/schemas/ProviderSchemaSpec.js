@@ -50,7 +50,7 @@ describe('OpenID Connect Provider Schema', () => {
   })
 
   it('should define format of "issuer"', () => {
-    properties.issuer.format.should.equal('url')
+    properties.issuer.format.should.equal('uri')
   })
 
   /**
@@ -66,7 +66,7 @@ describe('OpenID Connect Provider Schema', () => {
   })
 
   it('should define format of "authorization_endpoint"', () => {
-    properties.authorization_endpoint.format.should.equal('url')
+    properties.authorization_endpoint.format.should.equal('uri')
   })
 
   /**
@@ -83,7 +83,7 @@ describe('OpenID Connect Provider Schema', () => {
   })
 
   it('should define format of "token_endpoint"', () => {
-    properties.token_endpoint.format.should.equal('url')
+    properties.token_endpoint.format.should.equal('uri')
   })
 
   /**
@@ -101,7 +101,7 @@ describe('OpenID Connect Provider Schema', () => {
   })
 
   it('should define format of "userinfo_endpoint"', () => {
-    properties.userinfo_endpoint.format.should.equal('url')
+    properties.userinfo_endpoint.format.should.equal('uri')
   })
 
   /**
@@ -127,7 +127,7 @@ describe('OpenID Connect Provider Schema', () => {
   })
 
   it('should define format of "jwks_uri"', () => {
-    properties.jwks_uri.format.should.equal('url')
+    properties.jwks_uri.format.should.equal('uri')
   })
 
   /**
@@ -144,7 +144,7 @@ describe('OpenID Connect Provider Schema', () => {
   })
 
   it('should define format of "registration_endpoint"', () => {
-    properties.registration_endpoint.format.should.equal('url')
+    properties.registration_endpoint.format.should.equal('uri')
   })
 
   /**
@@ -628,7 +628,7 @@ describe('OpenID Connect Provider Schema', () => {
   })
 
   it('should define format of "op_policy_uri"', () => {
-    properties.op_policy_uri.format.should.equal('url')
+    properties.op_policy_uri.format.should.equal('uri')
   })
 
   /**
@@ -643,7 +643,7 @@ describe('OpenID Connect Provider Schema', () => {
   })
 
   it('should define format of "op_tos_uri"', () => {
-    properties.op_tos_uri.format.should.equal('url')
+    properties.op_tos_uri.format.should.equal('uri')
   })
 
   /**

@@ -15,37 +15,37 @@ const schema = {
 
     issuer: {
       type: 'string',
-      format: 'url',
+      format: 'uri',
       required: true
     },
 
     authorization_endpoint: {
       type: 'string',
-      format: 'url',
+      format: 'uri',
       required: true
     },
 
     token_endpoint: {
       type: 'string',
-      format: 'url',
+      format: 'uri',
       required: true
     },
 
     userinfo_endpoint: {
       type: 'string',
-      format: 'url',
+      format: 'uri',
       required: true
     },
 
     jwks_uri: {
       type: 'string',
-      format: 'url',
+      format: 'uri',
       required: true
     },
 
     registration_endpoint: {
       type: 'string',
-      format: 'url',
+      format: 'uri',
       required: true
     },
 
@@ -225,7 +225,7 @@ const schema = {
 
     service_documentation: {
       type: 'string',
-      format: 'url'
+      format: 'uri'
     },
 
     claims_locales_supported: {
@@ -260,23 +260,23 @@ const schema = {
 
     op_policy_uri: {
       type: 'string',
-      format: 'url'
+      format: 'uri'
     },
 
     op_tos_uri: {
       type: 'string',
-      format: 'url'
+      format: 'uri'
     },
 
     check_session_iframe: {
       type: 'string',
-      format: 'url',
+      format: 'uri',
       required: true
     },
 
     end_session_endpoint: {
       type: 'string',
-      format: 'url',
+      format: 'uri',
       required: true
     },
 

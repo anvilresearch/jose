@@ -229,6 +229,9 @@ describe('TokenRequest', () => {
     })
   })
 
+  /**
+   * Authenticate Client
+   */
   describe('authenticateClient', () => {
     describe('with "client_secret_basic" and "client_secret_post" credentials', () => {
       let request
@@ -555,6 +558,9 @@ describe('TokenRequest', () => {
     })
   })
 
+  /**
+   * Client Secret Basic
+   */
   describe('clientSecretBasic', () => {
     describe('with malformed credentials', () => {
       let request
@@ -765,6 +771,9 @@ describe('TokenRequest', () => {
     })
   })
 
+  /**
+   * Client Secret Post
+   */
   describe('clientSecretPost', () => {
     describe('with missing client id', () => {
       let request
@@ -940,8 +949,19 @@ describe('TokenRequest', () => {
     })
   })
 
+  /**
+   * Client Secret JWT
+   */
   describe('clientSecretJWT', () => {})
+
+  /**
+   * Private Key JWT
+   */
   describe('privateKeyJWT', () => {})
+
+  /**
+   * None
+   */
   describe('none', () => {})
 
   /**
@@ -1036,12 +1056,44 @@ describe('TokenRequest', () => {
     })
   })
 
+  /**
+   * Authorization Code Grant
+   */
   describe('authorizationCodeGrant', () => {})
-  describe('refreshGrant', () => {})
+
+  /**
+   * Refresh Token Grant
+   */
+  describe('refreshTokenGrant', () => {})
+
+  /**
+   * Client Credentials Grant
+   */
   describe('clientCredentialsGrant', () => {})
+
+  /**
+   * Verify Authorization Code
+   */
   describe('verifyAuthorizationCode', () => {})
+
+  /**
+   * Include Access Token
+   */
   describe('includeAccessToken', () => {})
+
+  /**
+   * Include Refresh Token
+   */
   describe('includeRefreshToken', () => {})
+
+  /**
+   * Include ID Token
+   */
   describe('includeIDToken', () => {})
+
+  /**
+   * Include Session State
+   * TODO: should this be on the base class?
+   */
   describe('includeSessionState', () => {})
 })

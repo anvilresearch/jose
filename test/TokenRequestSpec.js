@@ -756,7 +756,181 @@ describe('TokenRequest', () => {
     })
   })
 
-  describe('clientSecretPost', () => {})
+  describe('clientSecretPost', () => {
+    describe('with missing client id', () => {
+      let request
+
+      before(() => {
+        sinon.stub(TokenRequest.prototype, 'badRequest')
+
+        let req = {
+          method: 'POST',
+          body: {
+            client_secret: 'secret'
+          }
+        }
+
+        let res = {}
+        let provider = { host: {} }
+
+        request = new TokenRequest(req, res, provider)
+        request.clientSecretPost(request)
+      })
+
+      after(() => {
+        TokenRequest.prototype.badRequest.restore()
+      })
+
+      it('should respond "400 Bad Request"', () => {
+        request.badRequest.should.have.been.calledWith({
+          error: 'unauthorized_client',
+          error_description: 'Missing client credentials'
+        })
+      })
+    })
+
+    describe('with missing client secret', () => {
+      let request
+
+      before(() => {
+        sinon.stub(TokenRequest.prototype, 'badRequest')
+
+        let req = {
+          method: 'POST',
+          body: {
+            client_id: 'secret'
+          }
+        }
+
+        let res = {}
+        let provider = { host: {} }
+
+        request = new TokenRequest(req, res, provider)
+        request.clientSecretPost(request)
+      })
+
+      after(() => {
+        TokenRequest.prototype.badRequest.restore()
+      })
+
+      it('should respond "400 Bad Request"', () => {
+        request.badRequest.should.have.been.calledWith({
+          error: 'unauthorized_client',
+          error_description: 'Missing client credentials'
+        })
+      })
+    })
+
+    describe('with unknown client', () => {
+      let request
+
+      before(() => {
+        sinon.stub(TokenRequest.prototype, 'unauthorized')
+
+        let req = {
+          method: 'POST',
+          body: {
+            client_id: 'uuid',
+            client_secret: 'secret'
+          }
+        }
+
+        let res = {}
+        let provider = {
+          host: {},
+          getClient: () => Promise.resolve(null)
+        }
+
+        request = new TokenRequest(req, res, provider)
+        request.clientSecretPost(request)
+      })
+
+      after(() => {
+        TokenRequest.prototype.unauthorized.restore()
+      })
+
+      it('should respond "401 Unauthorized"', () => {
+        request.unauthorized.should.have.been.calledWith({
+          error: 'unauthorized_client',
+          error_description: 'Unknown client identifier'
+        })
+      })
+    })
+
+    describe('with mismatching client secret', () => {
+      let request
+
+      before(() => {
+        sinon.stub(TokenRequest.prototype, 'unauthorized')
+
+        let req = {
+          method: 'POST',
+          body: {
+            client_id: 'uuid',
+            client_secret: 'WRONG'
+          }
+        }
+
+        let res = {}
+        let provider = {
+          host: {},
+          getClient: () => Promise.resolve({ client_secret: 'secret' })
+        }
+
+        request = new TokenRequest(req, res, provider)
+        request.clientSecretPost(request)
+      })
+
+      after(() => {
+        TokenRequest.prototype.unauthorized.restore()
+      })
+
+      it('should respond "401 Unauthorized"', () => {
+        request.unauthorized.should.have.been.calledWith({
+          error: 'unauthorized_client',
+          error_description: 'Mismatching client secret'
+        })
+      })
+    })
+
+    describe('with valid credentials', () => {
+      let request, promise
+
+      before(() => {
+        sinon.stub(TokenRequest.prototype, 'unauthorized')
+
+        let req = {
+          method: 'POST',
+          body: {
+            client_id: 'uuid',
+            client_secret: 'secret'
+          }
+        }
+
+        let res = {}
+        let provider = {
+          host: {},
+          getClient: () => Promise.resolve({ client_secret: 'secret' })
+        }
+
+        request = new TokenRequest(req, res, provider)
+        promise = request.clientSecretPost(request)
+      })
+
+      after(() => {
+        TokenRequest.prototype.unauthorized.restore()
+      })
+
+      it('should return a promise', () => {
+        promise.should.be.instanceof(Promise)
+      })
+
+      it('should resolve request', () => {
+        promise.then(result => result.should.equal(request))
+      })
+    })
+  })
+
   describe('clientSecretJWT', () => {})
   describe('privateKeyJWT', () => {})
   describe('none', () => {})

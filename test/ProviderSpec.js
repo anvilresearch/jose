@@ -22,7 +22,7 @@ let expect = chai.expect
 const Provider = require(path.join(cwd, 'src', 'Provider'))
 const ProviderSchema = require(path.join(cwd, 'src', 'schemas', 'ProviderSchema'))
 const AuthenticationRequest = require(path.join(cwd, 'src', 'handlers', 'AuthenticationRequest'))
-const DiscoveryRequest = require(path.join(cwd, 'src', 'handlers', 'DiscoveryRequest'))
+const OpenIDConfigurationRequest = require(path.join(cwd, 'src', 'handlers', 'OpenIDConfigurationRequest'))
 const DynamicRegistrationRequest = require(path.join(cwd, 'src', 'handlers', 'DynamicRegistrationRequest'))
 const JWKSetRequest = require(path.join(cwd, 'src', 'handlers', 'JWKSetRequest'))
 const TokenRequest = require(path.join(cwd, 'src', 'handlers', 'TokenRequest'))
@@ -99,17 +99,17 @@ describe('OpenID Connect Provider', () => {
     before(() => {
       req = {}
       res = {}
-      sinon.stub(DiscoveryRequest, 'handle')
+      sinon.stub(OpenIDConfigurationRequest, 'handle')
       provider = new Provider({}, {}, {})
       provider.discover(req, res, provider)
     })
 
     after(() => {
-      DiscoveryRequest.handle.restore()
+      OpenIDConfigurationRequest.handle.restore()
     })
 
-    it('should invoke the DiscoveryRequest handler', () => {
-      DiscoveryRequest.handle.should.have.been
+    it('should invoke the OpenIDConfigurationRequest handler', () => {
+      OpenIDConfigurationRequest.handle.should.have.been
         .calledWith(req, res, provider)
     })
   })

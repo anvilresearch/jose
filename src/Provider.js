@@ -8,7 +8,7 @@ const path = require('path')
 
 const providerSchema = require(path.join(cwd, 'src', 'schemas', 'ProviderSchema'))
 const AuthenticationRequest = require(path.join(cwd, 'src', 'handlers', 'AuthenticationRequest'))
-const DiscoveryRequest = require(path.join(cwd, 'src', 'handlers', 'DiscoveryRequest'))
+const OpenIDConfigurationRequest = require(path.join(cwd, 'src', 'handlers', 'OpenIDConfigurationRequest'))
 const DynamicRegistrationRequest = require(path.join(cwd, 'src', 'handlers', 'DynamicRegistrationRequest'))
 const JWKSetRequest = require(path.join(cwd, 'src', 'handlers', 'JWKSetRequest'))
 const TokenRequest = require(path.join(cwd, 'src', 'handlers', 'TokenRequest'))
@@ -78,7 +78,7 @@ class Provider {
    * @param {HTTPResponse} res
    */
   discover (req, res) {
-    DiscoveryRequest.handle(req, res, this)
+    OpenIDConfigurationRequest.handle(req, res, this)
   }
 
   /**

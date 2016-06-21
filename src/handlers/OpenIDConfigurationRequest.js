@@ -6,9 +6,9 @@
 const BaseRequest = require('./BaseRequest')
 
 /**
- * DiscoveryRequest
+ * OpenIDConfigurationRequest
  */
-class DiscoveryRequest extends BaseRequest {
+class OpenIDConfigurationRequest extends BaseRequest {
 
   /**
    * Request Handler
@@ -25,6 +25,6 @@ class DiscoveryRequest extends BaseRequest {
 /**
  * Export
  */
-module.exports = DiscoveryRequest
+module.exports = OpenIDConfigurationRequest
 
 

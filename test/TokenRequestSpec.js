@@ -546,7 +546,216 @@ describe('TokenRequest', () => {
     })
   })
 
-  describe('clientSecretBasic', () => {})
+  describe('clientSecretBasic', () => {
+    describe('with malformed credentials', () => {
+      let request
+
+      before(() => {
+        sinon.stub(TokenRequest.prototype, 'badRequest')
+
+        let req = {
+          method: 'POST',
+          body: {},
+          headers: {
+            authorization: 'Basic MALFORMED'
+          }
+        }
+
+        let res = {}
+        let provider = { host: {} }
+
+        request = new TokenRequest(req, res, provider)
+        request.clientSecretBasic(request)
+      })
+
+      after(() => {
+        TokenRequest.prototype.badRequest.restore()
+      })
+
+      it('should respond "400 Bad Request"', () => {
+        request.badRequest.should.have.been.calledWith({
+          error: 'unauthorized_client',
+          error_description: 'Malformed HTTP Basic credentials'
+        })
+      })
+    })
+
+    describe('with invalid authorization scheme', () => {
+      let request
+
+      before(() => {
+        sinon.stub(TokenRequest.prototype, 'badRequest')
+
+        let req = {
+          method: 'POST',
+          body: {},
+          headers: {
+            authorization: `Bearer ${new Buffer('id:secret').toString('base64')}`
+          }
+        }
+
+        let res = {}
+        let provider = { host: {} }
+
+        request = new TokenRequest(req, res, provider)
+        request.clientSecretBasic(request)
+      })
+
+      after(() => {
+        TokenRequest.prototype.badRequest.restore()
+      })
+
+      it('should respond "400 Bad Request"', () => {
+        request.badRequest.should.have.been.calledWith({
+          error: 'unauthorized_client',
+          error_description: 'Invalid authorization scheme'
+        })
+      })
+    })
+
+    describe('with missing credentials', () => {
+      let request
+
+      before(() => {
+        sinon.stub(TokenRequest.prototype, 'badRequest')
+
+        let req = {
+          method: 'POST',
+          body: {},
+          headers: {
+            authorization: `Basic ${new Buffer(':').toString('base64')}`
+          }
+        }
+
+        let res = {}
+        let provider = { host: {} }
+
+        request = new TokenRequest(req, res, provider)
+        request.clientSecretBasic(request)
+      })
+
+      after(() => {
+        TokenRequest.prototype.badRequest.restore()
+      })
+
+      it('should respond "400 Bad Request"', () => {
+        request.badRequest.should.have.been.calledWith({
+          error: 'unauthorized_client',
+          error_description: 'Missing client credentials'
+        })
+      })
+    })
+
+    describe('with unknown client', () => {
+      let request
+
+      before(() => {
+        sinon.stub(TokenRequest.prototype, 'unauthorized')
+
+        let req = {
+          method: 'POST',
+          body: {},
+          headers: {
+            authorization: `Basic ${new Buffer('id:secret').toString('base64')}`
+          }
+        }
+
+        let res = {}
+        let provider = {
+          host: {},
+          getClient: () => Promise.resolve(null)
+        }
+
+        request = new TokenRequest(req, res, provider)
+        request.clientSecretBasic(request)
+      })
+
+      after(() => {
+        TokenRequest.prototype.unauthorized.restore()
+      })
+
+      it('should respond "401 Unauthorized"', () => {
+        request.unauthorized.should.have.been.calledWith({
+          error: 'unauthorized_client',
+          error_description: 'Unknown client identifier'
+        })
+      })
+    })
+
+    describe('with mismatching secret', () => {
+      let request
+
+      before(() => {
+        sinon.stub(TokenRequest.prototype, 'unauthorized')
+
+        let req = {
+          method: 'POST',
+          body: {},
+          headers: {
+            authorization: `Basic ${new Buffer('id:WRONG').toString('base64')}`
+          }
+        }
+
+        let res = {}
+        let provider = {
+          host: {},
+          getClient: () => Promise.resolve({ client_secret: 'secret' })
+        }
+
+        request = new TokenRequest(req, res, provider)
+        request.clientSecretBasic(request)
+      })
+
+      after(() => {
+        TokenRequest.prototype.unauthorized.restore()
+      })
+
+      it('should respond "401 Unauthorized"', () => {
+        request.unauthorized.should.have.been.calledWith({
+          error: 'unauthorized_client',
+          error_description: 'Mismatching client secret'
+        })
+      })
+    })
+
+    describe('with valid credentials', () => {
+      let request, promise
+
+      before(() => {
+        sinon.stub(TokenRequest.prototype, 'unauthorized')
+
+        let req = {
+          method: 'POST',
+          body: {},
+          headers: {
+            authorization: `Basic ${new Buffer('id:secret').toString('base64')}`
+          }
+        }
+
+        let res = {}
+        let provider = {
+          host: {},
+          getClient: () => Promise.resolve({ client_secret: 'secret' })
+        }
+
+        request = new TokenRequest(req, res, provider)
+        promise = request.clientSecretBasic(request)
+      })
+
+      after(() => {
+        TokenRequest.prototype.unauthorized.restore()
+      })
+
+      it('should return a promise', () => {
+        promise.should.be.instanceof(Promise)
+      })
+
+      it('should resolve request', () => {
+        promise.then(result => result.should.equal(request))
+      })
+    })
+  })
+
   describe('clientSecretPost', () => {})
   describe('clientSecretJWT', () => {})
   describe('privateKeyJWT', () => {})

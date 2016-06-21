@@ -175,9 +175,13 @@ class TokenRequest extends OIDCRequest {
    * @returns {Promise}
    */
   clientSecretBasic (request) {
-    let {req: { headers: { authorization }}} = request
-    let [scheme,credentials] = authorization.split(' ')
-    let [id, secret] = new Buffer(credentials, 'base64').toString('ascii').split(':')
+    let {req:{headers},provider} = request
+    let authorization = headers.authorization.split(' ')
+    let scheme = authorization[0]
+    let credentials = new Buffer(authorization[1], 'base64')
+      .toString('ascii')
+      .split(':')
+    let [id, secret] = credentials
 
    // MALFORMED CREDENTIALS
     if (credentials.length !== 2) {

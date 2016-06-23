@@ -8,7 +8,15 @@ const KeyPair = require('./KeyPair')
 /**
  * RSAKeyPair
  */
-class RSAKeyPair extends KeyPair {}
+class RSAKeyPair extends KeyPair {
+
+  /**
+   * Generate
+   */
+  static generate () {
+    return Promise.resolve('TBD')
+  }
+}
 
 /**
  * Export

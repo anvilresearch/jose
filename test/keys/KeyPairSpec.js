@@ -53,4 +53,15 @@ describe('KeyPair', () => {
       properties.pem.properties.prv.type.should.equal('string')
     })
   })
+
+  /**
+   * Generate
+   */
+  describe('generate', () => {
+    it('should throw an error', () => {
+      expect(() => KeyPair.generate()).to.throw(
+        'KeyPair generate method must be implemented by extending class'
+      )
+    })
+  })
 })

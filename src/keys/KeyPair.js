@@ -15,6 +15,9 @@ class KeyPair {
 
   /**
    * Schema
+   *
+   * @description
+   * Defines containers for PEM and JWK representations of an asymmetric keypair.
    */
   static get schema () {
     return {
@@ -49,9 +52,17 @@ class KeyPair {
 
   /**
    * Generate
+   *
+   * @description
+   * Create an asymmetric cryptographic key pair and return a new instance.
+   *
+   * @returns {Promise}
+   * @abstract
    */
   static generate () {
-    throw new Error('KeyPair generate method must be implemented by extending class')
+    throw new Error(
+      'KeyPair generate method must be implemented by extending class'
+    )
   }
 }
 

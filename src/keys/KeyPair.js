@@ -64,6 +64,13 @@ class KeyPair {
       'KeyPair generate method must be implemented by extending class'
     )
   }
+
+  /**
+   * Constructor
+   */
+  constructor (data) {
+    Object.assign(this, data)
+  }
 }
 
 /**

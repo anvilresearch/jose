@@ -12,41 +12,6 @@ const KeyPair = require('./KeyPair')
 class RSAKeyPair extends KeyPair {
 
   /**
-   * Schema
-   */
-  static get schema () {
-    return {
-      type: 'object',
-      properties: {
-
-        jwk: {
-          type: 'object',
-          properties: {
-            pub: {
-              type: 'object'
-            },
-            prv: {
-              type: 'object'
-            }
-          }
-        },
-
-        pem: {
-          type: 'object',
-          properties: {
-            pub: {
-              type: 'string'
-            },
-            prv: {
-              type: 'string'
-            }
-          }
-        }
-      }
-    }
-  }
-
-  /**
    * Generate
    */
   static generate (bitlength = 4096) {

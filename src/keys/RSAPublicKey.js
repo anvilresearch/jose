@@ -16,8 +16,19 @@ class RSAPublicKey extends JWK {
   static get schema () {
     return {
       properties: {
-        n: { type: 'string' },
-        e: { type: 'string' }
+
+        n: {
+          type: 'string',
+          format: 'Base64urlUInt',
+          required: true
+        },
+
+        e: {
+          type: 'string',
+          format: 'Base64urlUInt',
+          required: true
+        }
+
       }
     }
   }

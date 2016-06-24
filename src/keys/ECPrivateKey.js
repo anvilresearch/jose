@@ -16,7 +16,35 @@ class ECPrivateKey extends EncryptedJWK {
   static get schema () {
     return {
       properties: {
-        d: { type: 'string' }
+
+        crv: {
+          type: 'string',
+          required: true,
+          enum: [
+            'P-256',
+            'P-384',
+            'P-521'
+          ],
+        },
+
+        x: {
+          type: 'string',
+          format: 'base64url',
+          required: true,
+        },
+
+        y: {
+          type: 'string',
+          format: 'base64url',
+          required: true,
+        },
+
+        d: {
+          type: 'string',
+          format: 'base64url',
+          required: true,
+        }
+
       }
     }
   }

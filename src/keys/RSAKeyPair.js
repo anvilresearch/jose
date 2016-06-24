@@ -2,12 +2,17 @@
 
 /**
  * Dependencies
+ * @ignore
  */
 const {spawn} = require('child_process')
 const KeyPair = require('./KeyPair')
 
 /**
  * RSAKeyPair
+ *
+ * @class
+ * RSAKeyPair represents an RSA cryptographic keypair in memory.
+ * It maintains both PEM and JWK representations.
  */
 class RSAKeyPair extends KeyPair {
 
@@ -38,14 +43,6 @@ class RSAKeyPair extends KeyPair {
         resolve(new RSAKeyPair(keypair))
       })
     })
-  }
-
-  /**
-   * Constructor
-   */
-  constructor (data) {
-    super(data)
-    Object.assign(this, data)
   }
 }
 

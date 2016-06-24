@@ -16,9 +16,29 @@ class ECPublicKey extends JWK {
   static get schema () {
     return {
       properties: {
-        crv: {},
-        x: {},
-        y: {}
+
+        crv: {
+          type: 'string',
+          required: true,
+          enum: [
+            'P-256',
+            'P-384',
+            'P-521'
+          ],
+        },
+
+        x: {
+          type: 'string',
+          format: 'base64url',
+          required: true,
+        },
+
+        y: {
+          type: 'string',
+          format: 'base64url',
+          required: true,
+        }
+
       }
     }
   }

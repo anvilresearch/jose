@@ -5,9 +5,18 @@
  */
 
 /**
+ * Formats
+ */
+const BASE64_REGEXP = /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$/
+
+/**
  * JWK
  */
 class JWK {
+
+  /**
+   * Schema
+   */
   static get schema () {
     return {
       type: 'object',
@@ -16,13 +25,20 @@ class JWK {
         kty: {
           type: 'string',
           format: 'case-sensitive',
-          enum: ['RSA', 'EC', 'oct'] // other values MAY be used
+          enum: [
+            'RSA',
+            'EC',
+            'oct'
+          ] // other values MAY be used
         },
 
         use: {
           type: 'string',
           format: 'case-sensitive',
-          enum: ['sig', 'enc'] // other values MAY be used
+          enum: [
+            'sig',
+            'enc'
+          ] // other values MAY be used
         },
 
         key_ops: {
@@ -69,11 +85,20 @@ class JWK {
           format: 'url'
         },
 
-        x5c: {},
+        x5c: {
+          type: 'array',
+          format: BASE64_REGEXP
+        },
 
-        x5t: {},
+        x5t: {
+          type: 'string',
+          format: BASE64_REGEXP
+        },
 
-        'x5t#S256': {}
+        'x5t#S256': {
+          type: 'string',
+          format: BASE64_REGEXP
+        }
       }
     }
   }

@@ -57,4 +57,20 @@ describe('RSAKeyPair', () => {
       )
     })
   })
+
+  /**
+   * Constructor
+   */
+  describe('constructor', () => {
+    it('should throw an error if "type" is not "RSA"', () => {
+      expect(() => {
+        new RSAKeyPair({ type: 'EC' })
+      }).to.throw('RSAKeyPair data must have the type "RSA"')
+    })
+
+    it('should set "type" to "RSA" if undefined by argument', () => {
+      let keypair = new RSAKeyPair()
+      keypair.type.should.equal('RSA')
+    })
+  })
 })

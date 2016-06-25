@@ -44,6 +44,19 @@ class RSAKeyPair extends KeyPair {
       })
     })
   }
+
+  /**
+   * Constructor
+   */
+  constructor (data) {
+    super(data)
+
+    if (this.type && this.type !== 'RSA') {
+      throw new Error('RSAKeyPair data must have the type "RSA"')
+    }
+
+    this.type = 'RSA'
+  }
 }
 
 /**

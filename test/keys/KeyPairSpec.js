@@ -29,6 +29,14 @@ describe('KeyPair', () => {
   describe('schema', () => {
     let {schema: {properties}} = KeyPair
 
+    it('should define type of "type"', () => {
+      properties.type.type.should.equal('string')
+    })
+
+    it('should define enum of "type"', () => {
+      properties.type.enum.should.eql(['RSA', 'EC'])
+    })
+
     it('should define type of "jwk"', () => {
       properties.jwk.type.should.equal('object')
     })

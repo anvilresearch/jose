@@ -21,7 +21,13 @@ class KeyPair {
    */
   static get schema () {
     return {
+      type: 'object',
       properties: {
+
+        type: {
+          type: 'string',
+          enum: ['RSA', 'EC']
+        },
 
         jwk: {
           type: 'object',

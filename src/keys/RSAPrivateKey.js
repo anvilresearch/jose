@@ -7,6 +7,10 @@ const EncryptedJWK = require('./EncryptedJWK')
 
 /**
  * RSAPrivateKey
+ *
+ * @class
+ * RSAPrivate key represents an RSA private key as a JWK, and
+ * can serialize/deserialize the key as an Encrypted JWT.
  */
 class RSAPrivateKey extends EncryptedJWK {
 

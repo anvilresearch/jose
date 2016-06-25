@@ -7,6 +7,10 @@ const EncryptedJWK = require('./EncryptedJWK')
 
 /**
  * ECPrivateKey
+ *
+ * @class
+ * ECPrivate key represents an Elliptic Curve private key as a JWK, and
+ * can serialize/deserialize the key as an Encrypted JWT.
  */
 class ECPrivateKey extends EncryptedJWK {
 

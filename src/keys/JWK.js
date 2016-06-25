@@ -11,6 +11,11 @@ const BASE64_REGEXP = /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[
 
 /**
  * JWK
+ *
+ * @class
+ * JWK is a base class that represents a JSON Web Key. It is extended by
+ * ECPublicKey, RSAPublicKey, EncryptedJWK, and indirectly by ECPrivateKey and
+ * RSAPrivateKey, through EncryptedJWK.
  */
 class JWK {
 

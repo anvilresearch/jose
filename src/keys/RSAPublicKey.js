@@ -7,6 +7,9 @@ const JWK = require('./JWK')
 
 /**
  * RSAPublicKey
+ *
+ * @class
+ * RSAPublicKey represents an RSA public key as a JWK.
  */
 class RSAPublicKey extends JWK {
 

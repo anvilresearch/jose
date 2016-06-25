@@ -7,6 +7,9 @@ const JWK = require('./JWK')
 
 /**
  * ECPublicKey
+ *
+ * @class
+ * ECPublicKey represents an Elliptic Curve public key as a JWK.
  */
 class ECPublicKey extends JWK {
 

@@ -9,7 +9,8 @@ const JWK = require('./JWK')
  * EncryptedJWK
  *
  * @class
- * Adds methods suitable for serializing and deserializing a private key JWK.
+ * EncryptedJWK extends JWK and adds methods suitable for serializing and
+ * deserializing a private key JWK.
  */
 class EncryptedJWK extends JWK {
 

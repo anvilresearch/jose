@@ -2,7 +2,10 @@
 
 /**
  * Dependencies
+ * @ignore
  */
+const RSAKeyPair = require('./RSAKeyPair')
+const ECKeyPair = require('./ECKeyPair')
 
 /**
  * KeyChain
@@ -27,12 +30,66 @@ class KeyChain {
   /**
    * Generate
    */
-  static generate (descriptor) {}
+  static generate (descriptor) {
+    return Promise.resolve(new KeyChain(descriptor))
+  }
 
   /**
    * Constructor
    */
-  constructor (data) {}
+  constructor (data) {
+    Object.assign(this, data)
+    KeyChain.initialize(this)
+  }
+
+  /**
+   * Initialize
+   *
+   * @description
+   * Traverse the keychain and cast leaf objects to a KeyPair instance dependending
+   * on their type.
+   *
+   * @param {Object} object
+   *
+   * TODO
+   * - test the hell out of this
+   * - perhaps this should be part of deserialize?
+   */
+  static initialize (object) {
+    Object.keys(object).forEach(key => {
+      let property = object[key]
+
+      // the property is not an object
+      //  => error
+      if (typeof property !== 'object') {
+        throw new Error(`Can\'t initialize ${JSON.stringify(object)}`)
+      }
+      // the property is an object with an unsupported type
+      //  => error
+      if (property.type && (
+        property.type !== 'RSA' &&
+        property.type !== 'EC'
+      )) {
+        throw new Error(
+          `Can\'t initialize KeyPair of unsupported type ${property.type}`
+        )
+      }
+      // the property is an object without type
+      //  => recurse
+      if (typeof property === 'object' && !property.type) {
+        return KeyChain.initialize(property)
+      }
+      // the property is an object with a supported type
+      //  => cast to type and terminate the recursion
+      if (property.type === 'RSA') {
+        object[key] = new RSAKeyPair(property)
+      }
+
+      if (property.type === 'EC') {
+        object[key] = new ECKeyPair(property)
+      }
+    })
+  }
 
   /**
    * Validate

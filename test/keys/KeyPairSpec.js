@@ -24,7 +24,7 @@ const KeyPair = require(path.join(cwd, 'src', 'keys', 'KeyPair'))
 describe('KeyPair', () => {
 
   /**
-   * Shema
+   * Schema
    */
   describe('schema', () => {
     let {schema: {properties}} = KeyPair

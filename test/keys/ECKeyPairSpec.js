@@ -56,14 +56,4 @@ describe('ECKeyPair', () => {
       )
     })
   })
-
-  /**
-   * Type
-   */
-  describe('type getter', () => {
-    it('should return "RSA"', () => {
-      let keypair = new ECKeyPair()
-      keypair.type.should.equal('EC')
-    })
-  })
 })

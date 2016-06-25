@@ -44,13 +44,6 @@ class ECKeyPair extends KeyPair {
       })
     })
   }
-
-  /**
-   * Type
-   */
-  get type () {
-    return 'EC'
-  }
 }
 
 /**

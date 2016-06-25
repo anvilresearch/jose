@@ -64,4 +64,20 @@ describe('KeyPair', () => {
       )
     })
   })
+
+  /**
+   * Constructor
+   */
+  describe('constructor', () => {})
+
+  /**
+   * Type
+   */
+  describe('type getter', () => {
+    it('should throw an error', () => {
+      expect(() => (new KeyPair().type)).to.throw(
+        'KeyPair type getter method must be implemented by extending class'
+      )
+    })
+  })
 })

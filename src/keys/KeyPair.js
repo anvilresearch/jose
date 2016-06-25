@@ -71,6 +71,15 @@ class KeyPair {
   constructor (data) {
     Object.assign(this, data)
   }
+
+  /**
+   * Type
+   */
+  get type () {
+    throw new Error(
+      'KeyPair type getter method must be implemented by extending class'
+    )
+  }
 }
 
 /**

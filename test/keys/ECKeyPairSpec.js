@@ -56,4 +56,20 @@ describe('ECKeyPair', () => {
       )
     })
   })
+
+  /**
+   * Constructor
+   */
+  describe('constructor', () => {
+    it('should throw an error if "type" is not "EC"', () => {
+      expect(() => {
+        new ECKeyPair({ type: 'RSA' })
+      }).to.throw('ECKeyPair data must have the type "EC"')
+    })
+
+    it('should set "type" to "EC" if undefined by argument', () => {
+      let keypair = new ECKeyPair()
+      keypair.type.should.equal('EC')
+    })
+  })
 })

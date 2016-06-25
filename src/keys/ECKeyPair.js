@@ -44,6 +44,19 @@ class ECKeyPair extends KeyPair {
       })
     })
   }
+
+  /**
+   * Constructor
+   */
+  constructor (data) {
+    super(data)
+
+    if (this.type && this.type !== 'EC') {
+      throw new Error('ECKeyPair data must have the type "EC"')
+    }
+
+    this.type = 'EC'
+  }
 }
 
 /**

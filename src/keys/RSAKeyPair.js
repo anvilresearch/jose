@@ -21,20 +21,20 @@ class RSAKeyPair extends KeyPair {
    */
   static generate (bitlength = 4096) {
     return new Promise((resolve, reject) => {
-      let keypair = {}
+      let keypair = { pem: {} }
       let genrsa = spawn('openssl', ['genrsa', bitlength])
       let rsa = spawn('openssl', ['rsa', '-pubout'])
 
       // store private key pem on the keypair
       // and pipe stdout to the public key process
       genrsa.stdout.on('data', (data) => {
-        keypair.prv = data.toString('ascii')
+        keypair.pem.prv = data.toString('ascii')
         rsa.stdin.write(data)
       })
 
       // store public key pem on the keypair
       rsa.stdout.on('data', (data) => {
-        keypair.pub = data.toString('ascii')
+        keypair.pem.pub = data.toString('ascii')
       })
 
       // cast the keypair to RSAKeyPair

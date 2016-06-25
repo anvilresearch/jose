@@ -24,34 +24,37 @@ const RSAKeyPair = require(path.join(cwd, 'src', 'keys', 'RSAKeyPair'))
 describe('RSAKeyPair', () => {
 
   /**
-   * Shema
+   * Generate
    */
-  describe('schema', () => {
-    let {schema: {properties}} = RSAKeyPair
+  describe('generate', () => {
+    let promise, keypair
 
-
-    it('should define type of "jwk"', () => {
-      properties.jwk.type.should.equal('object')
+    before((done) => {
+      // short keylength so the tests done lag
+      promise = RSAKeyPair.generate(1024).then(result => {
+        keypair = result
+        done()
+      })
     })
 
-    it('should define type of "jwk.pub"', () => {
-      properties.jwk.properties.pub.type.should.equal('object')
+    it('should return a promise', () => {
+      promise.should.be.instanceof(Promise)
     })
 
-    it('should define type of "jwk.prv"', () => {
-      properties.jwk.properties.prv.type.should.equal('object')
+    it('should resolve an instance of ECKeyPair', () => {
+      keypair.should.be.instanceof(RSAKeyPair)
     })
 
-    it('should define type of "pem"', () => {
-      properties.pem.type.should.equal('object')
+    it('should set the public PEM', () => {
+      keypair.pem.pub.should.contain(
+        '-----BEGIN PUBLIC KEY-----'
+      )
     })
 
-    it('should define type of "pem.pub"', () => {
-      properties.pem.properties.pub.type.should.equal('string')
-    })
-
-    it('should define type of "pem.prv"', () => {
-      properties.pem.properties.prv.type.should.equal('string')
+    it('should set the private PEM', () => {
+      keypair.pem.prv.should.contain(
+        '-----BEGIN RSA PRIVATE KEY-----'
+      )
     })
   })
 })

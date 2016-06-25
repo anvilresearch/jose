@@ -21,20 +21,20 @@ class ECKeyPair extends KeyPair {
    */
   static generate () {
     return new Promise((resolve, reject) => {
-      let keypair = {}
+      let keypair = { pem: {} }
       let ecparam = spawn('openssl', ['ecparam', '-name', 'secp256k1', '-genkey'])
       let ec = spawn('openssl', ['ec', '-pubout'])
 
       // store private key pem on the keypair
       // and pipe stdout to the public key process
       ecparam.stdout.on('data', (data) => {
-        keypair.prv = data.toString('ascii')
+        keypair.pem.prv = data.toString('ascii')
         ec.stdin.write(data)
       })
 
       // store public key pem on the keypair
       ec.stdout.on('data', (data) => {
-        keypair.pub = data.toString('ascii')
+        keypair.pem.pub = data.toString('ascii')
       })
 
       // cast the keypair to ECKeyPair

@@ -44,6 +44,13 @@ class RSAKeyPair extends KeyPair {
       })
     })
   }
+
+  /**
+   * Type
+   */
+  get type () {
+    return 'RSA'
+  }
 }
 
 /**

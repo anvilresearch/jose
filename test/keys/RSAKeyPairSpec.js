@@ -57,14 +57,4 @@ describe('RSAKeyPair', () => {
       )
     })
   })
-
-  /**
-   * Type
-   */
-  describe('type getter', () => {
-    it('should return "RSA"', () => {
-      let keypair = new RSAKeyPair()
-      keypair.type.should.equal('RSA')
-    })
-  })
 })

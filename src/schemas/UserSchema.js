@@ -15,7 +15,7 @@
  * - implement JSON Schema such that it doesn't completely suck
  */
 //const schema = new JSONSchema({
-const schema = {
+const UserSchema = {
   type: 'object',
 
   // simple property names
@@ -164,4 +164,4 @@ const schema = {
 /**
  * Export
  */
-module.exports = schema
+module.exports = UserSchema

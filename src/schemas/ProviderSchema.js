@@ -9,7 +9,7 @@
  * OpenID Provider Schema
  */
 //const schema = new JSONSchema({
-const schema = {
+const ProviderSchema = {
   type: 'object',
   properties: {
 
@@ -294,4 +294,4 @@ const schema = {
 /**
  * Export
  */
-module.exports = schema
+module.exports = ProviderSchema

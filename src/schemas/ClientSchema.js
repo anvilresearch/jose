@@ -6,10 +6,10 @@
 //const JSONSchema = require('nv-schema')
 
 /**
- * OpenID Provider Schema
+ * OpenID Client Metadata (Relying Party) Schema
  */
 //const schema = new JSONSchema({
-const schema = {
+const ClientSchema = {
   type: 'object',
   properties: {
 
@@ -35,7 +35,7 @@ const schema = {
 
     /**
      * TODO
-     * 
+     *
      * The following table lists the correspondence between response_type values
      * that the Client will use and grant_type values that MUST be included in
      * the registered grant_types list:
@@ -71,7 +71,7 @@ const schema = {
      * than the localhost case for Native Clients. The Authorization Server MUST
      * verify that all the registered redirect_uris conform to these
      * constraints. This prevents sharing a Client ID across different types of
-     * Clients.    
+     * Clients.
      */
     application_type: {
       type: 'string',
@@ -159,8 +159,8 @@ const schema = {
       type: 'string'
     },
 
-    userinfo_encrypted_response_alg: { 
-      type: 'string' 
+    userinfo_encrypted_response_alg: {
+      type: 'string'
     },
 
     userinfo_encrypted_response_enc: {
@@ -228,4 +228,4 @@ const schema = {
 /**
  * Export
  */
-module.exports = schema
+module.exports = ClientSchema

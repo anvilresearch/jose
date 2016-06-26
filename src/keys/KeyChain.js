@@ -39,14 +39,14 @@ class KeyChain {
    * @example
    * KeyChain.generate({
    *   token: {
-   *     sig: 'RSA',
-   *     enc: 'RSA'
+   *     sig: 'RSAKeyPair',
+   *     enc: 'RSAKeyPair'
    *   },
    *   idtoken: {
-   *     sig: 'RSA'
+   *     sig: 'RSAKeyPair'
    *   },
    *   userinfo: {
-   *     enc: 'RSA'
+   *     enc: 'RSAKeyPair'
    *   }
    * })
    * .then(keys => {...})
@@ -61,58 +61,80 @@ class KeyChain {
    * @param {Object} descriptor
    * @returns {Promise}
    */
-  static generate (descriptor) {
-    // iterate over object members asynchronously
+  static generate (descriptor, options) {
+
+    // Asyncronously recurse over nested descriptor properties
     return Promise.all(
       Object.keys(descriptor).map(key => {
         let value = descriptor[key]
 
-        // operate on each property of the descriptor
-        return new Promise((resolve, reject) => {
-          // if the property is a string that identifies
-          // an algorithm, generate a cryptographic keypair
-          // for that value
-          if (typeof value === 'string') {
-            if (value === 'RSA') {
-              RSAKeyPair.generate().then(resolve).catch(reject)
-            }
+        // Expand arrays into objects and recurse
+        if (Array.isArray(value)) {
+          // TODO: expand shorthand
 
-            if (value === 'EC') {
-              ECKeyPair.generate().then(resolve).catch(reject)
-            }
+        // Recurse over the nested object
+        } else if (typeof value === 'object') {
+          return KeyChain.generate(value)
+
+        // Strings represent abbreviated key generation method names
+        } else if (typeof value === 'string') {
+          let method = `generate${value}`
+
+          // Return a promise, replacing the descriptor value
+          // with the newly generated cryptographic key
+          try {
+            let promise = KeyChain[method](options)
+            return promise.then(result => descriptor[key] = result)
+
+          // Handle an invalid value
+          } catch (e) {
+            return Promise.reject(
+              new Error(
+                `${value} is not a valid generation method`
+              )
+            )
           }
 
-          // if the property is an object, recurse
-          if (typeof value === 'object') {
-            resolve(KeyChain.generate(value))
-          }
-        })
-
-        // replace the original value with the resulting keypair
-        .then(result => {
-          if (result) {
-            descriptor[key] = result
-          }
-
-          return result
-        })
+        // Bad Descriptor Value
+        } else {
+          throw new Error(`Invalid value in KeyChain descriptor: ${value}`)
+        }
       })
     )
     .then(results => {
-      // once the entire keychain has been generated,
+      // Once the entire keychain has been generated,
       // resolve the promise returned by `KeyChain.generate()`
       // with the mutated descriptor
-      return Promise.resolve(descriptor)
+      return Promise.resolve(new KeyChain(descriptor))
       // TODO^ cast descriptor to KeyChain
     })
   }
+
+  /**
+   * Generate RSA KeyPair
+   */
+  static generateRSAKeyPair () {
+    return RSAKeyPair.generate()
+  }
+
+  /**
+   * Generate EC KeyPair
+   */
+  static generateECKeyPair () {
+    return ECKeyPair.generate()
+  }
+
+  /**
+   * TODO
+   * Generate Symmetric Key
+   */
 
   /**
    * Constructor
    */
   constructor (data) {
     Object.assign(this, data)
-    KeyChain.initialize(this)
+    //KeyChain.initialize(this)
   }
 
   /**

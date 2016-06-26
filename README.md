@@ -25,6 +25,13 @@ like Express.
 - Proof Key for Code Exchange by OAuth Clients (PKCE)
 - Authorization Cross Domain Code (ACDC)
 
+## Dependency Scope
+
+- JSON Schema
+- JSON Mapping
+- JSON Pointer
+- JOSE: JWT, JWS, JWE, JWA, JWK, JWK Set
+
 ## Tentative Scope
 
 - Account Chooser 1.0

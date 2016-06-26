@@ -2,6 +2,7 @@
 
 /**
  * Dependencies
+ * @ignore
  */
 const EncryptedJWK = require('./EncryptedJWK')
 

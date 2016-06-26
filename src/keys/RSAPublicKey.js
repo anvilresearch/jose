@@ -2,6 +2,7 @@
 
 /**
  * Dependencies
+ * @ignore
  */
 const JWK = require('./JWK')
 

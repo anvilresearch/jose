@@ -29,9 +29,82 @@ class KeyChain {
 
   /**
    * Generate
+   *
+   * @description
+   * Iterates recursively over the nested object members of its argument,
+   * generating cryptographic keys for each well-formed leaf node value. The
+   * returned promise resolves to an instance of KeyChain containing the newly
+   * generated keys, organized accordingly.
+   *
+   * @example
+   * KeyChain.generate({
+   *   token: {
+   *     sig: 'RSA',
+   *     enc: 'RSA'
+   *   },
+   *   idtoken: {
+   *     sig: 'RSA'
+   *   },
+   *   userinfo: {
+   *     enc: 'RSA'
+   *   }
+   * })
+   * .then(keys => {...})
+   *
+   * // =>
+   * KeyChain {
+   *   token: { sig: RSAKeyPair {...}, enc: RSAKeyPair {...} },
+   *   idtoken { sig: RSAKeyPair {...} },
+   *   userinfo { enc: RSAKeyPair {...} }
+   * }
+   *
+   * @param {Object} descriptor
+   * @returns {Promise}
    */
   static generate (descriptor) {
-    return Promise.resolve(new KeyChain(descriptor))
+    // iterate over object members asynchronously
+    return Promise.all(
+      Object.keys(descriptor).map(key => {
+        let value = descriptor[key]
+
+        // operate on each property of the descriptor
+        return new Promise((resolve, reject) => {
+          // if the property is a string that identifies
+          // an algorithm, generate a cryptographic keypair
+          // for that value
+          if (typeof value === 'string') {
+            if (value === 'RSA') {
+              RSAKeyPair.generate().then(resolve).catch(reject)
+            }
+
+            if (value === 'EC') {
+              ECKeyPair.generate().then(resolve).catch(reject)
+            }
+          }
+
+          // if the property is an object, recurse
+          if (typeof value === 'object') {
+            resolve(KeyChain.generate(value))
+          }
+        })
+
+        // replace the original value with the resulting keypair
+        .then(result => {
+          if (result) {
+            descriptor[key] = result
+          }
+
+          return result
+        })
+      })
+    )
+    .then(results => {
+      // once the entire keychain has been generated,
+      // resolve the promise returned by `KeyChain.generate()`
+      // with the mutated descriptor
+      return Promise.resolve(descriptor)
+      // TODO^ cast descriptor to KeyChain
+    })
   }
 
   /**

@@ -31,7 +31,7 @@ describe('RSAKeyPair', () => {
 
     before((done) => {
       // short keylength so the tests done lag
-      promise = RSAKeyPair.generate(1024).then(result => {
+      promise = RSAKeyPair.generate({ bitlength: 1024 }).then(result => {
         keypair = result
         done()
       })

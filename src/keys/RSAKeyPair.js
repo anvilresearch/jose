@@ -19,7 +19,9 @@ class RSAKeyPair extends KeyPair {
   /**
    * Generate
    */
-  static generate (bitlength = 4096) {
+  static generate (options) {
+    let bitlength = options.bitlength || 4096
+
     return new Promise((resolve, reject) => {
       let keypair = { pem: {} }
       let genrsa = spawn('openssl', ['genrsa', bitlength])

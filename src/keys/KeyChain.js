@@ -61,7 +61,7 @@ class KeyChain {
    * @param {Object} descriptor
    * @returns {Promise}
    */
-  static generate (descriptor, options) {
+  static generate (descriptor, options = {}) {
 
     // Asyncronously recurse over nested descriptor properties
     return Promise.all(
@@ -70,30 +70,29 @@ class KeyChain {
 
         // Expand arrays into objects and recurse
         if (Array.isArray(value)) {
+          return Promise.all(
+            value.map(item => {
+              return KeyChain.generateKey(options.type, options)
+            })
+          )
+          .then(results => {
+            let o = {}
+            results.forEach((result, index) => {
+              o[value[index]] = result
+            })
+            descriptor[key] = o
+          })
           // TODO: expand shorthand
 
         // Recurse over the nested object
         } else if (typeof value === 'object') {
-          return KeyChain.generate(value)
+          return KeyChain.generate(value, options)
 
         // Strings represent abbreviated key generation method names
         } else if (typeof value === 'string') {
-          let method = `generate${value}`
-
-          // Return a promise, replacing the descriptor value
-          // with the newly generated cryptographic key
-          try {
-            let promise = KeyChain[method](options)
-            return promise.then(result => descriptor[key] = result)
-
-          // Handle an invalid value
-          } catch (e) {
-            return Promise.reject(
-              new Error(
-                `${value} is not a valid generation method`
-              )
-            )
-          }
+          return KeyChain.generateKey(value, options).then(result => {
+            descriptor[key] = result
+          })
 
         // Bad Descriptor Value
         } else {
@@ -111,10 +110,35 @@ class KeyChain {
   }
 
   /**
+   * GenerateKey
+   *
+   * @description
+   * Dispatches to other static key(pair) generation methods by type
+   * and handles error resulting from an unsupported type.
+   */
+  static generateKey (type, options) {
+    let method = `generate${type}`
+
+    // Return a promise, replacing the descriptor value
+    // with the newly generated cryptographic key
+    try {
+      return KeyChain[method](options)
+
+    // Handle an invalid value
+    } catch (e) {
+      return Promise.reject(
+        new Error(
+          `${type} is not a valid generation method`
+        )
+      )
+    }
+  }
+
+  /**
    * Generate RSA KeyPair
    */
-  static generateRSAKeyPair () {
-    return RSAKeyPair.generate()
+  static generateRSAKeyPair (options) {
+    return RSAKeyPair.generate(options)
   }
 
   /**

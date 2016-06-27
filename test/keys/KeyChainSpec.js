@@ -32,53 +32,93 @@ describe('KeyChain', () => {
    * Generate
    */
   describe('generate', () => {
-    let descriptor, promise, keys
+    describe('with long form and omitted options argument', () => {
+      let descriptor, promise, keys
 
-    before((done) => {
-      sinon.stub(KeyChain, 'generateRSAKeyPair')
-        .returns(Promise.resolve(new RSAKeyPair))
+      before((done) => {
+        sinon.stub(KeyChain, 'generateRSAKeyPair')
+          .returns(Promise.resolve(new RSAKeyPair))
 
-      sinon.stub(KeyChain, 'generateECKeyPair')
-        .returns(Promise.resolve(new ECKeyPair))
+        sinon.stub(KeyChain, 'generateECKeyPair')
+          .returns(Promise.resolve(new ECKeyPair))
 
-      descriptor = {
-        a: {
-          b: 'RSAKeyPair',
-          c: 'RSAKeyPair'
-        },
-        d: {
-          e: 'ECKeyPair',
-          f: 'ECKeyPair'
+        descriptor = {
+          a: {
+            b: 'RSAKeyPair',
+            c: 'RSAKeyPair'
+          },
+          d: {
+            e: 'ECKeyPair',
+            f: 'ECKeyPair'
+          }
         }
-      }
 
-      promise = KeyChain.generate(descriptor).then(result => {
-        keys = result
-        done()
+        promise = KeyChain.generate(descriptor).then(result => {
+          keys = result
+          done()
+        })
+      })
+
+      after(() => {
+        KeyChain.generateRSAKeyPair.restore()
+        KeyChain.generateECKeyPair.restore()
+      })
+
+      it('should return a promise', () => {
+        promise.should.be.instanceof(Promise)
+      })
+
+      it('should resolve an instance of KeyChain', () => {
+        keys.should.be.instanceof(KeyChain)
+      })
+
+      it('should generate RSAKeyPairs', () => {
+        keys.a.b.should.be.instanceof(RSAKeyPair)
+        keys.a.c.should.be.instanceof(RSAKeyPair)
+      })
+
+      it('should generate ECKeyPairs', () => {
+        keys.d.e.should.be.instanceof(ECKeyPair)
+        keys.d.f.should.be.instanceof(ECKeyPair)
       })
     })
 
-    after(() => {
-      KeyChain.generateRSAKeyPair.restore()
-      KeyChain.generateECKeyPair.restore()
-    })
+    describe('with short form and options argument', () => {
+      let descriptor, options, promise, keys
 
-    it('should return a promise', () => {
-      promise.should.be.instanceof(Promise)
-    })
+      before((done) => {
+        descriptor = {
+          a: { b: ['c', 'd'] },
+          e: { f: ['g', 'h'] },
+          i: { j: 'RSAKeyPair' }
+        }
 
-    it('should resolve an instance of KeyChain', () => {
-      keys.should.be.instanceof(KeyChain)
-    })
+        options = {
+          type: 'RSAKeyPair' ,
+          bitlength: 1024 // short for testing
+        }
 
-    it('should generate RSAKeyPairs', () => {
-      keys.a.b.should.be.instanceof(RSAKeyPair)
-      keys.a.c.should.be.instanceof(RSAKeyPair)
-    })
+        promise = KeyChain.generate(descriptor, options).then(result => {
+          keys = result
+          done()
+        })
+      })
 
-    it('should generate ECKeyPairs', () => {
-      keys.d.e.should.be.instanceof(ECKeyPair)
-      keys.d.f.should.be.instanceof(ECKeyPair)
+      it('should return a promise', () => {
+        promise.should.be.instanceof(Promise)
+      })
+
+      it('should resolve an instance of KeyChain', () => {
+        keys.should.be.instanceof(KeyChain)
+      })
+
+      it('should generate keys', () => {
+        keys.a.b.c.should.be.instanceof(RSAKeyPair)
+        keys.a.b.d.should.be.instanceof(RSAKeyPair)
+        keys.e.f.g.should.be.instanceof(RSAKeyPair)
+        keys.e.f.h.should.be.instanceof(RSAKeyPair)
+        keys.i.j.should.be.instanceof(RSAKeyPair)
+      })
     })
   })
 

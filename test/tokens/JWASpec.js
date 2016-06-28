@@ -188,7 +188,7 @@ const JWA = require(path.join(cwd, 'src', 'tokens', 'JWA'))
 /**
  * Tests
  */
-describe.only('JSON Web Algorithms (JWA)', () => {
+describe('JSON Web Algorithms (JWA)', () => {
   /**
    * 1.  Introduction
    *
@@ -421,16 +421,6 @@ describe.only('JSON Web Algorithms (JWA)', () => {
      *
      *   An example using this algorithm is shown in Appendix A.1 of [JWS].
      */
-    describe('3.2. HMAC with SHA-2 Functions', () => {
-
-      describe('sign', () => {
-        it('should enforce minimum key size')
-        it('should return true with valid input')
-        it('should return false with invalid input')
-      })
-
-      describe('verify', () => {})
-    })
 
     /**
      * 3.3.  Digital Signature with RSASSA-PKCS1-v1_5

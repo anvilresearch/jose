@@ -8,108 +8,23 @@ const crypto = require('crypto')
 const base64url = require('base64url')
 
 /**
+ * Algorithms
+ */
+const HS = require('./algs/HMAC-SHA-2')
+const RS = require('./algs/RSASSA-PKCS1-v1_5')
+const ES = require('./algs/ECDSA')
+const PS = require('./algs/RSASSA-PSS')
+const NONE = require('./algs/None')
+
+/**
+ * Algorithms Dictionary
+ */
+const algorithms = { HS, RS, ES, PS, NONE }
+
+/**
  * Regular Expressions
  */
 const SUPPORTED_ALGORITHMS = /^(RS|ES|HS|PS)(256|384|512)$|^(none)$/i
-
-/**
- * HMAC with SHA-2 Functions
- */
-class HS {
-
-  /**
-   * Constructor
-   */
-  constructor (bitlength) {
-    this.bitlength = bitlength
-  }
-
-  /**
-   * Sign
-   */
-  sign (input, key) {
-    //assertSufficientKeyLength(key)
-    let {bitlength} = this
-    let hmac = crypto.createHmac(`sha${bitlength}`, key)
-    hmac.update(input)
-    return base64url.fromBase64(hmac.digest('base64'))
-  }
-
-  /**
-   * Verify
-   */
-  verify (input, signature, key) {
-    let computed = this.sign(input, key)
-    return computed === signature
-  }
-
-  /**
-   * Assert Sufficient Key Length
-   */
-  assertSufficientKeyLength (key) {
-    if (key.length < bitlength) {
-      throw new Error('The key is too short.')
-    }
-  }
-}
-
-/**
- * RSASSA-PKCS1-v1_5
- */
-class RS {
-
-  /**
-   * Constructor
-   */
-  constructor (bitlength) {
-    this.bitlength = bitlength
-  }
-
-  /**
-   * Sign
-   */
-  sign (input, privateKey) {
-    let {bitlength} = this
-    let signer = crypto.createSign(`RSA-SHA${bitlength}`)
-    signer.update(input)
-    return base64url.fromBase64(signer.sign(privateKey))
-  }
-
-  /**
-   * Verify
-   */
-  verify (input, signature, publicKey) {
-    let {bitlength} = this
-    let base64sig = base64url.toBase64(signature)
-    let verifier = crypto.createVerify(`RSA-SHA${bitlength}`)
-    verifier.update(input)
-    return verifier.verify(publicKey, signature, 'base64')
-  }
-}
-
-/**
- * ECDSA
- */
-class ES {}
-
-/**
- * RSASSA-PSS
- */
-class PS {}
-
-/**
- * "none" Algorithm
- */
-class NONE {
-  sign () {
-    return ''
-  }
-}
-
-/**
- * Algorithms Lookup Object
- */
-const algorithms = { HS, RS, ES, PS, NONE }
 
 /**
  * JWA

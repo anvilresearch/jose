@@ -8,7 +8,7 @@
 /**
  * PEM Regular Expression
  */
-const PEM = /^-----BEGIN (.+) (PRIVATE|PUBLIC) KEY-----[\s\S]*-----END \1 (PRIVATE|PUBLIC) KEY-----/
+const PEM = /^-----BEGIN (.+) (PRIVATE|PUBLIC) KEY-----\s?\S[\s\S]+-----END \1 \2 KEY-----/m
 
 /**
  * BaseAlgorithm
@@ -56,7 +56,7 @@ class BaseAlgorithm {
    * isPEM
    */
   static isPEM (key) {
-    return (
+    return Boolean(
       typeof key === 'string' &&
       key.match(PEM)
     )
@@ -78,4 +78,7 @@ class BaseAlgorithm {
   }
 }
 
-
+/**
+ * Export
+ */
+module.exports = BaseAlgorithm

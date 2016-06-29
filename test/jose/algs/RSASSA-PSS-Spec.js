@@ -19,7 +19,7 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const ES = require(path.join(cwd, 'src', 'tokens', 'algs', 'ECDSA'))
+const ES = require(path.join(cwd, 'src', 'jose', 'algs', 'ECDSA'))
 
 /**
  * Tests

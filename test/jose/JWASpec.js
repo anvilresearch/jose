@@ -19,7 +19,7 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const JWA = require(path.join(cwd, 'src', 'tokens', 'JWA'))
+const JWA = require(path.join(cwd, 'src', 'jose', 'JWA'))
 
 /**
  * Internet Engineering Task Force (IETF)                          M. Jones

@@ -19,7 +19,7 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const RS = require(path.join(cwd, 'src', 'tokens', 'algs', 'RSASSA-PKCS1-v1_5'))
+const RS = require(path.join(cwd, 'src', 'jose', 'algs', 'RSASSA-PKCS1-v1_5'))
 
 /**
  * Tests

@@ -19,7 +19,7 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const NONE = require(path.join(cwd, 'src', 'tokens', 'algs', 'None'))
+const NONE = require(path.join(cwd, 'src', 'jose', 'algs', 'None'))
 
 /**
  * Tests

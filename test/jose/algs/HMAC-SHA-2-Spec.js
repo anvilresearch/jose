@@ -19,7 +19,7 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const HS = require(path.join(cwd, 'src', 'tokens', 'algs', 'HMAC-SHA-2'))
+const HS = require(path.join(cwd, 'src', 'jose', 'algs', 'HMAC-SHA-2'))
 
 /**
  * Tests

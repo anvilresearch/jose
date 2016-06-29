@@ -8,7 +8,7 @@
 /**
  * PEM Regular Expression
  */
-const PEM = /^/
+const PEM = /^-----BEGIN (.+) (PRIVATE|PUBLIC) KEY-----[\s\S]*-----END \1 (PRIVATE|PUBLIC) KEY-----/
 
 /**
  * BaseAlgorithm

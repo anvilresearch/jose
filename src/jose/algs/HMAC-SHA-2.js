@@ -4,13 +4,14 @@
  * Dependencies
  * @ignore
  */
+const BaseAlgorithm = require('./BaseAlgorithm')
 const base64url = require('base64url')
 const crypto = require('crypto')
 
 /**
  * HMAC with SHA-2 Functions
  */
-class HMAC_SHA_2 {
+class HMAC_SHA_2 extends BaseAlgorithm {
 
   /**
    * Constructor

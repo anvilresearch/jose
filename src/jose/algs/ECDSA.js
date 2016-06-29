@@ -4,11 +4,12 @@
  * Dependencies
  * @ignore
  */
+const BaseAlgorithm = require('./BaseAlgorithm')
 
 /**
  * ECDSA
  */
-class ECDSA {}
+class ECDSA extends BaseAlgorithm {}
 
 /**
  * Export

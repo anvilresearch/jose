@@ -4,13 +4,14 @@
  * Dependencies
  * @ignore
  */
+const BaseAlgorithm = require('./BaseAlgorithm')
 const base64url = require('base64url')
 const crypto = require('crypto')
 
 /**
  * RSASSA-PKCS1-v1_5
  */
-class RSASSA_PKCS1_v1_5 {
+class RSASSA_PKCS1_v1_5 extends BaseAlgorithm {
 
   /**
    * Constructor

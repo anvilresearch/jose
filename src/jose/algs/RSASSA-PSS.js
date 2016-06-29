@@ -4,11 +4,12 @@
  * Dependencies
  * @ignore
  */
+const BaseAlgorithm = require('./BaseAlgorithm')
 
 /**
  * RSASSA-PSS
  */
-class RSASSA_PSS {}
+class RSASSA_PSS extends BaseAlgorithm {}
 
 /**
  * Export

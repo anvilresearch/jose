@@ -22,6 +22,7 @@
   "homepage": "https://gitlab.com/anvilresearch/oidc#README",
   "dependencies": {
     "base64url": "^1.0.6",
+    "pem-jwk": "^1.5.1",
     "qs": "^6.2.0"
   },
   "devDependencies": {

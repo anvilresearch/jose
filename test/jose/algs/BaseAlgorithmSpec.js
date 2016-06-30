@@ -93,20 +93,6 @@ describe('BaseAlgorithm', () => {
       })
     })
 
-    describe('with missing algorithm', () => {
-      let invalidEC = 
-        '-----BEGIN EC PARAMETERS-----\n' +
-        'BgUrgQQAIQ==\n' +
-        '-----END EC PARAMETERS-----\n' +
-        '-----BEGIN PRIVATE KEY-----\n' +
-        'This key should be invalid\n' +
-        '-----END PRIVATE KEY-----'
-
-      it('should return false', () => {
-        BaseAlgorithm.isPEM(invalidEC).should.equal(false)
-      })
-    })
-
     describe('with invalid key type', () => {
       let invalidEC = 
         '-----BEGIN EC PARAMETERS-----\n' +

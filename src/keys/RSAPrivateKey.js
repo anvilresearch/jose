@@ -8,6 +8,12 @@ const EncryptedJWK = require('./EncryptedJWK')
 const {pem2jwk, jwk2pem} = require('pem-jwk')
 
 /**
+ * Symbols
+ * @ignore
+ */
+const PEM = Symbol()
+
+/**
  * RSAPrivateKey
  *
  * @class
@@ -136,6 +142,22 @@ class RSAPrivateKey extends EncryptedJWK {
     }
   }
 
+  /**
+   * To PEM
+   *
+   * @description
+   * If there is no already cached result, translate the
+   * JWK into PEM format and store the result on the instance.
+   * 
+   * @return {string} PEM
+   */
+  toPEM () {
+    let pem = this[PEM]
+    if (pem) {
+      return pem
+    } else {
+      return this[PEM] = jwk2pem(this)
+    }
   }
 }
 

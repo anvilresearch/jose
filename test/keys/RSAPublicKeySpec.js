@@ -92,4 +92,89 @@ describe('RSAPublicKey', () => {
     })
 
   })
+
+  /**
+   * From PEM
+   */
+  describe('from PEM', () => {
+    const PEM = 
+    '-----BEGIN RSA PUBLIC KEY-----\n' +
+    'MIIEowIBAAKCAQEAq/XXemqchJrxinZup0G/CbkAGUY59B1F9oWRMXZlDrD3OpRF\n' +
+    'kqUNBmzyohap59LQMBNBL3JIK4PtmFkQ6zorJv3y9tRGaz3+JMpwOp1UWuV+3Jsq\n' +
+    'x/3XSL3ylC0FgjCcr+RrkvNzbBU3pcF5xJ7giabb29ya4ao+NOJkFKOOoiH1iA7P\n' +
+    'JH4f0j8SvzJjLOH6G9EYaDvj1Cbqc1GNYTYqhqGQvVkECMnZoOk7OMaZ+Nq0yJa8\n' +
+    '0f/kI3FP85d+D/OVW4tg1Sf2oItieh5ZKKLBg6mzBmGb5GiFe4ip+aQUaupxwYi5\n' +
+    '8DofmdZZvPCd1vv0Y8C3Ae0qEPpqibulwLGBrwIDAQABAoIBAEuiCJFOPONSJvTI\n' +
+    'nGiyUS0ckn+LVMga6/++xZqkwVQR39uDBYq3T6BI4PsLztUo8uqCPYR51mZVU3ZT\n' +
+    'jk53ui0fOvL3cLWQgax64ZvWQRjtobuz/8AQ1NSovv4PQ0H80Z3HcM0kiNq8BkrA\n' +
+    'aydg3c+NdVwhjnm84DlwbaZqPbzvS8/Xxc2+fHtlbK/x1TycrL8B0PlIFYEZlxGL\n' +
+    'rDofRFja46hT1kS15k/WPIlbN9gqIpwqgtnx5T0sBFpaRvRCCufbipOvTExh1RJd\n' +
+    'wwcOfID0vvo1Ramem0MyAc15AGInPlArztIW5HG9TenykC2IYGTLFY7chdReB/Jz\n' +
+    'l/+8npECgYEA4CKtiYZs8y+q4Xw/8Sc+8DrwJPT40jNXsYpKe/zH9cd0fji8qDuP\n' +
+    'B06Mh1HQ9OER9Jalo6+9nALKb50/umBAzsCRu4zag6FFZ/ykOKbyJ1Sax/Ond2ZQ\n' +
+    'WhD6U/eP4xiJ5LvNJv4YFj4Rnv34TWevW6Qja2tQRHOf1SzSJFPhYdkCgYEAxGhF\n' +
+    'IXCXxod5bsTvroaKAhw3vzXUkjVPklVqc0qXO6DstvpPBBhc8V9nWRP2cUJKKRH8\n' +
+    'eY2AXAwkl/hbSZnS82uyWkCRcZQ6MrBAkszUNfk6K5GVa4Zy/5ttPqV3ua6aRj6d\n' +
+    'l1oQJSaku9GAMfQl2UcTJ37mP9SmOL7m+rQYwscCgYBq5790GB0BRVwxHs103a5E\n' +
+    'cSg3yGyh/gE22mo6h1Bs54yl47QAXiATcSDQLnMHSg8BZZVt5JYAwsgBwrQx1lUz\n' +
+    'CGC6Xy2emR58weEmcGKR5eXJt2rKJY/v1adAw5Tq0bp70iPBFHMysLpA5ow3h1v5\n' +
+    'zuliBBaN/8Rdrnow/51ByQKBgDrvErdLAq/WnNBpFYZn5mdlsjCU5XkNuBevu6Zm\n' +
+    'nmSNEBqDl0wiR1lCCE/JVqx7eKdEN17936M/HYfgRPwbxRm3mifMshfDo4bsLiQe\n' +
+    'hBrB8vt5zr0Z9c3PBIPEwN0dkDs9tKnio2+SXeHhpjbXDLhaxFuYj1xd4ZaracGW\n' +
+    'YsunAoGBALWFRQMHCRLR98uMxAm855BVNkHUKpsfotKcmkUQQHYde9CYNMDS4Glh\n' +
+    'bCJFwSXa/CBiXRCqHGwOhakQED9i8RlAkVQLA9UPTQICNUoa8dspLzFic7a6aHkN\n' +
+    'ruPxDI84mkD/H89FhshitQkgTTGqk9yM8PR6im9vieNsspZ+SVXn\n' +
+    '-----END RSA PUBLIC KEY-----'
+
+    const MALFORMED_PEM = 
+    '-----BEGIN RSA PUBLIC KEY-----\n' +
+    'Key Data\n' +
+    '-----END RSA PUBLIC KEY-----'
+
+    it('should return RSAPublicKey', () => {
+      RSAPublicKey.fromPEM(PEM).should.be.instanceof(RSAPublicKey)
+    })
+
+    it('should throw with "undefined" arg', () => {
+      expect(() => { RSAPublicKey.fromPEM(undefined) })
+        .to.throw('undefined is not a valid PEM encoded RSA Public key')
+    })
+
+    it('should throw with "null" arg', () => {
+      expect(() => { RSAPublicKey.fromPEM(null) })
+        .to.throw('null is not a valid PEM encoded RSA Public key')
+    })
+
+    it('should throw with "false" arg', () => {
+      expect(() => { RSAPublicKey.fromPEM(false) })
+        .to.throw('false is not a valid PEM encoded RSA Public key')
+    })
+
+    it('should throw with "true" arg', () => {
+      expect(() => { RSAPublicKey.fromPEM(true) })
+        .to.throw('true is not a valid PEM encoded RSA Public key')
+    })
+
+    it('should throw with "object" arg', () => {
+      expect(() => { RSAPublicKey.fromPEM({}) })
+        .to.throw('{} is not a valid PEM encoded RSA Public key')
+    })
+
+    it('should throw with "array" arg', () => {
+      expect(() => { RSAPublicKey.fromPEM([]) })
+        .to.throw('[] is not a valid PEM encoded RSA Public key')
+    })
+
+    it('should throw with empty string arg', () => {
+      expect(() => { RSAPublicKey.fromPEM("") })
+        .to.throw('"" is not a valid PEM encoded RSA Public key')
+    })
+
+    it('should throw with malformed PEM', () => {
+      expect(() => { RSAPublicKey.fromPEM(MALFORMED_PEM) })
+        .to.throw('-----BEGIN RSA... is not a valid PEM encoded RSA Public key')
+    })
+
+  })
+
 })

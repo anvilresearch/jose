@@ -15,6 +15,18 @@
     "url": "git+ssh://git@gitlab.com/anvilresearch/oidc.git"
   },
   "author": "",
+  "contributors": [
+    {
+      "name": "Christian Smith",
+      "email": "smith@anvil.io",
+      "url": "http://anvil.io"
+    },
+    {
+      "name": "Greg Linklater",
+      "email": "greglink49@gmail.com",
+      "url": "https://github.com/EternalDeiwos"
+    }
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://gitlab.com/anvilresearch/oidc/issues"

@@ -29,28 +29,12 @@ class KeyPair {
           enum: ['RSA', 'EC']
         },
 
-        jwk: {
-          type: 'object',
-          properties: {
-            pub: {
-              type: 'object'
-            },
-            prv: {
-              type: 'object'
-            }
-          }
+        pub: {
+          type: 'object'
         },
 
-        pem: {
-          type: 'object',
-          properties: {
-            pub: {
-              type: 'string'
-            },
-            prv: {
-              type: 'string'
-            }
-          }
+        prv: {
+          type: 'object'
         }
       }
     }

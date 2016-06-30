@@ -36,6 +36,13 @@ class RSAPublicKey extends JWK {
       }
     }
   }
+
+  /**
+   * From PEM
+   */
+  static fromPEM (pem) {
+    return new RSAPublicKey()
+  }
 }
 
 /**

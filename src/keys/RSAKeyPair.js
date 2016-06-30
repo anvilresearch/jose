@@ -6,6 +6,8 @@
  */
 const {spawn} = require('child_process')
 const KeyPair = require('./KeyPair')
+const RSAPublicKey = require('./RSAPublicKey')
+const RSAPrivateKey = require('./RSAPrivateKey')
 
 /**
  * RSAKeyPair
@@ -30,13 +32,13 @@ class RSAKeyPair extends KeyPair {
       // store private key pem on the keypair
       // and pipe stdout to the public key process
       genrsa.stdout.on('data', (data) => {
-        keypair.pem.prv = data.toString('ascii')
+        keypair.prv = RSAPrivateKey.fromPEM(data.toString('ascii'))
         rsa.stdin.write(data)
       })
 
       // store public key pem on the keypair
       rsa.stdout.on('data', (data) => {
-        keypair.pem.pub = data.toString('ascii')
+        keypair.pub = RSAPublicKey.fromPEM(data.toString('ascii'))
       })
 
       // cast the keypair to RSAKeyPair

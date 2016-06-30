@@ -46,6 +46,13 @@ class ECPublicKey extends JWK {
       }
     }
   }
+
+  /**
+   * From PEM
+   */
+  static fromPEM (pem) {
+    return new ECPublicKey()
+  }
 }
 
 /**

@@ -53,6 +53,13 @@ class ECPrivateKey extends EncryptedJWK {
       }
     }
   }
+
+  /**
+   * From PEM
+   */
+  static fromPEM (pem) {
+    return new ECPrivateKey()
+  }
 }
 
 /**

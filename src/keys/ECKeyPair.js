@@ -6,6 +6,8 @@
  */
 const {spawn} = require('child_process')
 const KeyPair = require('./KeyPair')
+const ECPublicKey = require('./ECPublicKey')
+const ECPrivateKey = require('./ECPrivateKey')
 
 /**
  * ECKeyPair
@@ -28,13 +30,13 @@ class ECKeyPair extends KeyPair {
       // store private key pem on the keypair
       // and pipe stdout to the public key process
       ecparam.stdout.on('data', (data) => {
-        keypair.pem.prv = data.toString('ascii')
+        keypair.prv = ECPrivateKey.fromPEM(data.toString('ascii'))
         ec.stdin.write(data)
       })
 
       // store public key pem on the keypair
       ec.stdout.on('data', (data) => {
-        keypair.pem.pub = data.toString('ascii')
+        keypair.pub = ECPublicKey.fromPEM(data.toString('ascii'))
       })
 
       // cast the keypair to ECKeyPair

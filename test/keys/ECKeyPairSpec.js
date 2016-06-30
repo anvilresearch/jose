@@ -17,6 +17,8 @@ let expect = chai.expect
  * Code under test
  */
 const ECKeyPair = require(path.join(cwd, 'src', 'keys', 'ECKeyPair'))
+const ECPublicKey = require(path.join(cwd, 'src', 'keys', 'ECPublicKey'))
+const ECPrivateKey = require(path.join(cwd, 'src', 'keys', 'ECPrivateKey'))
 
 /**
  * Tests
@@ -44,16 +46,12 @@ describe('ECKeyPair', () => {
       keypair.should.be.instanceof(ECKeyPair)
     })
 
-    it('should set the public PEM', () => {
-      keypair.pem.pub.should.contain(
-        '-----BEGIN PUBLIC KEY-----'
-      )
+    it('should set the public JWK', () => {
+      keypair.pub.should.be.an.instanceof(ECPublicKey)
     })
 
-    it('should set the private PEM', () => {
-      keypair.pem.prv.should.contain(
-        '-----BEGIN EC PRIVATE KEY-----'
-      )
+    it('should set the private JWK', () => {
+      keypair.prv.should.be.an.instanceof(ECPrivateKey)
     })
   })
 

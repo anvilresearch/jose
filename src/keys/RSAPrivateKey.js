@@ -103,6 +103,48 @@ class RSAPrivateKey extends EncryptedJWK {
       }
     }
   }
+
+  /**
+   * From PEM
+   *
+   * Take a PEM file and return a JWK for the same key.
+   * The JWK instance should have a toPEM() method that
+   * returns the original PEM or translates if there is
+   * none (in the case it has been deserialized from
+   * JSON, etc.
+   */
+  static fromPEM (pem) {
+    //let mapping = new Map({
+    //  'n': 'modulus',
+    //  'e': 'publicExponent',
+    //  'd': 'privateExponent',
+    //  'p': 'prime1',
+    //  'q': 'prime2',
+    //  'dp': 'exponent1',
+    //  'dq': 'exponent2',
+    //  'qi': 'coefficient'
+    //})
+
+    //let properties = {}
+    //let data = unpack(pem)
+
+    //mapping.forEach((value, key) => {
+    //  if (value) {
+    //    properties[key] = base64url.encode(data[value])
+    //  }
+    //})
+
+    //if (data.oth) {
+    //  // wtf do we do with this?
+    //}
+
+    //let jwk = new RSAPrivateKey(data)
+    //jwk.setPEM(pem)
+    //jwk.keylength = data.bits
+
+    //return jwk
+    return new RSAPrivateKey()
+  }
 }
 
 /**

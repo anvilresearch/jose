@@ -5,6 +5,7 @@
  * @ignore
  */
 const EncryptedJWK = require('./EncryptedJWK')
+const {pem2jwk, jwk2pem} = require('pem-jwk')
 
 /**
  * RSAPrivateKey
@@ -112,38 +113,29 @@ class RSAPrivateKey extends EncryptedJWK {
    * returns the original PEM or translates if there is
    * none (in the case it has been deserialized from
    * JSON, etc.
+   *
+   * @return {RSAPrivateKey} return a new instance
+   *
+   * @todo When building a jwk from a PEM string, we need to assign
+   * kid and other paramters that are not included in PEM encoding
    */
   static fromPEM (pem) {
-    //let mapping = new Map({
-    //  'n': 'modulus',
-    //  'e': 'publicExponent',
-    //  'd': 'privateExponent',
-    //  'p': 'prime1',
-    //  'q': 'prime2',
-    //  'dp': 'exponent1',
-    //  'dq': 'exponent2',
-    //  'qi': 'coefficient'
-    //})
+    try {
+      let match = pem.match(PEM_REGEXP)
+      if (!match || match[0] !== 'RSA' || match[1] !== 'PRIVATE') {
+        throw new Error()
+      }
 
-    //let properties = {}
-    //let data = unpack(pem)
+      let jwk = pem2jwk(pem)
+      return new RSAPrivateKey(jwk, pem)
 
-    //mapping.forEach((value, key) => {
-    //  if (value) {
-    //    properties[key] = base64url.encode(data[value])
-    //  }
-    //})
+    } catch (err) {
+      throw new Error(
+        `${JSON.stringify(pem)} is not a valid PEM encoded RSA Private key`
+      )
+    }
+  }
 
-    //if (data.oth) {
-    //  // wtf do we do with this?
-    //}
-
-    //let jwk = new RSAPrivateKey(data)
-    //jwk.setPEM(pem)
-    //jwk.keylength = data.bits
-
-    //return jwk
-    return new RSAPrivateKey()
   }
 }
 

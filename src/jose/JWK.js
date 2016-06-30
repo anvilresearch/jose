@@ -104,6 +104,25 @@ class JWK {
       }
     }
   }
+
+  /**
+   * From PEM
+   * 
+   * @param  {string} pem PEM
+   * @throws {Error} This class method must be implemented by the subclass.
+   */
+  static fromPEM(pem) {
+    throw new Error('This key type does not support PEM')
+  }
+
+  /**
+   * To PEM
+   * 
+   * @throws {Error} This method must be implemented by the subclass.
+   */
+  toPEM () {
+    throw new Error('This key type does not support PEM')
+  }
 }
 
 /**

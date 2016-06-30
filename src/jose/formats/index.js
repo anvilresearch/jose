@@ -2,7 +2,7 @@
 /**
  * PEM Regular Expression
  */
-const PEM_REGEXP = /^-----BEGIN (.+) (PRIVATE|PUBLIC) KEY-----\s?\S[\s\S]+-----END \1 \2 KEY-----\s?/m
+const PEM_REGEXP = /^-----BEGIN (.+ )?(PRIVATE|PUBLIC) KEY-----\s?\S[\s\S]+-----END \1?\2 KEY-----\s?/m
 
 /**
  * Base64 Regular Expression

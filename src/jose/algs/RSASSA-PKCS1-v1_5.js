@@ -29,7 +29,7 @@ class RSASSA_PKCS1_v1_5 extends BaseAlgorithm {
    * Generate a digital signature for a given input and private key.
    *
    * @param {string} input
-   * @param {string|JWK} privateKey
+   * @param {JWK} privateKey
    * @returns {string}
    */
   sign (input, privateKey) {
@@ -47,7 +47,7 @@ class RSASSA_PKCS1_v1_5 extends BaseAlgorithm {
    *
    * @param {string} input
    * @param {string} signature
-   * @param {string|JWK} publicKey
+   * @param {JWK} publicKey
    * @returns {Boolean}
    */
   verify (input, signature, publicKey) {

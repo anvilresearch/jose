@@ -31,7 +31,7 @@ class HMAC_SHA_2 extends BaseAlgorithm {
    * or greater than the bitlength.
    *
    * @param {string} input
-   * @param {string|JWK} privateKey
+   * @param {JWK} privateKey
    * @returns {string}
    */
   sign (input, key) {
@@ -50,7 +50,7 @@ class HMAC_SHA_2 extends BaseAlgorithm {
    *
    * @param {string} input
    * @param {string} signature
-   * @param {string|JWK} publicKey
+   * @param {JWK} publicKey
    * @returns {Boolean}
    */
   verify (input, signature, key) {

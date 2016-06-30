@@ -4,11 +4,7 @@
  * Dependencies
  * @ignore
  */
-
-/**
- * PEM Regular Expression
- */
-const PEM = /^-----BEGIN (.+) (PRIVATE|PUBLIC) KEY-----\s?\S[\s\S]+-----END \1 \2 KEY-----/m
+const {PEM_REGEXP} = require('../formats')
 
 /**
  * BaseAlgorithm
@@ -58,7 +54,7 @@ class BaseAlgorithm {
   static isPEM (key) {
     return Boolean(
       typeof key === 'string' &&
-      key.match(PEM)
+      key.match(PEM_REGEXP)
     )
   }
 

@@ -4,8 +4,8 @@
  * Dependencies
  * @ignore
  */
+const pj = require('pem-jwk')
 const {JWK} = require('../jose')
-const {pem2jwk, jwk2pem} = require('pem-jwk')
 const {PEM_REGEXP} = require('../jose/formats')
 
 /**
@@ -72,15 +72,15 @@ class RSAPublicKey extends JWK {
         throw new Error()
       }
 
-      let jwk = pem2jwk(pem)
+      let jwk = pj.pem2jwk(pem)
       return new RSAPublicKey(jwk, pem)
 
     } catch (err) {
       // console.log('ERROR', err.message, err.stack)
       let stringified = JSON.stringify(pem)
-      stringified = stringified && stringified.length > 16 
-        ? stringified.slice(0, 15) + '...' 
-        : stringified 
+      stringified = stringified && stringified.length > 16
+        ? stringified.slice(0, 15) + '...'
+        : stringified
 
       throw new Error(
         `${stringified} is not a valid PEM encoded RSA Public key`
@@ -94,7 +94,7 @@ class RSAPublicKey extends JWK {
    * @description
    * If there is no already cached result, translate the
    * JWK into PEM format and store the result on the instance.
-   * 
+   *
    * @return {string} PEM
    */
   toPEM () {
@@ -102,7 +102,7 @@ class RSAPublicKey extends JWK {
     if (pem) {
       return pem
     } else {
-      return this[PEM] = jwk2pem(this)
+      return this[PEM] = pj.jwk2pem(this)
     }
   }
 }

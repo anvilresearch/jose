@@ -9,14 +9,13 @@ const fs = require('fs')
 const chai = require('chai')
 const sinon = require('sinon')
 const sinonChai = require('sinon-chai')
-const pemjwk = require('pem-jwk')
 
 /**
  * PEMs
  */
 const PEM = fs.readFileSync(path.join(cwd, 'test', 'lib', 'public.pem'), 'ascii')
 
-const MALFORMED_PEM = 
+const MALFORMED_PEM =
 `-----BEGIN PUBLIC KEY-----
 Malformed Key Data
 -----END PUBLIC KEY-----`
@@ -33,6 +32,7 @@ let expect = chai.expect
  */
 const RSAPublicKey = require(path.join(cwd, 'src', 'keys', 'RSAPublicKey'))
 const {PEM_REGEXP} = require(path.join(cwd, 'src', 'jose', 'formats'))
+const pj = require('pem-jwk')
 
 /**
  * Tests
@@ -169,18 +169,18 @@ describe.only('RSAPublicKey', () => {
       let pem, match
 
       before(() => {
-        sinon.spy(pemjwk, 'jwk2pem')
+        sinon.spy(pj, 'jwk2pem')
 
         pem = RSAPublicKey.fromPEM(PEM).toPEM()
         match = pem.match(PEM_REGEXP)
       })
 
       after(() => {
-        pemjwk.jwk2pem.restore()
+        pj.jwk2pem.restore()
       })
-      
+
       it('should return the cached PEM', () => {
-        pemjwk.jwk2pem.should.not.have.been.called
+        pj.jwk2pem.should.not.have.been.called
       })
 
       it('should return a PEM encoded string', () => {
@@ -194,19 +194,19 @@ describe.only('RSAPublicKey', () => {
       let jwk, pem, match
 
       before(() => {
-        jwk = pemjwk.pem2jwk(PEM)
-        sinon.spy(pemjwk, 'jwk2pem')
-        
+        sinon.spy(pj, 'jwk2pem')
+        let jwk = pj.pem2jwk(PEM)
+
         pem = new RSAPublicKey(jwk).toPEM()
         match = pem.match(PEM_REGEXP)
       })
 
       after(() => {
-        pemjwk.jwk2pem.restore()
+        pj.jwk2pem.restore()
       })
 
       it('should assemble the PEM', () => {
-        pemjwk.jwk2pem.should.have.been.called
+        pj.jwk2pem.should.have.been.called
       })
 
       it('should return a PEM encoded string', () => {
@@ -214,6 +214,5 @@ describe.only('RSAPublicKey', () => {
         expect(match).to.not.be.null
       })
     })
-    
   })
 })

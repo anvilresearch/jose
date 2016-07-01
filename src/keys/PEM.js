@@ -5,6 +5,7 @@
  * @ignore
  */
 const pj = require('pem-jwk')
+const {PEM_REGEXP} = require('../jose/formats')
 
 /**
  * PEM
@@ -26,6 +27,23 @@ class PEM {
     }
 
     return pj.jwk2pem(jwk)
+  }
+
+  /**
+   * To JWK
+   */
+  static toJWK (pem) {
+    if (!(
+      typeof pem === 'string' &&
+      pem.match(PEM_REGEXP) &&
+      !Buffer.isBuffer(pem) &&
+      !Array.isArray(pem) &&
+      !!pem
+    )) {
+      let message = `${JSON.stringify(pem)} is not a valid PEM-encoded key`
+      throw new Error(message)
+    }
+    return pj.pem2jwk(pem)
   }
 }
 

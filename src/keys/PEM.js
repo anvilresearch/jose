@@ -45,6 +45,18 @@ class PEM {
     }
     return pj.pem2jwk(pem)
   }
+
+  /**
+   * Is PEM
+   */
+  static isPEM (pem) {
+    if (typeof pem !== 'string') {
+      return false
+    }
+
+    return Boolean(pem.match(PEM_REGEXP))
+  }
+
 }
 
 /**

@@ -21,13 +21,16 @@ const PEM = require(path.join(cwd, 'src', 'keys', 'PEM'))
 const {PEM_REGEXP} = require(path.join(cwd, 'src', 'jose', 'formats'))
 
 /**
- * Data
+ * Test PEM
  */
 const publicKey = fs.readFileSync(
   path.join(cwd, 'test', 'lib', 'public.pem'),
   'ascii'
 )
 
+/**
+ * Test JWK
+ */
 const publicJWK = {
   kty: 'RSA',
   n: 'pZw_uVDIDGMdsIsibYdNpBmrbOMcS06U--Wk3113F04w_lKpl-6UHZRq9Omn8LIKUopbbbQAhLwPtBr_LEx8zwc6cc-aCkkiapZGawstY21NsLYxXJwOwboYJ97Q_vhohSm8MGsbR3pXb9WVBPQivtGXbHfAuLB_h8Sgvy2WJHxqXQbwwPmxXB6AbPEJH7Po1-Hgb0c-bpZqVvlo5bZC7NGv4luT5VbM0mR5dj9vGnM5VQmcDF0sQbXSBA6L-V7EhF5ICnM2S9PMrkELz5osAmaROTaJzFT-3oqak5x-zk1sXKJ3xEG3tU723wHMVM5QokMqdyCT2Du5ZzKEQI4ZEw',
@@ -37,7 +40,7 @@ const publicJWK = {
 /**
  * Tests
  */
-describe('PEM', () => {
+describe.only('PEM', () => {
 
   /**
    * From JWK
@@ -106,7 +109,7 @@ describe('PEM', () => {
   /**
    * To JWK
    */
-  describe.only('toJWK', () => {
+  describe('toJWK', () => {
     it('should return a JWK representation of a PEM', () => {
       PEM.toJWK(publicKey).should.eql(publicJWK)
     })
@@ -164,6 +167,55 @@ describe('PEM', () => {
       expect(() => {
         PEM.toJWK(new Buffer('pem'))
       }).to.throw('{"type":"Buffer","data":[112,101,109]} is not a valid PEM-encoded key')
+    })
+  })
+
+  /**
+   * Is PEM
+   */
+  describe('isPEM', () => {
+    it('should return true with a valid PEM formatted string', () => {
+      PEM.isPEM(publicKey).should.be.true
+    })
+
+    it('should return false with malformed PEM argument', () => {
+      PEM.isPEM(publicKey.slice(0, publicKey.length - 2)).should.be.false
+    })
+
+    it('should return false with undefined argument', () => {
+      PEM.isPEM().should.be.false
+    })
+
+    it('should return false with null argument', () => {
+      PEM.isPEM(null).should.be.false
+    })
+
+    it('should return false with empty string argument', () => {
+      PEM.isPEM('').should.be.false
+    })
+
+    it('should return false with number argument', () => {
+      PEM.isPEM(5150).should.be.false
+    })
+
+    it('should return false with false argument', () => {
+      PEM.isPEM(false).should.be.false
+    })
+
+    it('should return false with true argument', () => {
+      PEM.isPEM(true).should.be.false
+    })
+
+    it('should return false with object argument', () => {
+      PEM.isPEM({}).should.be.false
+    })
+
+    it('should return false with array argument', () => {
+      PEM.isPEM([]).should.be.false
+    })
+
+    it('should return false with buffer argument', () => {
+      PEM.isPEM(new Buffer('no')).should.be.false
     })
   })
 })

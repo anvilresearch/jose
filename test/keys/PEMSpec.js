@@ -23,6 +23,10 @@ const {PEM_REGEXP} = require(path.join(cwd, 'src', 'jose', 'formats'))
 /**
  * Test PEM
  */
+const privateKey = fs.readFileSync(
+  path.join(cwd, 'test', 'lib', 'private.pem'),
+  'ascii'
+)
 const publicKey = fs.readFileSync(
   path.join(cwd, 'test', 'lib', 'public.pem'),
   'ascii'
@@ -174,48 +178,74 @@ describe('PEM', () => {
    * Is PEM
    */
   describe('isPEM', () => {
-    it('should return true with a valid PEM formatted string', () => {
-      PEM.isPEM(publicKey).should.be.true
+    describe('with a single argument', () => {
+      it('should return true with a valid PEM formatted string', () => {
+        PEM.isPEM(publicKey).should.be.true
+      })
+
+      it('should return false with malformed PEM argument', () => {
+        PEM.isPEM(publicKey.slice(0, publicKey.length - 2)).should.be.false
+      })
+
+      it('should return false with undefined argument', () => {
+        PEM.isPEM().should.be.false
+      })
+
+      it('should return false with null argument', () => {
+        PEM.isPEM(null).should.be.false
+      })
+
+      it('should return false with empty string argument', () => {
+        PEM.isPEM('').should.be.false
+      })
+
+      it('should return false with number argument', () => {
+        PEM.isPEM(5150).should.be.false
+      })
+
+      it('should return false with false argument', () => {
+        PEM.isPEM(false).should.be.false
+      })
+
+      it('should return false with true argument', () => {
+        PEM.isPEM(true).should.be.false
+      })
+
+      it('should return false with object argument', () => {
+        PEM.isPEM({}).should.be.false
+      })
+
+      it('should return false with array argument', () => {
+        PEM.isPEM([]).should.be.false
+      })
+
+      it('should return false with buffer argument', () => {
+        PEM.isPEM(new Buffer('no')).should.be.false
+      })
     })
 
-    it('should return false with malformed PEM argument', () => {
-      PEM.isPEM(publicKey.slice(0, publicKey.length - 2)).should.be.false
+    describe('with optional algorithm argument', () => {
+      it('should return true with a valid PEM and no encoded algorithm', () => {
+        PEM.isPEM(publicKey, 'RSA').should.be.true
+      })
+
+      it('should return true with a valid PEM and matching algorithm', () => {
+        PEM.isPEM(privateKey, 'RSA').should.be.true
+      })
+
+      it('should return false with a valid PEM and mismatching algorithm', () => {
+        PEM.isPEM(privateKey, 'EC').should.be.false
+      })
     })
 
-    it('should return false with undefined argument', () => {
-      PEM.isPEM().should.be.false
-    })
+    describe('with optional type argument', () => {
+      it('should return true with matching type', () => {
+        PEM.isPEM(publicKey, 'RSA', 'PUBLIC').should.be.true
+      })
 
-    it('should return false with null argument', () => {
-      PEM.isPEM(null).should.be.false
-    })
-
-    it('should return false with empty string argument', () => {
-      PEM.isPEM('').should.be.false
-    })
-
-    it('should return false with number argument', () => {
-      PEM.isPEM(5150).should.be.false
-    })
-
-    it('should return false with false argument', () => {
-      PEM.isPEM(false).should.be.false
-    })
-
-    it('should return false with true argument', () => {
-      PEM.isPEM(true).should.be.false
-    })
-
-    it('should return false with object argument', () => {
-      PEM.isPEM({}).should.be.false
-    })
-
-    it('should return false with array argument', () => {
-      PEM.isPEM([]).should.be.false
-    })
-
-    it('should return false with buffer argument', () => {
-      PEM.isPEM(new Buffer('no')).should.be.false
+      it('should return true with mismatching type', () => {
+        PEM.isPEM(publicKey, 'RSA', 'PRIVATE').should.be.false
+      })
     })
   })
 })

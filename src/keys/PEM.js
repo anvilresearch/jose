@@ -49,14 +49,23 @@ class PEM {
   /**
    * Is PEM
    */
-  static isPEM (pem) {
+  static isPEM (pem, alg, type) {
     if (typeof pem !== 'string') {
       return false
     }
 
-    return Boolean(pem.match(PEM_REGEXP))
-  }
+    let match = pem.match(PEM_REGEXP)
 
+    if (!match) { return false }
+
+    let algorithm = match[1]
+    let asymmetric = match[2]
+
+    if (algorithm && !algorithm.match(alg)) { return false }
+    if (type && asymmetric !== type) { return false }
+
+    return true
+  }
 }
 
 /**

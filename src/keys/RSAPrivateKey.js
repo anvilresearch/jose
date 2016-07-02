@@ -5,13 +5,13 @@
  * @ignore
  */
 const EncryptedJWK = require('./EncryptedJWK')
-const {pem2jwk, jwk2pem} = require('pem-jwk')
+const PEM = require('./PEM')
 
 /**
  * Symbols
  * @ignore
  */
-const PEM = Symbol()
+const CACHED_PEM = Symbol()
 
 /**
  * RSAPrivateKey
@@ -127,12 +127,11 @@ class RSAPrivateKey extends EncryptedJWK {
    */
   static fromPEM (pem) {
     try {
-      let match = pem.match(PEM_REGEXP)
-      if (!match || match[0] !== 'RSA' || match[1] !== 'PRIVATE') {
+      if (!PEM.isPEM(pem, 'RSA', 'PRIVATE')) {
         throw new Error()
       }
 
-      let jwk = pem2jwk(pem)
+      let jwk = PEM.toJWK(pem)
       return new RSAPrivateKey(jwk, pem)
 
     } catch (err) {
@@ -148,15 +147,15 @@ class RSAPrivateKey extends EncryptedJWK {
    * @description
    * If there is no already cached result, translate the
    * JWK into PEM format and store the result on the instance.
-   * 
+   *
    * @return {string} PEM
    */
   toPEM () {
-    let pem = this[PEM]
+    let pem = this[CACHED_PEM]
     if (pem) {
       return pem
     } else {
-      return this[PEM] = jwk2pem(this)
+      return this[CACHED_PEM] = PEM.fromJWK(this)
     }
   }
 }

@@ -6,7 +6,6 @@
  */
 const PEM = require('./PEM')
 const {JWK} = require('../jose')
-const {PEM_REGEXP} = require('../jose/formats')
 
 /**
  * Symbols
@@ -45,6 +44,9 @@ class RSAPublicKey extends JWK {
     }
   }
 
+  /**
+   * Constructor
+   */
   constructor (jwk, pem) {
     super(jwk)
     Object.assign(this, jwk)
@@ -67,8 +69,7 @@ class RSAPublicKey extends JWK {
    */
   static fromPEM (pem) {
     try {
-      let match = pem.match(PEM_REGEXP)
-      if (!match || match[2] !== 'PUBLIC') {
+      if (!PEM.isPEM(pem, 'RSA', 'PUBLIC')) {
         throw new Error()
       }
 
@@ -76,7 +77,6 @@ class RSAPublicKey extends JWK {
       return new RSAPublicKey(jwk, pem)
 
     } catch (err) {
-      // console.log('ERROR', err.message, err.stack)
       let stringified = JSON.stringify(pem)
       stringified = stringified && stringified.length > 16
         ? stringified.slice(0, 15) + '...'

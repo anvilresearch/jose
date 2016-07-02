@@ -40,7 +40,7 @@ const publicJWK = {
 /**
  * Tests
  */
-describe.only('PEM', () => {
+describe('PEM', () => {
 
   /**
    * From JWK

@@ -11,9 +11,12 @@ const sinon = require('sinon')
 const sinonChai = require('sinon-chai')
 
 /**
- * PEMs
+ * Test PEM
  */
-const PEM = fs.readFileSync(path.join(cwd, 'test', 'lib', 'public.pem'), 'ascii')
+const publicKey = fs.readFileSync(
+  path.join(cwd, 'test', 'lib', 'public.pem'),
+  'ascii'
+)
 
 const MALFORMED_PEM =
 `-----BEGIN PUBLIC KEY-----
@@ -31,13 +34,13 @@ let expect = chai.expect
  * Code under test
  */
 const RSAPublicKey = require(path.join(cwd, 'src', 'keys', 'RSAPublicKey'))
+const PEM = require(path.join(cwd, 'src', 'keys', 'PEM'))
 const {PEM_REGEXP} = require(path.join(cwd, 'src', 'jose', 'formats'))
-const pj = require('pem-jwk')
 
 /**
  * Tests
  */
-describe.only('RSAPublicKey', () => {
+describe('RSAPublicKey', () => {
 
   /**
    * Shema
@@ -112,10 +115,10 @@ describe.only('RSAPublicKey', () => {
   /**
    * From PEM
    */
-  describe('from PEM', () => {
+  describe('fromPEM', () => {
 
     it('should return RSAPublicKey', () => {
-      RSAPublicKey.fromPEM(PEM).should.be.instanceof(RSAPublicKey)
+      RSAPublicKey.fromPEM(publicKey).should.be.instanceof(RSAPublicKey)
     })
 
     it('should throw with "undefined" arg', () => {
@@ -163,24 +166,24 @@ describe.only('RSAPublicKey', () => {
   /**
    * To PEM
    */
-  describe('to PEM', () => {
+  describe('toPEM', () => {
 
     describe('with cached value', () => {
       let pem, match
 
       before(() => {
-        sinon.spy(pj, 'jwk2pem')
+        sinon.spy(PEM, 'fromJWK')
 
-        pem = RSAPublicKey.fromPEM(PEM).toPEM()
+        pem = RSAPublicKey.fromPEM(publicKey).toPEM()
         match = pem.match(PEM_REGEXP)
       })
 
       after(() => {
-        pj.jwk2pem.restore()
+        PEM.fromJWK.restore()
       })
 
       it('should return the cached PEM', () => {
-        pj.jwk2pem.should.not.have.been.called
+        PEM.fromJWK.should.not.have.been.called
       })
 
       it('should return a PEM encoded string', () => {
@@ -194,19 +197,19 @@ describe.only('RSAPublicKey', () => {
       let jwk, pem, match
 
       before(() => {
-        sinon.spy(pj, 'jwk2pem')
-        let jwk = pj.pem2jwk(PEM)
+        sinon.spy(PEM, 'fromJWK')
+        let jwk = PEM.toJWK(publicKey)
 
         pem = new RSAPublicKey(jwk).toPEM()
         match = pem.match(PEM_REGEXP)
       })
 
       after(() => {
-        pj.jwk2pem.restore()
+        PEM.fromJWK.restore()
       })
 
       it('should assemble the PEM', () => {
-        pj.jwk2pem.should.have.been.called
+        PEM.fromJWK.should.have.been.called
       })
 
       it('should return a PEM encoded string', () => {

@@ -4,7 +4,7 @@
  * Dependencies
  * @ignore
  */
-const pj = require('pem-jwk')
+const PEM = require('./PEM')
 const {JWK} = require('../jose')
 const {PEM_REGEXP} = require('../jose/formats')
 
@@ -12,7 +12,7 @@ const {PEM_REGEXP} = require('../jose/formats')
  * Symbols
  * @ignore
  */
-const PEM = Symbol()
+const CACHED_PEM = Symbol()
 
 /**
  * RSAPublicKey
@@ -48,7 +48,7 @@ class RSAPublicKey extends JWK {
   constructor (jwk, pem) {
     super(jwk)
     Object.assign(this, jwk)
-    this[PEM] = pem
+    this[CACHED_PEM] = pem
   }
 
   /**
@@ -60,7 +60,7 @@ class RSAPublicKey extends JWK {
    * none (in the case it has been deserialized from
    * JSON, etc.
    *
-   * @return {RSAPrivateKey} return a new instance
+   * @return {RSAPublicKey} return a new instance
    *
    * @todo When building a jwk from a PEM string, we need to assign
    * kid and other paramters that are not included in PEM encoding
@@ -72,7 +72,7 @@ class RSAPublicKey extends JWK {
         throw new Error()
       }
 
-      let jwk = pj.pem2jwk(pem)
+      let jwk = PEM.toJWK(pem)
       return new RSAPublicKey(jwk, pem)
 
     } catch (err) {
@@ -98,11 +98,12 @@ class RSAPublicKey extends JWK {
    * @return {string} PEM
    */
   toPEM () {
-    let pem = this[PEM]
+    let pem = this[CACHED_PEM]
+
     if (pem) {
       return pem
     } else {
-      return this[PEM] = pj.jwk2pem(this)
+      return this[CACHED_PEM] = PEM.fromJWK(this)
     }
   }
 }

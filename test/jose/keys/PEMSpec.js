@@ -17,7 +17,7 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const PEM = require(path.join(cwd, 'src', 'keys', 'PEM'))
+const PEM = require(path.join(cwd, 'src', 'jose', 'keys', 'PEM'))
 const {PEM_REGEXP} = require(path.join(cwd, 'src', 'jose', 'formats'))
 
 /**

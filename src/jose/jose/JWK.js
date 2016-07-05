@@ -4,7 +4,7 @@
  * Dependencies
  * @ignore
  */
-const {BASE64_REGEXP} = require('./formats')
+const {BASE64_REGEXP} = require('../formats')
 
 /**
  * JWK

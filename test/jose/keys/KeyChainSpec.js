@@ -19,9 +19,9 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const KeyChain = require(path.join(cwd, 'src', 'keys', 'KeyChain'))
-const RSAKeyPair = require(path.join(cwd, 'src', 'keys', 'RSAKeyPair'))
-const ECKeyPair = require(path.join(cwd, 'src', 'keys', 'ECKeyPair'))
+const KeyChain = require(path.join(cwd, 'src', 'jose', 'keys', 'KeyChain'))
+const RSAKeyPair = require(path.join(cwd, 'src', 'jose', 'keys', 'RSAKeyPair'))
+const ECKeyPair = require(path.join(cwd, 'src', 'jose', 'keys', 'ECKeyPair'))
 
 /**
  * Tests

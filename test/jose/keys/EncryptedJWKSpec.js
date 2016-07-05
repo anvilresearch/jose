@@ -16,7 +16,7 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const EncryptedJWK = require(path.join(cwd, 'src', 'keys', 'EncryptedJWK'))
+const EncryptedJWK = require(path.join(cwd, 'src', 'jose', 'keys', 'EncryptedJWK'))
 
 /**
  * Tests

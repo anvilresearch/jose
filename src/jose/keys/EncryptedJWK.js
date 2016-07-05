@@ -4,7 +4,7 @@
  * Dependencies
  * @ignore
  */
-const {JWK} = require('../jose')
+const {JWK} = require('..')
 
 /**
  * EncryptedJWK

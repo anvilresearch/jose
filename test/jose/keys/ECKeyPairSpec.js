@@ -16,9 +16,9 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const ECKeyPair = require(path.join(cwd, 'src', 'keys', 'ECKeyPair'))
-const ECPublicKey = require(path.join(cwd, 'src', 'keys', 'ECPublicKey'))
-const ECPrivateKey = require(path.join(cwd, 'src', 'keys', 'ECPrivateKey'))
+const ECKeyPair = require(path.join(cwd, 'src', 'jose', 'keys', 'ECKeyPair'))
+const ECPublicKey = require(path.join(cwd, 'src', 'jose', 'keys', 'ECPublicKey'))
+const ECPrivateKey = require(path.join(cwd, 'src', 'jose', 'keys', 'ECPrivateKey'))
 
 /**
  * Tests

@@ -16,7 +16,7 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const RSAPrivateKey = require(path.join(cwd, 'src', 'keys', 'RSAPrivateKey'))
+const RSAPrivateKey = require(path.join(cwd, 'src', 'jose', 'keys', 'RSAPrivateKey'))
 
 /**
  * Tests

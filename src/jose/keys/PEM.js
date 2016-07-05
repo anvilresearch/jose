@@ -5,7 +5,7 @@
  * @ignore
  */
 const pj = require('pem-jwk')
-const {PEM_REGEXP} = require('../jose/formats')
+const {PEM_REGEXP} = require('../formats')
 
 /**
  * PEM

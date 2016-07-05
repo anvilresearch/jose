@@ -10,11 +10,11 @@ const base64url = require('base64url')
 /**
  * Algorithms
  */
-const HS = require('./algs/HMAC-SHA-2')
-const RS = require('./algs/RSASSA-PKCS1-v1_5')
-const ES = require('./algs/ECDSA')
-const PS = require('./algs/RSASSA-PSS')
-const NONE = require('./algs/None')
+const HS = require('../algs/HMAC-SHA-2')
+const RS = require('../algs/RSASSA-PKCS1-v1_5')
+const ES = require('../algs/ECDSA')
+const PS = require('../algs/RSASSA-PSS')
+const NONE = require('../algs/None')
 
 /**
  * Algorithms Dictionary

@@ -16,7 +16,7 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const JWK = require(path.join(cwd, 'src', 'jose', 'JWK'))
+const JWK = require(path.join(cwd, 'src', 'jose', 'jose', 'JWK'))
 
 /**
  * Tests

@@ -16,18 +16,18 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const ECPrivateKey = require(path.join(cwd, 'src', 'keys', 'ECPrivateKey'))
+const ECPublicKey = require(path.join(cwd, 'src', 'jose', 'keys', 'ECPublicKey'))
 
 /**
  * Tests
  */
-describe('ECPrivateKey', () => {
+describe('ECPublicKey', () => {
 
   /**
    * Shema
    */
   describe('schema', () => {
-    let {schema: {properties}} = ECPrivateKey
+    let {schema: {properties}} = ECPublicKey
 
     /**
      * 6.2.  Parameters for Elliptic Curve Keys
@@ -132,36 +132,5 @@ describe('ECPrivateKey', () => {
     it('should define format of "y"', () => {
       properties.y.format.should.equal('base64url')
     })
-
-    /**
-     * 6.2.2.  Parameters for Elliptic Curve Private Keys
-     *
-     *   In addition to the members used to represent Elliptic Curve public
-     *   keys, the following member MUST be present to represent Elliptic
-     *   Curve private keys.
-     */
-
-    /**
-     * 6.2.2.1.  "d" (ECC Private Key) Parameter
-     *
-     *   The "d" (ECC private key) parameter contains the Elliptic Curve
-     *   private key value.  It is represented as the base64url encoding of
-     *   the octet string representation of the private key value, as defined
-     *   in Section 2.3.7 of SEC1 [SEC1].  The length of this octet string
-     *   MUST be ceiling(log-base-2(n)/8) octets (where n is the order of the
-     *   curve).
-     */
-    it('should require "d"', () => {
-      properties.d.required.should.equal(true)
-    })
-
-    it('should define type of "d"', () => {
-      properties.d.type.should.equal('string')
-    })
-
-    it('should define format of "d"', () => {
-      properties.d.format.should.equal('base64url')
-    })
-
   })
 })

@@ -33,8 +33,8 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const RSAPublicKey = require(path.join(cwd, 'src', 'keys', 'RSAPublicKey'))
-const PEM = require(path.join(cwd, 'src', 'keys', 'PEM'))
+const RSAPublicKey = require(path.join(cwd, 'src', 'jose', 'keys', 'RSAPublicKey'))
+const PEM = require(path.join(cwd, 'src', 'jose', 'keys', 'PEM'))
 const {PEM_REGEXP} = require(path.join(cwd, 'src', 'jose', 'formats'))
 
 /**

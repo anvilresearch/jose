@@ -4,7 +4,7 @@
  * Dependencies
  * @ignore
  */
-const {JWK} = require('..')
+const JWK = require('../jose/JWK')
 
 /**
  * ECPublicKey

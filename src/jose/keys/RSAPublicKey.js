@@ -5,7 +5,7 @@
  * @ignore
  */
 const PEM = require('./PEM')
-const {JWK} = require('..')
+const JWK = require('../jose/JWK')
 
 /**
  * Symbols

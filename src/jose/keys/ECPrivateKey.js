@@ -7,7 +7,42 @@
 const EncryptedJWK = require('./EncryptedJWK')
 
 /**
- * ECPrivateKey
+ * ECPrivateKey Schema
+ */
+const schema = EncryptedJWK.schema.extend({
+  properties: {
+    crv: {
+      type: 'string',
+      required: true,
+      enum: [
+        'P-256',
+        'P-384',
+        'P-521'
+      ],
+    },
+
+    x: {
+      type: 'string',
+      //format: 'base64url',
+      required: true,
+    },
+
+    y: {
+      type: 'string',
+      //format: 'base64url',
+      required: true,
+    },
+
+    d: {
+      type: 'string',
+      //format: 'base64url',
+      required: true,
+    }
+  }
+})
+
+/**
+ * ECPrivateKey Class
  *
  * @class
  * ECPrivate key represents an Elliptic Curve private key as a JWK, and
@@ -19,39 +54,7 @@ class ECPrivateKey extends EncryptedJWK {
    * Schema
    */
   static get schema () {
-    return {
-      properties: {
-
-        crv: {
-          type: 'string',
-          required: true,
-          enum: [
-            'P-256',
-            'P-384',
-            'P-521'
-          ],
-        },
-
-        x: {
-          type: 'string',
-          format: 'base64url',
-          required: true,
-        },
-
-        y: {
-          type: 'string',
-          format: 'base64url',
-          required: true,
-        },
-
-        d: {
-          type: 'string',
-          format: 'base64url',
-          required: true,
-        }
-
-      }
-    }
+    return schema
   }
 
   /**

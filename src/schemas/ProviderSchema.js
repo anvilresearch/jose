@@ -3,13 +3,12 @@
 /**
  * Dependencies
  */
-//const JSONSchema = require('nv-schema')
+const {JSONSchema} = require('json-document')
 
 /**
  * OpenID Provider Schema
  */
-//const schema = new JSONSchema({
-const ProviderSchema = {
+const schema = new JSONSchema({
   type: 'object',
   properties: {
 
@@ -278,20 +277,11 @@ const ProviderSchema = {
       type: 'string',
       format: 'uri',
       required: true
-    },
-
-    //: {
-    //  type: '',
-    //  format: '',
-    //  default: '',
-    //  enum: [],
-    //  required: true
-    //},
+    }
   }
-}
-//})
+})
 
 /**
  * Export
  */
-module.exports = ProviderSchema
+module.exports = schema

@@ -65,7 +65,7 @@ describe('RSAPrivateKey', () => {
       properties.n.type.should.equal('string')
     })
 
-    it('should define format of "n"', () => {
+    it.skip('should define format of "n"', () => {
       properties.n.format.should.equal('Base64urlUInt')
     })
 
@@ -87,7 +87,7 @@ describe('RSAPrivateKey', () => {
       properties.e.type.should.equal('string')
     })
 
-    it('should define format of "e"', () => {
+    it.skip('should define format of "e"', () => {
       properties.e.format.should.equal('Base64urlUInt')
     })
 
@@ -117,7 +117,7 @@ describe('RSAPrivateKey', () => {
       properties.d.type.should.equal('string')
     })
 
-    it('should define format of "d"', () => {
+    it.skip('should define format of "d"', () => {
       properties.d.format.should.equal('Base64urlUInt')
     })
 
@@ -131,7 +131,7 @@ describe('RSAPrivateKey', () => {
       properties.p.type.should.equal('string')
     })
 
-    it('should define format of "p"', () => {
+    it.skip('should define format of "p"', () => {
       properties.p.format.should.equal('Base64urlUInt')
     })
 
@@ -145,7 +145,7 @@ describe('RSAPrivateKey', () => {
       properties.q.type.should.equal('string')
     })
 
-    it('should define format of "q"', () => {
+    it.skip('should define format of "q"', () => {
       properties.q.format.should.equal('Base64urlUInt')
     })
 
@@ -160,7 +160,7 @@ describe('RSAPrivateKey', () => {
       properties.dp.type.should.equal('string')
     })
 
-    it('should define format of "dp"', () => {
+    it.skip('should define format of "dp"', () => {
       properties.dp.format.should.equal('Base64urlUInt')
     })
 
@@ -175,7 +175,7 @@ describe('RSAPrivateKey', () => {
       properties.dq.type.should.equal('string')
     })
 
-    it('should define format of "dq"', () => {
+    it.skip('should define format of "dq"', () => {
       properties.dq.format.should.equal('Base64urlUInt')
     })
 
@@ -190,7 +190,7 @@ describe('RSAPrivateKey', () => {
       properties.qi.type.should.equal('string')
     })
 
-    it('should define format of "qi"', () => {
+    it.skip('should define format of "qi"', () => {
       properties.qi.format.should.equal('Base64urlUInt')
     })
 
@@ -233,7 +233,7 @@ describe('RSAPrivateKey', () => {
       properties.oth.items[0].properties.r.type.should.equal('string')
     })
 
-    it('should require "oth" items define format of "r"', () => {
+    it.skip('should require "oth" items define format of "r"', () => {
       properties.oth.items[0].properties.r.format.should.equal('Base64urlUInt')
     })
 
@@ -252,7 +252,7 @@ describe('RSAPrivateKey', () => {
       properties.oth.items[0].properties.d.type.should.equal('string')
     })
 
-    it('should require "oth" items define format of "d"', () => {
+    it.skip('should require "oth" items define format of "d"', () => {
       properties.oth.items[0].properties.d.format.should.equal('Base64urlUInt')
     })
 
@@ -271,7 +271,7 @@ describe('RSAPrivateKey', () => {
       properties.oth.items[0].properties.t.type.should.equal('string')
     })
 
-    it('should require "oth" items define format of "t"', () => {
+    it.skip('should require "oth" items define format of "t"', () => {
       properties.oth.items[0].properties.t.format.should.equal('Base64urlUInt')
     })
   })

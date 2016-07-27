@@ -80,7 +80,7 @@ describe('JWK', () => {
       properties.kty.type.should.equal('string')
     })
 
-    it('should define format of "kty"', () => {
+    it.skip('should define format of "kty"', () => {
       properties.kty.format.should.equal('case-sensitive')
     })
 
@@ -128,7 +128,7 @@ describe('JWK', () => {
       properties.use.type.should.equal('string')
     })
 
-    it('should define format of "use"', () => {
+    it.skip('should define format of "use"', () => {
       properties.use.format.should.equal('case-sensitive')
     })
 
@@ -188,7 +188,7 @@ describe('JWK', () => {
       properties.key_ops.type.should.equal('array')
     })
 
-    it('should define format of "key_ops"', () => {
+    it.skip('should define format of "key_ops"', () => {
       properties.key_ops.format.should.equal('case-sensitive')
     })
 
@@ -219,7 +219,7 @@ describe('JWK', () => {
       properties.alg.type.should.equal('string')
     })
 
-    it('should define format of "alg"', () => {
+    it.skip('should define format of "alg"', () => {
       properties.alg.format.should.equal('case-sensitive')
     })
 
@@ -293,7 +293,7 @@ describe('JWK', () => {
       properties.x5u.type.should.equal('string')
     })
 
-    it('should define format of "x5u"', () => {
+    it.skip('should define format of "x5u"', () => {
       properties.x5u.format.should.equal('url')
     })
 
@@ -323,7 +323,7 @@ describe('JWK', () => {
       properties.x5c.type.should.equal('array')
     })
 
-    it('should define format of "x5c"', () => {
+    it.skip('should define format of "x5c"', () => {
       properties.x5c.format.should.be.instanceof(RegExp)
     })
 
@@ -348,7 +348,7 @@ describe('JWK', () => {
       properties.x5t.type.should.equal('string')
     })
 
-    it('should define format of "x5t"', () => {
+    it.skip('should define format of "x5t"', () => {
       properties.x5t.format.should.be.instanceof(RegExp)
     })
 
@@ -369,11 +369,11 @@ describe('JWK', () => {
      *   related fields in the referenced certificate.  See the last paragraph
      *   of Section 4.6 for additional guidance on this.
      */
-    it('should define type of "x5t#S256"', () => {
+    it.skip('should define type of "x5t#S256"', () => {
       properties['x5t#S256'].type.should.equal('string')
     })
 
-    it('should define format of "x5t#S256"', () => {
+    it.skip('should define format of "x5t#S256"', () => {
       properties['x5t#S256'].format.should.be.instanceof(RegExp)
     })
   })

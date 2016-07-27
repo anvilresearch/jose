@@ -3,13 +3,12 @@
 /**
  * Dependencies
  */
-//const JSONSchema = require('nv-schema')
+const {JSONSchema} = require('json-document')
 
 /**
  * OpenID Client Metadata (Relying Party) Schema
  */
-//const schema = new JSONSchema({
-const ClientSchema = {
+const schema = new JSONSchema({
   type: 'object',
   properties: {
 
@@ -222,10 +221,9 @@ const ClientSchema = {
       format: 'uri'
     }
   }
-}
-//})
+})
 
 /**
  * Export
  */
-module.exports = ClientSchema
+module.exports = schema

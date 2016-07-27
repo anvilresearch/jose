@@ -1,8 +1,8 @@
 {
-  "name": "oidc",
+  "name": "jose",
   "version": "1.0.0",
-  "description": "OpenID Connect Provider",
-  "main": "index.js",
+  "description": "JSON Object Signing and Encryption",
+  "main": "src/index.js",
   "directories": {
     "test": "test"
   },
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@gitlab.com/anvilresearch/oidc.git"
+    "url": "git+ssh://git@gitlab.com/anvilresearch/jose.git"
   },
   "author": "",
   "contributors": [
@@ -29,9 +29,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://gitlab.com/anvilresearch/oidc/issues"
+    "url": "https://gitlab.com/anvilresearch/jose/issues"
   },
-  "homepage": "https://gitlab.com/anvilresearch/oidc#README",
+  "homepage": "https://gitlab.com/anvilresearch/jose#README",
   "dependencies": {
     "base64url": "^1.0.6",
     "json-document": "0.0.0",

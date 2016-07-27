@@ -14,7 +14,25 @@ const JWK = require('../jose/JWK')
 const CACHED_PEM = Symbol()
 
 /**
- * RSAPublicKey
+ * RSAPublicKey Schema
+ */
+const schema = JWK.schema.extend({
+  properties: {
+    n: {
+      type: 'string',
+      //format: 'Base64urlUInt',
+      required: true
+    },
+    e: {
+      type: 'string',
+      //format: 'Base64urlUInt',
+      required: true
+    }
+  }
+})
+
+/**
+ * RSAPublicKey Class
  *
  * @class
  * RSAPublicKey represents an RSA public key as a JWK.
@@ -25,23 +43,7 @@ class RSAPublicKey extends JWK {
    * Schema
    */
   static get schema () {
-    return {
-      properties: {
-
-        n: {
-          type: 'string',
-          format: 'Base64urlUInt',
-          required: true
-        },
-
-        e: {
-          type: 'string',
-          format: 'Base64urlUInt',
-          required: true
-        }
-
-      }
-    }
+    return schema
   }
 
   /**

@@ -3,7 +3,7 @@
 /**
  * Dependencies
  */
-//const JSONSchema = require('nv-schema')
+const {JSONSchema} = require('json-document')
 
 /**
  * OpenID Connect User Schema
@@ -14,8 +14,7 @@
  * - support language tags
  * - implement JSON Schema such that it doesn't completely suck
  */
-//const schema = new JSONSchema({
-const UserSchema = {
+const schema = new JSONSchema({
   type: 'object',
 
   // simple property names
@@ -158,10 +157,9 @@ const UserSchema = {
       type: 'number'
     }
   }
-}
-//})
+})
 
 /**
  * Export
  */
-module.exports = UserSchema
+module.exports = schema

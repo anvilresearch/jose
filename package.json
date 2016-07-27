@@ -34,6 +34,7 @@
   "homepage": "https://gitlab.com/anvilresearch/oidc#README",
   "dependencies": {
     "base64url": "^1.0.6",
+    "json-document": "0.0.0",
     "pem-jwk": "^1.5.1",
     "qs": "^6.2.0"
   },

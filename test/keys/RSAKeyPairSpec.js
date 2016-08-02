@@ -3,8 +3,6 @@
 /**
  * Test dependencies
  */
-const cwd = process.cwd()
-const path = require('path')
 const chai = require('chai')
 
 /**
@@ -16,9 +14,9 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const RSAKeyPair = require(path.join(cwd, 'src', 'keys', 'RSAKeyPair'))
-const RSAPublicKey = require(path.join(cwd, 'src', 'keys', 'RSAPublicKey'))
-const RSAPrivateKey = require(path.join(cwd, 'src', 'keys', 'RSAPrivateKey'))
+const RSAKeyPair = require('../../src/keys/RSAKeyPair')
+const RSAPublicKey = require('../../src/keys/RSAPublicKey')
+const RSAPrivateKey = require('../../src/keys/RSAPrivateKey')
 
 /**
  * Tests

@@ -3,8 +3,6 @@
 /**
  * Test dependencies
  */
-const cwd = process.cwd()
-const path = require('path')
 const chai = require('chai')
 
 /**
@@ -16,7 +14,7 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const ECPublicKey = require(path.join(cwd, 'src', 'keys', 'ECPublicKey'))
+const ECPublicKey = require('../../src/keys/ECPublicKey')
 
 /**
  * Tests

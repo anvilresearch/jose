@@ -4,7 +4,7 @@
  * Dependencies
  * @ignore
  */
-const {spawn} = require('child_process')
+//const {spawn} = require('child_process')
 const KeyPair = require('./KeyPair')
 const RSAPublicKey = require('./RSAPublicKey')
 const RSAPrivateKey = require('./RSAPrivateKey')
@@ -25,27 +25,27 @@ class RSAKeyPair extends KeyPair {
     let bitlength = options.bitlength || 4096
 
     return new Promise((resolve, reject) => {
-      let keypair = { pem: {} }
-      let genrsa = spawn('openssl', ['genrsa', bitlength])
-      let rsa = spawn('openssl', ['rsa', '-pubout'])
+      //let keypair = { pem: {} }
+      //let genrsa = spawn('openssl', ['genrsa', bitlength])
+      //let rsa = spawn('openssl', ['rsa', '-pubout'])
 
-      // store private key pem on the keypair
-      // and pipe stdout to the public key process
-      genrsa.stdout.on('data', (data) => {
-        keypair.prv = RSAPrivateKey.fromPEM(data.toString('ascii'))
-        rsa.stdin.write(data)
-      })
+      //// store private key pem on the keypair
+      //// and pipe stdout to the public key process
+      //genrsa.stdout.on('data', (data) => {
+      //  keypair.prv = RSAPrivateKey.fromPEM(data.toString('ascii'))
+      //  rsa.stdin.write(data)
+      //})
 
-      // store public key pem on the keypair
-      rsa.stdout.on('data', (data) => {
-        keypair.pub = RSAPublicKey.fromPEM(data.toString('ascii'))
-      })
+      //// store public key pem on the keypair
+      //rsa.stdout.on('data', (data) => {
+      //  keypair.pub = RSAPublicKey.fromPEM(data.toString('ascii'))
+      //})
 
-      // cast the keypair to RSAKeyPair
-      // and resolve the promise
-      rsa.on('close', (code) => {
-        resolve(new RSAKeyPair(keypair))
-      })
+      //// cast the keypair to RSAKeyPair
+      //// and resolve the promise
+      //rsa.on('close', (code) => {
+      //  resolve(new RSAKeyPair(keypair))
+      //})
     })
   }
 

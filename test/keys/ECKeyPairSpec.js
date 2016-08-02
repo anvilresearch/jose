@@ -3,8 +3,6 @@
 /**
  * Test dependencies
  */
-const cwd = process.cwd()
-const path = require('path')
 const chai = require('chai')
 
 /**
@@ -16,9 +14,9 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const ECKeyPair = require(path.join(cwd, 'src', 'keys', 'ECKeyPair'))
-const ECPublicKey = require(path.join(cwd, 'src', 'keys', 'ECPublicKey'))
-const ECPrivateKey = require(path.join(cwd, 'src', 'keys', 'ECPrivateKey'))
+const ECKeyPair = require('../../src/keys/ECKeyPair')
+const ECPublicKey = require('../../src/keys/ECPublicKey')
+const ECPrivateKey = require('../../src/keys/ECPrivateKey')
 
 /**
  * Tests

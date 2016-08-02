@@ -3,8 +3,6 @@
 /**
  * Test dependencies
  */
-const cwd = process.cwd()
-const path = require('path')
 const chai = require('chai')
 
 /**
@@ -16,7 +14,7 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const JWK = require(path.join(cwd, 'src', 'jose', 'JWK'))
+const JWK = require('../../src/jose/JWK')
 
 /**
  * Tests

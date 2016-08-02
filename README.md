@@ -1,6 +1,15 @@
 # JSON Object Signing and Encryption (JOSE)
 
-### Scope of implementation
+## Planned Features
+
+- [ ] Based on Webcrypto API
+- [ ] JWK as first class key format
+- [ ] Isomorphic (Node.js and Browser)
+- [ ] KeyChain generation, rotation and (de)serialization
+- [ ] JWT Header and Payload Validation with JSON Schema
+- [ ] Extensible JWT/JWS/JWE classes
+
+## Scope of implementation
 
 - [JWA][jwa] – **RFC7518**
   - [ ] Cryptographic Algorithms for Digital Signatures and MACs
@@ -21,3 +30,20 @@
 [jws]: https://tools.ietf.org/html/rfc7515
 [jwe]: https://tools.ietf.org/html/rfc7516
 
+## Running tests
+
+### Nodejs
+
+```bash
+$ npm test
+```
+
+### Browser (karma)
+
+```bash
+$ npm run karma
+```
+
+## MIT License
+
+Copyright (c) 2016 Anvil Research, Inc.

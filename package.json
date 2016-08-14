@@ -1,6 +1,6 @@
 {
   "name": "jose",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "JSON Object Signing and Encryption",
   "main": "src/index.js",
   "directories": {
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@gitlab.com/anvilresearch/jose.git"
+    "url": "https://github.com/anvilresearch/jose.git"
   },
   "author": "",
   "contributors": [
@@ -30,9 +30,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://gitlab.com/anvilresearch/jose/issues"
+    "url": "https://github.com/anvilresearch/jose/issues"
   },
-  "homepage": "https://gitlab.com/anvilresearch/jose#README",
+  "homepage": "https://github.com/anvilresearch/jose#README",
   "dependencies": {
     "base64url": "^1.0.6",
     "json-document": "0.0.0",

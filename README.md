@@ -9,6 +9,16 @@
 - [ ] JWT Header and Payload Validation with JSON Schema
 - [ ] Extensible JWT/JWS/JWE classes
 
+## Dependencies
+
+This package is a work in progress, dependent on other ongoing projects. Code
+contained herein will be completed when the following dependencies are ready to
+release:
+
+- [anvilresearch/webcrypto](https://github.com/anvilresearch/webcrypto)
+
+The current contents of the respository should be considered a "sketch".
+
 ## Scope of implementation
 
 - [JWA][jwa] – **RFC7518**

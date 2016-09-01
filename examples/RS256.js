@@ -1,5 +1,5 @@
 const crypto = require('webcrypto')
-const JWA = require('../src/jose/JWAwc')
+const JWA = require('../src/jose/JWA')
 
 let privateKey, publicKey
 

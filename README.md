@@ -3,9 +3,8 @@
 ## Planned Features
 
 - [ ] Based on Webcrypto API
-- [ ] JWK as first class key format
+- [ ] CryptoKey as expected key argument
 - [ ] Isomorphic (Node.js and Browser)
-- [ ] KeyChain generation, rotation and (de)serialization
 - [ ] JWT Header and Payload Validation with JSON Schema
 - [ ] Extensible JWT/JWS/JWE classes
 

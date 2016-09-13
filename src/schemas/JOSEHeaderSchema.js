@@ -450,10 +450,10 @@ const JOSEHeaderSchema = new JSONSchema({
      *   certificate thumbprints are also sometimes known as certificate
      *   fingerprints.
      */
-    "x5t#S256": {
-      type: 'string',
-      format: 'base64url'
-    },
+    //'x5t#S256': {
+    //  type: 'string',
+    //  format: 'base64url'
+    //},
 
     /**
      * crit

@@ -83,7 +83,8 @@ const JWTSchema = new JSONSchema({
         properties: {
           protected: JOSEHeaderSchema,
           header: JOSEHeaderSchema,
-          signature: Base64URLSchema
+          signature: Base64URLSchema,
+          key: { type: 'object' }
         }
       }
     },
@@ -91,7 +92,23 @@ const JWTSchema = new JSONSchema({
     /**
      * signature
      */
-    signature: Base64URLSchema
+    signature: Base64URLSchema,
+
+    /**
+     * key
+     */
+    key: {
+      type: 'object'
+    },
+
+    /**
+     * serialization
+     */
+    serialization: {
+      type: 'string',
+      enum: ['compact', 'json', 'flattened'],
+      default: 'compact'
+    }
   }
 })
 

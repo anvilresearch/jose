@@ -1,6 +1,6 @@
 require('../src/formats')
 const crypto = require('webcrypto')
-const JWS = require('../src/jose/JWS')
+const JWT = require('../src/jose/JWT')
 
 crypto.subtle
   .generateKey({
@@ -12,5 +12,13 @@ crypto.subtle
     true,
     ['sign', 'verify']
   )
-  .then(key => JWS.encode({ alg: 'HS256' }, { iss: 'https://anvil.io' }, key))
+  .then(key => {
+    let token = new JWT({
+      header: { alg: 'HS256' },
+      payload: { iss: 'https://forge.anvil.io' },
+      key
+    })
+
+    return token.encode()
+  })
   .then(console.log).catch(console.log)

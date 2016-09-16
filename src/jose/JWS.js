@@ -3,20 +3,11 @@
  */
 const base64url = require('base64url')
 const JWA = require('./JWA')
-const JWT = require('./JWT')
-const JWSSchema = require('../schemas/JWSSchema')
 
 /**
  * JWS
  */
-class JWS extends JWT {
-
-  /**
-   * schema
-   */
-  static get schema () {
-    return JWSSchema
-  }
+class JWS {
 
   /**
    * decode
@@ -73,29 +64,37 @@ class JWS extends JWT {
   }
 
   /**
-   * encode
+   * sign
    *
    * @description
    * Encode a JWT instance
    *
-   * @param {CryptoKey} key
+   * @param {Object} token
    * @returns {Promise}
    */
-  encode (key) {
-    let validation = this.validate()
+  static sign (token) {
+    let payload = base64url(JSON.stringify(token.payload))
 
-    if (!validation.valid) {
-      return Promise.reject(validation)
+    // compact serialization
+    if (token.serialization === 'compact') {
+      let {key, header: {alg}} = token
+      let header = base64url(JSON.stringify(token.header))
+      let data = `${header}.${payload}`
+
+      return JWA.sign(alg, key, data).then(signature => `${data}.${signature}`)
     }
 
-    let algorithm = this.header.alg
-    let header = base64url(JSON.stringify(this.header))
-    let payload = base64url(JSON.stringify(this.payload))
-    let data = `${header}.${payload}`
+    // JSON serialization
+    if (token.serialization === 'json') {
 
-    return JWA
-      .sign(algorithm, key, data)
-      .then(signature => `${data}.${signature}`)
+    }
+
+    // Flattened serialization
+    if (token.serialization === 'flattened') {
+
+    }
+
+    throw new DataError('Unsupported serialization')
   }
 }
 

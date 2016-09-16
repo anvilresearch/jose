@@ -3,20 +3,12 @@
  */
 const {JSONDocument} = require('json-document')
 const JWTSchema = require('../schemas/JWTSchema')
+const JWS = require('./JWS')
 
 /**
  * JWT
  */
 class JWT extends JSONDocument {
-
-  /**
-   * constructor
-   */
-  constructor (header, payload, signature) {
-    super()
-    this.constructor.schema.initialize(this, { header, payload })
-    this.signature = signature
-  }
 
   /**
    * schema
@@ -118,15 +110,21 @@ class JWT extends JSONDocument {
   }
 
   /**
+   * isJWE
+   */
+  isJWE () {
+    return !!this.header.enc
+  }
+
+  /**
    * encode
    *
    * @description
    * Encode a JWT instance
    *
-   * @param {CryptoKey} key
    * @returns {Promise}
    */
-  encode (key) {
+  encode () {
     // validate
     let validation = this.validate()
 
@@ -134,16 +132,13 @@ class JWT extends JSONDocument {
       return Promise.reject(validation)
     }
 
-    let algorithm = this.header.alg
+    let token = this
 
-    if (algorithm !== 'none') {
-      return Promise.reject(new InvalidAlgorithmError())
+    if (this.isJWE()) {
+      return JWE.encrypt(token)
+    } else {
+      return JWS.sign(token)
     }
-
-    let header = base64url(JSON.stringify(this.header))
-    let payload = base64url(JSON.stringify(this.payload))
-
-    return Promise.resolve(`${header}.${payload}.`)
   }
 }
 

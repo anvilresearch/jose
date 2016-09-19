@@ -95,6 +95,14 @@ const JWTSchema = new JSONSchema({
     signature: Base64URLSchema,
 
     /**
+     * verified
+     */
+    verified: {
+      type: 'boolean',
+      default: false
+    },
+
+    /**
      * key
      */
     key: {

@@ -10,60 +10,6 @@ const JWA = require('./JWA')
 class JWS {
 
   /**
-   * decode
-   *
-   * @description
-   * Decode a JSON Web Token
-   *
-   * @param {string} token
-   * @param {CryptoKey} key
-   *
-   * @returns {Promise}
-   */
-  static decode (token, key) {
-    let header, payload, algorithm, signature, data
-
-    try {
-      let components = JWS.extractComponents(token)
-      header = JSON.parse(base64url.decode(components[0]))
-      payload = JSON.parse(base64url.decode(components[0]))
-      algorithm = header.alg
-      signature = components[2]
-      data = components.slice(0,2).join('.')
-    } catch (error) {
-      return Promise.reject(error)
-    }
-
-    return JWA.verify(algorithm, key, signature, data).then(verified => {
-      let jws = null
-
-      if (verified) {
-        let extendedJWS = this
-        jws = new extendedJWS(header, payload, signature)
-      }
-
-      return jws
-    })
-  }
-
-  /**
-   * encode
-   *
-   * @description
-   * Encode a JSON Web Token
-   *
-   * @param {Object} header
-   * @param {Object} payload
-   * @param {CryptoKey} key
-   *
-   * @returns {Promise}
-   */
-  static encode (header, payload, key) {
-    let jws = new JWS(header, payload)
-    return jws.encode(key)
-  }
-
-  /**
    * sign
    *
    * @description
@@ -95,6 +41,29 @@ class JWS {
     }
 
     throw new DataError('Unsupported serialization')
+  }
+
+  /**
+   * verify
+   */
+  static verify (jwt) {
+    // multiple signatures
+    if (jwt.signatures) {
+      // ...
+    }
+
+    // one signature
+    if (jwt.signature) {
+      let header = base64url(JSON.stringify(jwt.header))
+      let payload = base64url(JSON.stringify(jwt.payload))
+      let data = `${header}.${payload}`
+      let {key, signature, header: {alg}} = jwt
+
+      return JWA.verify(alg, key, signature, data)
+    }
+
+    // no signatures to verify
+    return Promise.reject(new DataError('Missing signature(s)'))
   }
 }
 

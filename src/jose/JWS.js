@@ -59,7 +59,10 @@ class JWS {
       let data = `${header}.${payload}`
       let {key, signature, header: {alg}} = jwt
 
-      return JWA.verify(alg, key, signature, data)
+      return JWA.verify(alg, key, signature, data).then(verified => {
+        jwt.verified = verified
+        return verified
+      })
     }
 
     // no signatures to verify

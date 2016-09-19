@@ -157,6 +157,21 @@ class JWT extends JSONDocument {
   }
 
   /**
+   * verify
+   *
+   * @description
+   *
+   * @param {CryptoKey} key
+   * @param {string} token
+   *
+   * @returns {Promise}
+   */
+  static verify (key, token) {
+    let jwt = JWT.decode(token)
+    return jwt.verify(key)
+  }
+
+  /**
    * isJWE
    */
   isJWE () {

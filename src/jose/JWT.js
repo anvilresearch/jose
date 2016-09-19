@@ -1,6 +1,7 @@
 /**
  * Dependencies
  */
+const base64url = require('base64url')
 const {JSONDocument} = require('json-document')
 const JWTSchema = require('../schemas/JWTSchema')
 const JWS = require('./JWS')
@@ -23,30 +24,76 @@ class JWT extends JSONDocument {
    * @description
    * Decode a JSON Web Token
    *
-   * @param {string} token
-   * @param {CryptoKey} key
-   *
-   * @returns {Promise}
+   * @param {string} data
+   * @returns {JWT}
    */
-  static decode (token, key) {
-    try {
-      let components = JWT.extractComponents(token)
-      let header = JSON.parse(base64url.decode(components[0]))
+  static decode (data) {
+    let ExtendedJWT = this
+    let jwt
 
-      let algorithm = header.alg
+    if (typeof data !== 'string') {
+      throw new DataError()
+    }
 
-      if (algorithm !== 'none') {
-        return Promise.reject(new InvalidAlgorithmError())
+    // JSON of Flattened JSON Serialization
+    if (data.startsWith('{')) {
+      try {
+        data = JSON.parse(data, () => {})
+      } catch (error) {
+        throw new DataError('Invalid JWT serialization')
       }
 
-      let payload = JSON.parse(base64url.decode(components[0]))
-      let signature = components[2]
+      if (data.signatures || data.recipients) {
+        data.serialization = 'json'
+      } else {
+        data.serialization = 'flattened'
+      }
 
-      let extendedJWT = this
-      return new extendedJWT(header, payload, signature)
-    } catch (error) {
-      return Promise.reject(error)
+      jwt = new ExtendedJWT(data)
+
+    // Compact Serialization
+    } else {
+      try {
+        let serialization = 'compact'
+        let segments = data.split('.')
+        let length = segments.length
+
+        if (length !== 3 && length !== 5) {
+          throw new Error('Malformed JWT')
+        }
+
+        let header = JSON.parse(base64url.decode(segments[0]))
+
+        // JSON Web Signature
+        if (length === 3) {
+          let type = 'JWS'
+          let payload = JSON.parse(base64url.decode(segments[1]))
+          let signature = segments[2]
+
+          jwt = new ExtendedJWT({type, header, payload, signature, serialization})
+        }
+
+        // JSON Web Encryption
+        if (length === 5) {
+          //let type = 'JWE'
+          //let [protected, encryption_key, iv, ciphertext, tag] = segments
+
+          //jwt = new ExtendedJWT({
+          //  type,
+          //  protected: base64url.decode(JSON.parse(protected)),
+          //  encryption_key,
+          //  iv,
+          //  ciphertext,
+          //  tag,
+          //  serialization
+          //})
+        }
+      } catch (error) {
+        throw new DataError('Invalid JWT compact serialization')
+      }
     }
+
+    return jwt
   }
 
   /**
@@ -139,6 +186,26 @@ class JWT extends JSONDocument {
     } else {
       return JWS.sign(token)
     }
+  }
+
+  /**
+   * verify
+   *
+   * @description
+   * Verify a decoded JWT instance
+   *
+   * @returns {Promise}
+   */
+  verify (keys, finder) {
+    this.key = keys
+
+    let validation = this.validate()
+
+    if (!validation.valid) {
+      return Promise.reject(validation)
+    }
+
+    return JWS.verify(this)
   }
 }
 

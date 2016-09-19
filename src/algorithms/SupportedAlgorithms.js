@@ -1,4 +1,9 @@
 /**
+ * Dependencies
+ */
+const NotSupportedError = require('../errors/NotSupportedError')
+
+/**
  * Operations
  */
 const operations = [
@@ -66,7 +71,7 @@ class SupportedAlgorithms {
     let argument = registeredAlgorithms[alg]
 
     if (!argument) {
-      throw new NotSupportedError()
+      throw new NotSupportedError(alg)
     }
 
     return argument

@@ -14,7 +14,7 @@ const {ab2buf, buf2ab, str2ab} = require('../encodings')
 class RSASSA_PKCS1_v1_5 {
 
   /**
-   * Constructor
+   * constructor
    *
    * @param {string} bitlength
    */
@@ -23,7 +23,7 @@ class RSASSA_PKCS1_v1_5 {
   }
 
   /**
-   * Sign
+   * sign
    *
    * @description
    * Generate a digital signature for a given input and private key.
@@ -31,7 +31,7 @@ class RSASSA_PKCS1_v1_5 {
    * @param {CryptoKey} key
    * @param {BufferSource} data
    *
-   * @returns {string}
+   * @returns {Promise}
    */
   sign (key, data) {
     let algorithm = this.params
@@ -51,7 +51,7 @@ class RSASSA_PKCS1_v1_5 {
   }
 
   /**
-   * Verify
+   * verify
    *
    * @description
    * Verify a digital signature for a given input and private key.
@@ -60,7 +60,7 @@ class RSASSA_PKCS1_v1_5 {
    * @param {BufferSource} signature
    * @param {BufferSource} data
    *
-   * @returns {Boolean}
+   * @returns {Promise}
    */
   verify (key, signature, data) {
     let algorithm = this.params
@@ -70,6 +70,37 @@ class RSASSA_PKCS1_v1_5 {
     return crypto.subtle.verify(algorithm, key, signature, data)
   }
 
+  /**
+   * importKey
+   *
+   * @param {JWK} key
+   * @returns {Promise}
+   */
+  importKey (key) {
+    let jwk = Object.assign({}, key)
+    let algorithm = this.params
+    let usages = []
+
+    if (key.use === 'sig') {
+      usages.push('verify')
+    }
+
+    if (key.use === 'enc') {
+      // TODO: handle encryption keys
+      return Promise.resolve(key)
+    }
+
+    return crypto.subtle
+      .importKey('jwk', jwk, algorithm, true, usages)
+      .then(cryptoKey => {
+        Object.defineProperty(jwk, 'cryptoKey', {
+          enumerable: false,
+          value: cryptoKey
+        })
+
+        return jwk
+      })
+  }
 }
 
 /**

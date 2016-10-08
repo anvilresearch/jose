@@ -3,27 +3,9 @@
 /**
  * Dependencies
  */
-const {JSONSchema,JSONDocument} = require('json-document')
-
-/**
- * JWKSet Schema
- */
-const schema = new JSONSchema({
-  type: 'object',
-  properties: {
-    keys: {
-      type: 'array',
-      items: {
-        anyOf: [ // schemas?
-          'RSAPublicKey',
-          'RSAPrivateKey',
-          'EllipticCurvePublicKey',
-          'EllipticCurvePrivateKey'
-        ]
-      }
-    }
-  }
-})
+const {JSONDocument} = require('json-document')
+const JWKSetSchema = require('../schemas/JWKSetSchema')
+const JWK = require('./JWK')
 
 /**
  * JWKSet
@@ -35,10 +17,29 @@ const schema = new JSONSchema({
 class JWKSet extends JSONDocument {
 
   /**
-   * Schema
+   * schema
    */
   static get schema () {
-    return schema
+    return JWKSetSchema
+  }
+
+  /**
+   * importKeys
+   */
+  static importKeys (jwks) {
+    let validation = this.schema.validate(jwks)
+
+    if (!validation.valid) {
+      Promise.reject(validation)
+    }
+
+    let imported = new JWKSet(jwks)
+    let importing = jwks.keys.map(key => JWK.importKey(key))
+
+    return Promise.all(importing).then(keys => {
+      imported.keys = keys
+      return imported
+    })
   }
 }
 

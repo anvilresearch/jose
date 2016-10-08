@@ -10,7 +10,8 @@ const operations = [
   'sign',
   'verify',
   'encrypt',
-  'decrypt'
+  'decrypt',
+  'importKey'
 ]
 
 /**

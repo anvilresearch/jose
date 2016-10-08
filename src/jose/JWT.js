@@ -211,9 +211,7 @@ class JWT extends JSONDocument {
    *
    * @returns {Promise}
    */
-  verify (keys, finder) {
-    this.key = keys
-
+  verify () {
     let validation = this.validate()
 
     if (!validation.valid) {

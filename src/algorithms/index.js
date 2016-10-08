@@ -114,6 +114,27 @@ supportedAlgorithms.define('RS512', 'verify', new RSASSA_PKCS1_v1_5({
 //supportedAlgorithms.define('PS512', 'verify', {})
 supportedAlgorithms.define('none', 'verify', {})
 
+supportedAlgorithms.define('RS256', 'importKey', new RSASSA_PKCS1_v1_5({
+  name: 'RSASSA-PKCS1-v1_5',
+  hash: {
+    name: 'SHA-256'
+  }
+}))
+
+supportedAlgorithms.define('RS384', 'importKey', new RSASSA_PKCS1_v1_5({
+  name: 'RSASSA-PKCS1-v1_5',
+  hash: {
+    name: 'SHA-384'
+  }
+}))
+
+supportedAlgorithms.define('RS512', 'importKey', new RSASSA_PKCS1_v1_5({
+  name: 'RSASSA-PKCS1-v1_5',
+  hash: {
+    name: 'SHA-512'
+  }
+}))
+
 /**
  * Export
  */

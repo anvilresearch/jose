@@ -90,6 +90,14 @@ class JWA {
   /**
    * Decrypt
    */
+
+  /**
+   * Import
+   */
+  static importKey (key) {
+    let normalizedAlgorithm = supportedAlgorithms.normalize('importKey', key.alg)
+    return normalizedAlgorithm.importKey(key)
+  }
 }
 
 /**

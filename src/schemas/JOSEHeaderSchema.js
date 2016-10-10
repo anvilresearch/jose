@@ -268,7 +268,7 @@ const JOSEHeaderSchema = new JSONSchema({
      *   that the key is the public key to which the JWE was encrypted; this
      *   can be used to determine the private key needed to decrypt the JWE.
      */
-    jwk: JWKSchema,
+    //jwk: JWKSchema,
 
     /**
      * kid

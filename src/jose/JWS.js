@@ -54,8 +54,7 @@ class JWS {
 
     // one signature
     if (jwt.signature) {
-      let header = base64url(JSON.stringify(jwt.header))
-      let payload = base64url(JSON.stringify(jwt.payload))
+      let [header, payload] = jwt.segments
       let data = `${header}.${payload}`
       let {key, signature, header: {alg}} = jwt
 

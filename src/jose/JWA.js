@@ -6,7 +6,7 @@
  */
 const base64url = require('base64url')
 const supportedAlgorithms = require('../algorithms')
-const {ab2buf, buf2ab, str2ab, ab2str} = require('../encodings')
+const {TextEncoder} = require('text-encoding')
 
 /**
  * JWA
@@ -74,10 +74,11 @@ class JWA {
     // validate publicKey
 
     // cast signature to BufferSource
-    signature = buf2ab(base64url.toBuffer(signature))
+    signature = new TextEncoder()
+      .encode(base64url.toBase64(signature))
 
     // cast data to BufferSource
-    data = str2ab(data)
+    data = new TextEncoder().encode(data)
 
     // verify the signature
     return normalizedAlgorithm.verify(key, signature, data)

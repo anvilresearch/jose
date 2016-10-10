@@ -5,6 +5,7 @@ const base64url = require('base64url')
 const {JSONDocument} = require('json-document')
 const JWTSchema = require('../schemas/JWTSchema')
 const JWS = require('./JWS')
+const DataError = require('../errors/DataError')
 
 /**
  * JWT
@@ -70,7 +71,7 @@ class JWT extends JSONDocument {
           let payload = JSON.parse(base64url.decode(segments[1]))
           let signature = segments[2]
 
-          jwt = new ExtendedJWT({type, header, payload, signature, serialization})
+          jwt = new ExtendedJWT({type, segments, header, payload, signature, serialization})
         }
 
         // JSON Web Encryption

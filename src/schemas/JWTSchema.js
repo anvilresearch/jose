@@ -20,6 +20,13 @@ const JWTSchema = new JSONSchema({
   properties: {
 
     /**
+     * segments
+     */
+    segments: {
+      type: 'array'
+    },
+
+    /**
      * header
      */
     header: JOSEHeaderSchema,

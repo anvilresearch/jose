@@ -45,8 +45,6 @@
     "babel-preset-es2015": "^6.16.0",
     "base64url": "^1.0.6",
     "json-document": "0.0.0",
-    "pem-jwk": "^1.5.1",
-    "qs": "^6.2.0",
     "text-encoding": "^0.6.1",
     "webcrypto": "git://github.com/anvilresearch/webcrypto.git"
   },

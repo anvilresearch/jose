@@ -48,7 +48,7 @@
     "pem-jwk": "^1.5.1",
     "qs": "^6.2.0",
     "text-encoding": "^0.6.1",
-    "webcrypto": "^0.1.0"
+    "webcrypto": "git://github.com/anvilresearch/webcrypto.git"
   },
   "devDependencies": {
     "babel-core": "^6.17.0",

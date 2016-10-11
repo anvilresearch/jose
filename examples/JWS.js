@@ -2,7 +2,7 @@ require('../src/formats')
 const crypto = require('webcrypto')
 const JWT = require('../src/jose/JWT')
 
-let key
+let key, jwt
 
 crypto.subtle
   .generateKey({
@@ -28,8 +28,10 @@ crypto.subtle
   .then(token => {
     console.log('Signed JWS Compact Serialization', token)
 
-    let jwt = JWT.decode(token)
-    return jwt.verify(key)
+    jwt = JWT.decode(token)
+    jwt.key = key
+    console.log('Decoded JWT', jwt)
+    return jwt.verify()
   })
   .then(verified => {
     console.log('VERIFIED', verified)

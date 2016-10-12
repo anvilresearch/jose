@@ -73,11 +73,11 @@ class JWA {
     // TODO
     // validate publicKey
 
-    // cast signature to BufferSource
+    // cast signature to Uint8Array
     signature = new TextEncoder()
       .encode(base64url.toBase64(signature))
 
-    // cast data to BufferSource
+    // cast data to Uint8Array
     data = new TextEncoder().encode(data)
 
     // verify the signature

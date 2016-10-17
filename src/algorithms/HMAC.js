@@ -6,6 +6,7 @@
  */
 const base64url = require('base64url')
 const crypto = require('webcrypto')
+const {TextEncoder} = require('text-encoding')
 const {ab2buf} = require('../encodings')
 
 /**
@@ -31,18 +32,20 @@ class HMAC {
    * or greater than the bitlength.
    *
    * @param {CryptoKey} key
-   * @param {BufferSource} data
+   * @param {string} data
    *
    * @returns {string}
    */
   sign (key, data) {
     let algorithm = this.params
 
-    // validation required here?
+    // TODO: validate key length
+
+    data = new TextEncoder().encode(data)
 
     return crypto.subtle
       .sign(algorithm, key, data)
-      .then(signature => base64url(ab2buf(signature)))
+      .then(signature => base64url(Buffer.from(signature)))
   }
 
   /**
@@ -52,15 +55,21 @@ class HMAC {
    * Verify a digital signature for a given input and private key.
    *
    * @param {CryptoKey} key
-   * @param {BufferSource} signature
-   * @param {BufferSource} data
+   * @param {string} signature
+   * @param {string} data
    *
    * @returns {Boolean}
    */
   verify (key, signature, data) {
     let algorithm = this.params
 
-    // ...
+    if (typeof signature === 'string') {
+      signature = Uint8Array.from(base64url.toBuffer(signature))
+    }
+
+    if (typeof data === 'string') {
+      data = new TextEncoder().encode(data)
+    }
 
     return crypto.subtle.verify(algorithm, key, signature, data)
   }

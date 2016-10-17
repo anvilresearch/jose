@@ -22,7 +22,7 @@ const base64url = require('base64url')
 /**
  * Tests
  */
-describe.only('HMAC', () => {
+describe('HMAC', () => {
 
   /**
    * constructor
@@ -80,7 +80,6 @@ describe.only('HMAC', () => {
           base64url.toBuffer(signature)
             .should.eql(Buffer.from(chromeHmacSignature.buffer))
         })
-
     })
   })
 
@@ -113,7 +112,6 @@ describe.only('HMAC', () => {
     it('should return a promise', () => {
       let hmac = new HMAC(alg)
       hmac.verify(importedHmacKey, signature, data).should.be.instanceof(Promise)
-
     })
 
     it('should resolve a boolean', () => {

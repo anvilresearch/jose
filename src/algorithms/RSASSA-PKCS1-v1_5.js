@@ -6,7 +6,7 @@
  */
 const base64url = require('base64url')
 const crypto = require('webcrypto')
-const {ab2buf, buf2ab, str2ab} = require('../encodings')
+const {TextEncoder} = require('text-encoding')
 
 /**
  * RSASSA-PKCS1-v1_5
@@ -45,9 +45,11 @@ class RSASSA_PKCS1_v1_5 {
     //  )
     //}
 
+    data = new TextEncoder().encode(data)
+
     return crypto.subtle
       .sign(algorithm, key, data)
-      .then(signature => base64url(ab2buf(signature)))
+      .then(signature => base64url(Buffer.from(signature)))
   }
 
   /**
@@ -65,6 +67,13 @@ class RSASSA_PKCS1_v1_5 {
   verify (key, signature, data) {
     let algorithm = this.params
 
+    if (typeof signature === 'string') {
+      signature = Uint8Array.from(base64url.toBuffer(signature))
+    }
+
+    if (typeof data === 'string') {
+      data = new TextEncoder().encode(data)
+    }
     // ...
 
     return crypto.subtle.verify(algorithm, key, signature, data)

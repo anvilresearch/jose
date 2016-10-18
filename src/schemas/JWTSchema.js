@@ -20,6 +20,14 @@ const JWTSchema = new JSONSchema({
   properties: {
 
     /**
+     * type
+     */
+    type: {
+      type: 'string',
+      enum: ['JWS', 'JWE']
+    },
+
+    /**
      * segments
      */
     segments: {

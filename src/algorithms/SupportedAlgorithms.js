@@ -66,13 +66,13 @@ class SupportedAlgorithms {
     let registeredAlgorithms = this[op]
 
     if (!registeredAlgorithms) {
-      throw new SyntaxError() // what kind of error should this be?
+      return new SyntaxError() // what kind of error should this be?
     }
 
     let argument = registeredAlgorithms[alg]
 
     if (!argument) {
-      throw new NotSupportedError(alg)
+      return new NotSupportedError(alg)
     }
 
     return argument

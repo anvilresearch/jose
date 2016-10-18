@@ -14,6 +14,7 @@ let expect = chai.expect
 /**
  * Code under test
  */
+const {NotSupportedError} = require('../../src/errors')
 const SupportedAlgorithms = require('../../src/algorithms/SupportedAlgorithms')
 
 /**
@@ -59,13 +60,12 @@ describe('SupportedAlgorithms', () => {
       supportedAlgorithms.normalize('verify', 'RS256').should.equal(argument)
     })
 
-    it('should throw NotSupportedError for unknown algorithms', () => {
+    it('should return NotSupportedError for unknown algorithms', () => {
       let supportedAlgorithms = new SupportedAlgorithms()
       let argument = {}
 
-      expect(() => {
-        supportedAlgorithms.normalize('verify', 'RS256').should.equal(argument)
-      }).to.throw('RS256 is not a supported algorithm')
+      supportedAlgorithms.normalize('verify', 'RS256')
+        .should.be.instanceof(NotSupportedError)
     })
   })
 })

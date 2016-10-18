@@ -33,7 +33,7 @@ class JWT extends JSONDocument {
     let jwt
 
     if (typeof data !== 'string') {
-      throw new DataError()
+      throw new DataError('JWT must be a string')
     }
 
     // JSON of Flattened JSON Serialization

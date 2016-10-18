@@ -3,6 +3,7 @@
  */
 const base64url = require('base64url')
 const JWA = require('./JWA')
+const {DataError} = require('../errors')
 
 /**
  * JWS
@@ -40,7 +41,7 @@ class JWS {
 
     }
 
-    throw new DataError('Unsupported serialization')
+    return Promise.reject(new DataError('Unsupported serialization'))
   }
 
   /**

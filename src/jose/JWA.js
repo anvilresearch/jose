@@ -7,6 +7,7 @@
 const base64url = require('base64url')
 const supportedAlgorithms = require('../algorithms')
 const {TextEncoder} = require('text-encoding')
+const {NotSupportedError} =require('../errors')
 
 /**
  * JWA
@@ -31,7 +32,7 @@ class JWA {
     let normalizedAlgorithm = supportedAlgorithms.normalize('sign', alg)
 
     // validate algorithm is supported
-    if (!normalizedAlgorithm) {
+    if (normalizedAlgorithm instanceof Error) {
       return Promise.reject(new NotSupportedError(alg))
     }
 
@@ -42,9 +43,6 @@ class JWA {
     //if (key instanceof CryptoKey) {
     //  return Promise.reject(new InvalidKeyError())
     //}
-
-    // cast data to BufferSource
-    data = str2ab(data)
 
     // sign the data
     return normalizedAlgorithm.sign(key, data)
@@ -66,19 +64,12 @@ class JWA {
   static verify (alg, key, signature, data) {
     let normalizedAlgorithm = supportedAlgorithms.normalize('verify', alg)
 
-    if (!normalizedAlgorithm) {
+    if (normalizedAlgorithm instanceof Error) {
       return Promise.reject(new NotSupportedError(alg))
     }
 
     // TODO
     // validate publicKey
-
-    // cast signature to Uint8Array
-    signature = new TextEncoder()
-      .encode(base64url.toBase64(signature))
-
-    // cast data to Uint8Array
-    data = new TextEncoder().encode(data)
 
     // verify the signature
     return normalizedAlgorithm.verify(key, signature, data)

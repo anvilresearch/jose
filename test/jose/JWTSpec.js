@@ -103,8 +103,15 @@ describe('JWT', () => {
   describe('static verify', () => {})
 
   describe('isJWE', () => {
-    it('should return true with "enc" header')
-    it('should return false without "enc" header')
+    it('should return true with "enc" header', () => {
+      let token = new JWT({ header: { enc: 'A128GCM' } })
+      token.isJWE().should.equal(true)
+    })
+
+    it('should return false without "enc" header', () => {
+      let token = new JWT({ header: { alg: 'HS256' } })
+      token.isJWE().should.equal(false)
+    })
   })
 
   describe('encode', () => {

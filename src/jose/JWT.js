@@ -114,48 +114,6 @@ class JWT extends JSONDocument {
     return jwt.encode(key)
   }
 
-  /**
-   * extractComponents
-   *
-   * @description
-   * Extract JWT components
-   */
-  static extractComponents (token) {
-    let segments = token.split('.')
-    let length = segments.length
-
-    if (length !== 3 && length !== 5) {
-      throw new Error('Malformed JWT')
-    }
-
-    return segments
-  }
-
-  /**
-   * header
-   *
-   * @description
-   * Inspect a JSON Web Token header
-   *
-   * @param {string} token
-   * @returns {Object}
-   */
-  static header (token) {
-    return JSON.parse(base64url.decode(this.extractComponents(token)[0]))
-  }
-
-  /**
-   * payload
-   *
-   * @description
-   * Inspect a JSON Web Token payload
-   *
-   * @param {string} token
-   * @returns {Object}
-   */
-  static payload (token) {
-    return JSON.parse(base64url.decode(this.extractComponents(token)[1]))
-  }
 
   /**
    * verify
@@ -169,7 +127,8 @@ class JWT extends JSONDocument {
    */
   static verify (key, token) {
     let jwt = JWT.decode(token)
-    return jwt.verify(key)
+    jwt.key = key
+    return jwt.verify().then(verified => jwt)
   }
 
   /**

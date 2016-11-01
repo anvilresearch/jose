@@ -139,6 +139,50 @@ class JWT extends JSONDocument {
   }
 
   /**
+   * resolveKeys
+   */
+  resolveKeys (jwks) {
+    let kid = this.header.kid
+    let keys, match
+
+    // treat an array as the "keys" property of a JWK Set
+    if (Array.isArray(jwks)) {
+      keys = jwks
+    }
+
+    // presence of keys indicates object is a JWK Set
+    if (jwks.keys) {
+      keys = jwks.keys
+    }
+
+    // wrap a plain object they is not a JWK Set in Array
+    if (!jwks.keys && typeof jwks === 'object') {
+      keys = [jwks]
+    }
+
+    // ensure there are keys to search
+    if (!keys) {
+      throw new DataError('Invalid JWK argument')
+    }
+
+    // match by "kid" or "use" header
+    if (kid) {
+      match = keys.find(jwk => jwk.kid === kid)
+    } else {
+      match = keys.find(jwk => jwk.use === 'sig')
+    }
+
+    // assign matching key to JWT and return a boolean
+    if (match) {
+      console.log(match)
+      this.key = match.cryptoKey
+      return true
+    } else {
+      return false
+    }
+  }
+
+  /**
    * encode
    *
    * @description

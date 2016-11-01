@@ -121,6 +121,54 @@ describe('JWT', () => {
   })
 
   /**
+   * resolveKeys
+   */
+  describe('resolveKeys', () => {
+    let jwks, token
+
+    beforeEach(() => {
+      jwks = {
+        keys: [
+          { kid: '123', cryptoKey: {} },
+          { use: 'sig', cryptoKey: {} }
+        ]
+      }
+
+      token = new JWT({
+        header: {
+          alg: 'RS256'
+        }
+      })
+    })
+
+    it('should throw with invalid argument', () => {
+      expect(() => {
+        token.resolveKeys(false)
+      }).to.throw('Invalid JWK argument')
+    })
+
+    it('should return true with match', () => {
+      token.resolveKeys(jwks).should.equal(true)
+    })
+
+    it('should return false with no match', () => {
+      token.header.kid = '234'
+      token.resolveKeys(jwks).should.equal(false)
+    })
+
+    it('should match JWK by `kid`', () => {
+      token.header.kid = '123'
+      token.resolveKeys(jwks)
+      token.key.should.equal(jwks.keys[0].cryptoKey)
+    })
+
+    it('should match JWK by `use`', () => {
+      token.resolveKeys(jwks)
+      token.key.should.equal(jwks.keys[1].cryptoKey)
+    })
+  })
+
+  /**
    * encode
    */
   describe('encode', () => {

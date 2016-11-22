@@ -88,7 +88,7 @@ class RSASSA_PKCS1_v1_5 {
   importKey (key) {
     let jwk = Object.assign({}, key)
     let algorithm = this.params
-    let usages = []
+    let usages = key['key_ops'] || []
 
     if (key.use === 'sig') {
       usages.push('verify')

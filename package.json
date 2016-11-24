@@ -12,8 +12,8 @@
   ],
   "scripts": {
     "build-lib": "babel src -d lib",
-    "build": "npm run clean && npm run build-lib",
-    "clean": "rm -rf dist/* && rm -rf lib/*",
+    "build": "npm run clean-lib && npm run build-lib",
+    "clean-lib": "rm -rf lib/*",
     "build-dist": "webpack --progress --colors --optimize-minimize --optimize-occurrence-order --optimize-dedupe",
     "dist": "npm run build && npm run build-dist",
     "prepublish": "npm run build && npm run build-dist",

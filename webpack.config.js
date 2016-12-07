@@ -11,6 +11,7 @@ module.exports = {
     libraryTarget: 'var'
   },
   externals: {
+    'text-encoding': 'TextEncoder',
     webcrypto: 'crypto'
   },
   devtool: 'source-map'

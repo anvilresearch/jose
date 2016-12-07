@@ -2,9 +2,9 @@
 
 ## Planned Features
 
-- [ ] Based on Webcrypto API
+- [x] Based on Webcrypto API
 - [ ] CryptoKey as expected key argument
-- [ ] Isomorphic (Node.js and Browser)
+- [x] Isomorphic (Node.js and Browser)
 - [ ] JWT Header and Payload Validation with JSON Schema
 - [ ] Extensible JWT/JWS/JWE classes
 
@@ -16,7 +16,7 @@ release:
 
 - [anvilresearch/webcrypto](https://github.com/anvilresearch/webcrypto)
 
-The current contents of the respository should be considered a "sketch".
+The current contents of the repository should be considered a "sketch".
 
 ## Scope of implementation
 
@@ -38,6 +38,37 @@ The current contents of the respository should be considered a "sketch".
 [jwt]: https://tools.ietf.org/html/rfc7519
 [jws]: https://tools.ietf.org/html/rfc7515
 [jwe]: https://tools.ietf.org/html/rfc7516
+
+## Usage in Browser
+
+If you `npm install jose` as a dependency, the Webpack'd minified bundle will be
+available in the `dist/` directory as `jose.min.js`.
+
+If you're actively developing/testing this lib, you can `npm run dist`, and the
+bundle will be rebuilt.
+
+To use in the browser, simply import the bundle in a `<script>` tag, and the lib
+will be loaded into the `window.JOSE` global variable.
+
+Example `test.html` file, to illustrate:
+
+```html
+<html>
+<head>
+  <script src="dist/jose.min.js"></script>
+  <script>
+    // You can now start using the library
+    let jwt = new JOSE.JWT({
+      header: { alg: 'HS256' },
+      payload: { iss: 'https://forge.anvil.io' }
+    })
+  </script>
+</head>
+<body>
+Sample usage of JOSE lib in a browser.
+</body>
+</html>
+```
 
 ## Running tests
 

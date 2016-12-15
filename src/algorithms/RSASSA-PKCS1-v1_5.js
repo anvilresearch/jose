@@ -99,6 +99,10 @@ class RSASSA_PKCS1_v1_5 {
       return Promise.resolve(key)
     }
 
+    if (key.key_ops) {
+      usages = key.key_ops
+    }
+
     return crypto.subtle
       .importKey('jwk', jwk, algorithm, true, usages)
       .then(cryptoKey => {

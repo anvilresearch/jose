@@ -6,8 +6,7 @@
  */
 const base64url = require('base64url')
 const supportedAlgorithms = require('../algorithms')
-const {TextEncoder} = require('text-encoding')
-const {NotSupportedError} =require('../errors')
+const {NotSupportedError} = require('../errors')
 
 /**
  * JWA

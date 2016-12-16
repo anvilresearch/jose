@@ -6,7 +6,7 @@
  */
 const base64url = require('base64url')
 const crypto = require('webcrypto')
-const {TextEncoder} = require('text-encoding')
+const TextEncoder = require('../text-encoder')
 
 /**
  * RSASSA-PKCS1-v1_5

@@ -35,52 +35,42 @@ class JWS {
     if (token.serialization === 'json') {
       let { signatures } = token
 
-      let promises = signatures.map(signature => {
-        let { header, signature: existingSignature, key } = signature
+      let promises = signatures.map(descriptor => {
+        let { header, signature, key } = descriptor
 
         // Attempt to use existing signature
-        if (existingSignature && !key) {
-          return Promise.resolve(existingSignature)
+        if (signature && !key) {
+          return Promise.resolve(descriptor)
 
-        } else if (existingSignature && key) {
+        } else if (signature && key) {
           // TODO
 
         // Create new signature
         } else {
-          let { alg } = protected
-          let protected = base64url(JSON.stringify(signature.protected))
-          let data = `${protected}.${payload}`
+          let { protected: { alg } } = descriptor
+          let protectedHeader = base64url(JSON.stringify(descriptor['protected']))
+          let data = `${protectedHeader}.${payload}`
 
           return JWA.sign(alg, key, data).then(signature => {
-            return {
-              protected,
-              header,
-              signature: base64url(signature)
-            }
+            return { protected: protectedHeader, header, signature }
           })
         }
       })
 
       return Promise.all(promises).then(signatures => {
-        return {
-          payload,
-          signatures
-        }
+        return JSON.stringify({ payload, signatures }, null, 2)
       })
     }
 
     // Flattened serialization
     if (token.serialization === 'flattened') {
-      let { key, header, protected } = token
+      let { key, header } = token
       let { alg } = header
-      let protected = base64url(JSON.stringify(protected))
-      let data = `${protected}.${payload}`
+      let protectedHeader = base64url(JSON.stringify(token.protected))
+      let data = `${protectedHeader}.${payload}`
 
       return JWA.sign(alg, key, data).then(signature => {
-        payload,
-        header,
-        protected,
-        signature
+        return { payload, header, protected: protectedHeader, signature }
       })
     }
 

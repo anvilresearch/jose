@@ -24,7 +24,7 @@ class JWS {
 
     // compact serialization
     if (token.serialization === 'compact') {
-      let {key, header: {alg}} = token
+      let { key, header: { alg } } = token
       let header = base64url(JSON.stringify(token.header))
       let data = `${header}.${payload}`
 
@@ -33,12 +33,55 @@ class JWS {
 
     // JSON serialization
     if (token.serialization === 'json') {
+      let { signatures } = token
 
+      let promises = signatures.map(signature => {
+        let { header, signature: existingSignature, key } = signature
+
+        // Attempt to use existing signature
+        if (existingSignature && !key) {
+          return Promise.resolve(existingSignature)
+
+        } else if (existingSignature && key) {
+          // TODO
+
+        // Create new signature
+        } else {
+          let { alg } = protected
+          let protected = base64url(JSON.stringify(signature.protected))
+          let data = `${protected}.${payload}`
+
+          return JWA.sign(alg, key, data).then(signature => {
+            return {
+              protected,
+              header,
+              signature: base64url(signature)
+            }
+          })
+        }
+      })
+
+      return Promise.all(promises).then(signatures => {
+        return {
+          payload,
+          signatures
+        }
+      })
     }
 
     // Flattened serialization
     if (token.serialization === 'flattened') {
+      let { key, header, protected } = token
+      let { alg } = header
+      let protected = base64url(JSON.stringify(protected))
+      let data = `${protected}.${payload}`
 
+      return JWA.sign(alg, key, data).then(signature => {
+        payload,
+        header,
+        protected,
+        signature
+      })
     }
 
     return Promise.reject(new DataError('Unsupported serialization'))

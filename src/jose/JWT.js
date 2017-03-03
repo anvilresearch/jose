@@ -39,18 +39,46 @@ class JWT extends JSONDocument {
     // JSON of Flattened JSON Serialization
     if (data.startsWith('{')) {
       try {
-        data = JSON.parse(data, () => {})
+        data = JSON.parse(data)
       } catch (error) {
         throw new DataError('Invalid JWT serialization')
       }
 
-      if (data.signatures || data.recipients) {
-        data.serialization = 'json'
-      } else {
-        data.serialization = 'flattened'
-      }
+      let { protected: protectedHeader, header, payload, signature, signatures, recipients } = data
 
-      jwt = new ExtendedJWT(data)
+      // General JSON Serialization
+      if (signatures || recipients) {
+        // TODO recipients
+
+        let decodedPayload = JSON.parse(base64url.decode(payload))
+        let decodedSignatures = signatures.map(descriptor => {
+          let { protected: protectedHeader, header, signature } = descriptor
+
+          return {
+            protected: JSON.parse(base64url.decode(protectedHeader)),
+            header,
+            signature
+          }
+        })
+
+        jwt = new ExtendedJWT({
+          payload: decodedPayload,
+          signatures: decodedSignatures
+        })
+
+        Object.defineProperty(jwt, 'serialization', { value: 'json', enumerable: false })
+
+      // Flattened JSON Serialization
+      } else {
+        jwt = new ExtendedJWT({
+          protected: JSON.parse(base64url.decode(protectedHeader)),
+          payload: JSON.parse(base64url.decode(payload)),
+          header,
+          signature
+        })
+
+        Object.defineProperty(jwt, 'serialization', { value: 'flattened', enumerable: false })
+      }
 
     // Compact Serialization
     } else {
@@ -71,7 +99,10 @@ class JWT extends JSONDocument {
           let payload = JSON.parse(base64url.decode(segments[1]))
           let signature = segments[2]
 
-          jwt = new ExtendedJWT({type, segments, header, payload, signature, serialization})
+          jwt = new ExtendedJWT({ header, payload, signature })
+          Object.defineProperty(jwt, 'serialization', { value: serialization, enumerable: false })
+          Object.defineProperty(jwt, 'type', { value: type, enumerable: false })
+          Object.defineProperty(jwt, 'segments', { value: segments, enumerable: false })
         }
 
         // JSON Web Encryption
@@ -103,15 +134,32 @@ class JWT extends JSONDocument {
    * @description
    * Encode a JSON Web Token
    *
-   * @param {Object} header
-   * @param {Object} payload
    * @param {CryptoKey} key
+   * @param {Object} data
+   * @param {Object} options
    *
    * @returns {Promise}
    */
-  static encode (header, payload, key) {
-    let jwt = new JWT(header, payload)
-    return jwt.encode(key)
+  static encode (key, data, options={}) {
+    let ExtendedJWT = this
+    let jwt = new ExtendedJWT(data)
+
+    Object.keys(options).forEach(field => {
+      Object.defineProperty(jwt, field, { value: options[field], enumerable: false })
+    })
+
+    if (Array.isArray(key) || jwt.signatures) {
+      let { signatures } = jwt
+
+      jwt.signatures = signatures.map((descriptor, index) => {
+        Object.defineProperty(descriptor, 'key', { value: key[index], enumerable: false })
+        return descriptor
+      })
+    } else {
+      Object.defineProperty(jwt, 'key', { value: key, enumerable: false })
+    }
+
+    return jwt.encode()
   }
 
 
@@ -127,7 +175,7 @@ class JWT extends JSONDocument {
    */
   static verify (key, token) {
     let jwt = JWT.decode(token)
-    jwt.key = key
+    Object.defineProperty(jwt, 'key', { value: key, enumerable: false })
     return jwt.verify().then(verified => jwt)
   }
 
@@ -216,11 +264,11 @@ class JWT extends JSONDocument {
    * @returns {Promise}
    */
   verify () {
-    let validation = this.validate()
+    // let validation = this.validate()
 
-    if (!validation.valid) {
-      return Promise.reject(validation)
-    }
+    // if (!validation.valid) {
+    //   return Promise.reject(validation)
+    // }
 
     return JWS.verify(this)
   }

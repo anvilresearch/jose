@@ -78,8 +78,7 @@ const JWTSchema = new JSONSchema({
         properties: {
           protected: JOSEHeaderSchema,
           header: JOSEHeaderSchema,
-          signature: Base64URLSchema,
-          key: { type: 'object' }
+          signature: Base64URLSchema
         }
       }
     },

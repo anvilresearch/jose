@@ -28,7 +28,7 @@ crypto.subtle
     return Promise.all([
       JWT.encode(privateKey, { header, payload }, { serialization: 'compact' }),
       JWT.encode(privateKey, { protected: header, payload }, { serialization: 'flattened' }),
-      JWT.encode([privateKey], { signatures: [{ protected: header }], payload }, { serialization: 'json' })
+      JWT.encode(privateKey, { signatures: [{ protected: header }], payload }, { serialization: 'json' })
     ])
   })
 
@@ -39,7 +39,7 @@ crypto.subtle
     return Promise.all([
       JWT.verify(publicKey, compact),
       JWT.verify(publicKey, flattened),
-      JWT.verify(publicKey, json)
+      JWT.verify([publicKey], json)
     ])
   })
 

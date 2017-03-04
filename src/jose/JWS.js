@@ -77,7 +77,33 @@ class JWS {
     }
 
     if (serialization === 'document') {
-      // TODO
+      let { signatures } = token
+
+      let promises = signatures.map(descriptor => {
+        let { header: unprotectedHeader, protected: protectedHeader, signature, key } = descriptor
+        let { alg } = protectedHeader
+
+        // Attempt to use existing signature
+        if (signature && !key) {
+          return Promise.resolve(descriptor)
+
+        } else if (signature && key) {
+          // TODO
+
+        // Create new signature
+        } else {
+          let encodedHeader = base64url(JSON.stringify(protectedHeader))
+          let data = `${encodedHeader}.${encodedPayload}`
+
+          return JWA.sign(alg, key, data).then(signature => {
+            return { protected: protectedHeader, header: unprotectedHeader, signature }
+          })
+        }
+      })
+
+      return Promise.all(promises).then(signatures => {
+        return JSON.stringify({ payload, signatures })
+      })
     }
 
     return Promise.reject(new DataError('Unsupported serialization'))

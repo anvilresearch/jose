@@ -252,9 +252,10 @@ class JWT extends JSONDocument {
    * isJWE
    */
   isJWE () {
-    let { header: unprotectedHeader, protected: protectedHeader } = this
+    let { header: unprotectedHeader, protected: protectedHeader, recipients } = this
     return !!((unprotectedHeader && unprotectedHeader.enc)
-      || (protectedHeader && protectedHeader.enc))
+      || (protectedHeader && protectedHeader.enc)
+      || recipients)
   }
 
   /**

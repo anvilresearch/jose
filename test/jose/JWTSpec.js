@@ -4,10 +4,12 @@
  * Test dependencies
  */
 const chai = require('chai')
+const chaiAsPromised = require('chai-as-promised')
 
 /**
  * Assertions
  */
+chai.use(chaiAsPromised)
 chai.should()
 let expect = chai.expect
 
@@ -15,7 +17,7 @@ let expect = chai.expect
  * Code under test
  */
 const crypto = require('webcrypto')
-const JWT = require('../../src/jose/JWT')
+const { JWT } = require('../../src')
 const JWTSchema = require('../../src/schemas/JWTSchema')
 const {RsaPrivateCryptoKey, RsaPublicCryptoKey} = require('../keys')
 
@@ -23,6 +25,8 @@ const {RsaPrivateCryptoKey, RsaPublicCryptoKey} = require('../keys')
  * Test data
  */
 const compact = 'eyJhbGciOiJSUzI1NiIsImtpZCI6InI0bmQwbWJ5dDNzIn0.eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIn0.FMer-lRR4Q4BVivMc9sl-jF3c-QWEenlH2pcW9oXTsiPRSEzc7lgPEryuXTimoToSKwWFgVpnjXKnmBaTaPVLpuRUMwGUeIUdQu0bQC-XEo-TKlwlqtUgelQcF2viEQwxU04UQaXWBh9ZDTIOutfXcjyhEPiMfCFLxT_aotR0zipmAi825lF1qBmxKrCv4c_9_46ACuaeuET6t0XvcAMDf3fjkEdw_0KPN2wnAlp2AwPP05D8Nwn8NqDAlljdN7bjnO99uJvhNWbvZgBYfhNXkMeDVJcukv0j3Cz6LCgedbXdX0rzJv_4qkO6l-LU9QeK1s0kwHfRUIWoa0TLJ4FtQ'
+const flattened = '{"payload":"eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIn0","header":{},"protected":"eyJhbGciOiJSUzI1NiIsImtpZCI6InI0bmQwbWJ5dDNzIn0","signature":"FMer-lRR4Q4BVivMc9sl-jF3c-QWEenlH2pcW9oXTsiPRSEzc7lgPEryuXTimoToSKwWFgVpnjXKnmBaTaPVLpuRUMwGUeIUdQu0bQC-XEo-TKlwlqtUgelQcF2viEQwxU04UQaXWBh9ZDTIOutfXcjyhEPiMfCFLxT_aotR0zipmAi825lF1qBmxKrCv4c_9_46ACuaeuET6t0XvcAMDf3fjkEdw_0KPN2wnAlp2AwPP05D8Nwn8NqDAlljdN7bjnO99uJvhNWbvZgBYfhNXkMeDVJcukv0j3Cz6LCgedbXdX0rzJv_4qkO6l-LU9QeK1s0kwHfRUIWoa0TLJ4FtQ"}'
+const json = '{"payload":"eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIn0","signatures":[{"protected":"eyJhbGciOiJSUzI1NiIsImtpZCI6InI0bmQwbWJ5dDNzIn0","signature":"FMer-lRR4Q4BVivMc9sl-jF3c-QWEenlH2pcW9oXTsiPRSEzc7lgPEryuXTimoToSKwWFgVpnjXKnmBaTaPVLpuRUMwGUeIUdQu0bQC-XEo-TKlwlqtUgelQcF2viEQwxU04UQaXWBh9ZDTIOutfXcjyhEPiMfCFLxT_aotR0zipmAi825lF1qBmxKrCv4c_9_46ACuaeuET6t0XvcAMDf3fjkEdw_0KPN2wnAlp2AwPP05D8Nwn8NqDAlljdN7bjnO99uJvhNWbvZgBYfhNXkMeDVJcukv0j3Cz6LCgedbXdX0rzJv_4qkO6l-LU9QeK1s0kwHfRUIWoa0TLJ4FtQ"}]}'
 
 const signature = 'FMer-lRR4Q4BVivMc9sl-jF3c-QWEenlH2pcW9oXTsiPRSEzc7lgPEryuXTimoToSKwWFgVpnjXKnmBaTaPVLpuRUMwGUeIUdQu0bQC-XEo-TKlwlqtUgelQcF2viEQwxU04UQaXWBh9ZDTIOutfXcjyhEPiMfCFLxT_aotR0zipmAi825lF1qBmxKrCv4c_9_46ACuaeuET6t0XvcAMDf3fjkEdw_0KPN2wnAlp2AwPP05D8Nwn8NqDAlljdN7bjnO99uJvhNWbvZgBYfhNXkMeDVJcukv0j3Cz6LCgedbXdX0rzJv_4qkO6l-LU9QeK1s0kwHfRUIWoa0TLJ4FtQ'
 
@@ -45,61 +49,158 @@ describe('JWT', () => {
    */
   describe('static decode', () => {
     describe('non-string argument', () => {
-      it('should throw a DataError', () => {
-        expect(() => {
-          JWT.decode(false)
-        }).to.throw('JWT must be a string')
+      it('should reject with a DataError', (done) => {
+        JWT.decode(false).should.be.rejectedWith('JWT must be a string').and.notify(done)
       })
     })
 
     describe('JWS JSON Serialization', () => {
-      it('should throw malformed JWT')
-      it('should return a JWT instance')
+      it('should return a promise', (done) => {
+        JWT.decode(json).should.be.fulfilled.and.notify(done)
+      })
+
+      it('should throw malformed JWT', (done) => {
+        JWT.decode('{wrong}')
+          .should.be.rejectedWith('Invalid JWT serialization')
+          .and.notify(done)
+      })
+
+      it('should resolve a JWT instance', (done) => {
+        JWT.decode(json).should.eventually.be.instanceof(JWT)
+          .and.notify(done)
+      })
+
+      it('should set JWT type', (done) => {
+        JWT.decode(json).should.eventually.have.property('type')
+          .that.equals('JWS').and.notify(done)
+      })
+
+      it('should set JWT payload', (done) => {
+        JWT.decode(json).should.eventually.have.property('payload')
+          .that.deep.equals({ iss: 'https://forge.anvil.io' })
+          .and.notify(done)
+      })
+
+      it('should set JWT serialization', (done) => {
+        JWT.decode(json).should.eventually.have.property('serialization')
+          .that.equals('json')
+          .and.notify(done)
+      })
+
+      it('should set JWT signatures', (done) => {
+        JWT.decode(json).should.eventually.have.property('signatures')
+          .and.notify(done)
+      })
+
+      describe('signatures', () => {
+
+        it('should set JWT protected header', (done) => {
+          JWT.decode(json).then(token => token.signatures[0])
+            .should.eventually.have.property('protected')
+            .that.deep.equals({ alg: 'RS256', kid: 'r4nd0mbyt3s' }).and.notify(done)
+        })
+
+        it('should set JWT signature', (done) => {
+          JWT.decode(json).then(token => token.signatures[0])
+            .should.eventually.have.property('signature')
+            .that.deep.equals(signature).and.notify(done)
+        })
+      })
     })
 
     describe('JWS Flattened JSON Serialization', () => {
-      it('should return a promise')
-      it('should reject malformed JWT')
-      it('should resolve a JWT instance')
+      it('should return a promise', (done) => {
+        JWT.decode(flattened).should.be.fulfilled.and.notify(done)
+      })
+
+      it('should reject malformed JWT', (done) => {
+        JWT.decode('{wrong}')
+          .should.be.rejectedWith('Invalid JWT serialization')
+          .and.notify(done)
+      })
+
+      it('should resolve a JWT instance', (done) => {
+        JWT.decode(flattened).should.eventually.be.instanceof(JWT)
+          .and.notify(done)
+      })
+
+      it('should set JWT type', (done) => {
+        JWT.decode(flattened).should.eventually.have.property('type')
+          .that.equals('JWS').and.notify(done)
+      })
+
+      it('should set JWT protected header', (done) => {
+        JWT.decode(flattened).should.eventually.have.property('protected')
+          .that.deep.equals({ alg: 'RS256', kid: 'r4nd0mbyt3s' })
+          .and.notify(done)
+      })
+
+      it('should set JWT payload', (done) => {
+        JWT.decode(flattened).should.eventually.have.property('payload')
+          .that.deep.equals({ iss: 'https://forge.anvil.io' })
+          .and.notify(done)
+      })
+
+      it('should set JWT signature', (done) => {
+        JWT.decode(flattened).should.eventually.have.property('signature')
+          .that.equals(signature)
+          .and.notify(done)
+      })
+
+      it('should set JWT serialization', (done) => {
+        JWT.decode(flattened).should.eventually.have.property('serialization')
+          .that.equals('flattened')
+          .and.notify(done)
+      })
     })
 
     describe('JWS Compact Serialization', () => {
-      it('should throw DataError', () => {
-        expect(() => {
-          JWT.decode('wrong')
-        }).to.throw('Invalid JWT compact serialization')
+      it('should return a promise', (done) => {
+        JWT.decode(compact).should.be.fulfilled.and.notify(done)
       })
 
-      it('should return a JWT instance', () => {
-        JWT.decode(compact).should.be.instanceof(JWT)
+      it('should reject malformed JWT with a DataError', (done) => {
+        JWT.decode('wrong').should.be.rejectedWith('Malformed JWT')
+          .and.notify(done)
       })
 
-      it('should set JWT type', () => {
-        JWT.decode(compact).type.should.equal('JWS')
+      it('should return a JWT instance', (done) => {
+        JWT.decode(compact).should.eventually.be.instanceof(JWT)
+          .and.notify(done)
       })
 
-      it('should set JWT segments', () => {
-        JWT.decode(compact).segments.should.eql(compact.split('.'))
+      it('should set JWT type', (done) => {
+        JWT.decode(compact).should.eventually.have.property('type')
+          .that.equals('JWS').and.notify(done)
       })
 
-      it('should set JWT header', () => {
-        JWT.decode(compact).header
-          .should.eql({ alg: 'RS256', kid: 'r4nd0mbyt3s' })
+      it('should set JWT segments', (done) => {
+        JWT.decode(compact).should.eventually.have.property('segments')
+          .that.deep.equals(compact.split('.')).and.notify(done)
       })
 
-      it('should set JWT payload', () => {
-        JWT.decode(compact).payload
-          .should.eql({ iss: 'https://forge.anvil.io' })
+      it('should set JWT header', (done) => {
+        JWT.decode(compact).should.eventually.have.property('header')
+          .that.deep.equals({ alg: 'RS256', kid: 'r4nd0mbyt3s' })
+          .and.notify(done)
       })
 
-      it('should set JWT signature', () => {
-        JWT.decode(compact).signature
-          .should.eql(signature)
+      it('should set JWT payload', (done) => {
+        JWT.decode(compact).should.eventually.have.property('payload')
+          .that.deep.equals({ iss: 'https://forge.anvil.io' })
+          .and.notify(done)
       })
 
-      it('should set JWT serialization', () => {
-        JWT.decode(compact).serialization
-          .should.equal('compact')
+      it('should set JWT signature', (done) => {
+        JWT.decode(compact).should.eventually.have.property('signature')
+          .that.equals(signature)
+          .and.notify(done)
+      })
+
+      it('should set JWT serialization', (done) => {
+        JWT.decode(compact).should.eventually.have.property('serialization')
+          .that.equals('compact')
+          .and.notify(done)
       })
     })
   })
@@ -172,24 +273,18 @@ describe('JWT', () => {
    * encode
    */
   describe('encode', () => {
-    it('should reject invalid JWT', () => {
-      let jwt = new JWT({
+    it('should reject invalid JWT', (done) => {
+      JWT.encode(RsaPrivateCryptoKey, {
         header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
-        payload: { iss: null },
-        key: RsaPrivateCryptoKey
-      })
-
-      return jwt.encode().should.be.rejected
+        payload: { iss: null }
+      }).should.be.rejected.and.notify(done)
     })
 
-    it('should resolve a JWS Compact Serialization', () => {
-      let jwt = new JWT({
+    it('should resolve a JWS Compact Serialization', (done) => {
+      JWT.encode(RsaPrivateCryptoKey, {
         header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
         payload: { iss: 'https://forge.anvil.io' },
-        key: RsaPrivateCryptoKey
-      })
-
-      return jwt.encode().should.eventually.equal(compact)
+      }).should.eventually.equal(compact).and.notify(done)
     })
   })
 
@@ -197,30 +292,15 @@ describe('JWT', () => {
    * verify
    */
   describe('verify', () => {
-    it('should reject invalid JWT', () => {
-      let jwt = new JWT({
-        header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
-        payload: { iss: null },
-        key: RsaPrivateCryptoKey
-      })
-
-      return jwt.verify().should.be.rejected
+    it('should reject invalid JWT', (done) => {
+      JWT.verify(RsaPublicCryptoKey, 'invalid')
+        .should.be.rejected.and.notify(done)
     })
 
-    it('should resolve a boolean', () => {
-      let jwt = new JWT({
-        segments: [
-          'eyJhbGciOiJSUzI1NiIsImtpZCI6InI0bmQwbWJ5dDNzIn0',
-          'eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIn0',
-          signature
-        ],
-        header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
-        payload: { iss: 'https://forge.anvil.io' },
-        signature,
-        key: RsaPublicCryptoKey
+    it('should resolve a boolean', (done) => {
+      JWT.verify(RsaPublicCryptoKey, compact).then(jwt => {
+        jwt.verify().should.eventually.equal(true).and.notify(done)
       })
-
-      return jwt.verify().should.eventually.equal(true)
     })
   })
 })

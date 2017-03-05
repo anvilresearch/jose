@@ -172,6 +172,15 @@ class JWT extends JSONDocument {
       Object.defineProperty(token, field, { value: options[field], enumerable: false })
     })
 
+    // Default to compact serialization or json serialization (multiple signatures)
+    if (!token.serialization) {
+      if (token.signatures) {
+        Object.defineProperty(token, 'serialization', { value: 'json', enumerable: false })
+      } else {
+        Object.defineProperty(token, 'serialization', { value: 'compact', enumerable: false })
+      }
+    }
+
     // Multiple Signatures/Keys
     if (token.signatures) {
       let { signatures } = token

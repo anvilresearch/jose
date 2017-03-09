@@ -44,7 +44,7 @@
   },
   "homepage": "https://github.com/anvilresearch/jose#README",
   "dependencies": {
-    "base64url": "^1.0.6",
+    "base64url": "^2.0.0",
     "json-document": "0.0.1",
     "text-encoding": "^0.6.1",
     "webcrypto": "git://github.com/anvilresearch/webcrypto.git"

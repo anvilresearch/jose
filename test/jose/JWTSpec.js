@@ -49,158 +49,139 @@ describe('JWT', () => {
    */
   describe('static decode', () => {
     describe('non-string argument', () => {
-      it('should reject with a DataError', (done) => {
-        JWT.decode(false).should.be.rejectedWith('JWT must be a string').and.notify(done)
+      it('should throw with a DataError', () => {
+        expect(() => {
+          JWT.decode(false)
+        }).to.throw('JWT must be a string')
       })
     })
 
     describe('JWS JSON Serialization', () => {
-      it('should return a promise', (done) => {
-        JWT.decode(json).should.be.fulfilled.and.notify(done)
+      it('should throw malformed JWT', () => {
+        expect(() => {
+          JWT.decode('{wrong}')
+        }).to.throw('Invalid JWT serialization')
       })
 
-      it('should throw malformed JWT', (done) => {
-        JWT.decode('{wrong}')
-          .should.be.rejectedWith('Invalid JWT serialization')
-          .and.notify(done)
+      it('should return an instance', () => {
+        JWT.decode(json).should.be.instanceof(JWT)
       })
 
-      it('should resolve a JWT instance', (done) => {
-        JWT.decode(json).should.eventually.be.instanceof(JWT)
-          .and.notify(done)
+      it('should set JWT type', () => {
+        JWT.decode(json).should.have.property('type').that.equals('JWS')
       })
 
-      it('should set JWT type', (done) => {
-        JWT.decode(json).should.eventually.have.property('type')
-          .that.equals('JWS').and.notify(done)
-      })
-
-      it('should set JWT payload', (done) => {
-        JWT.decode(json).should.eventually.have.property('payload')
+      it('should set JWT payload', () => {
+        JWT.decode(json).should.have.property('payload')
           .that.deep.equals({ iss: 'https://forge.anvil.io' })
-          .and.notify(done)
       })
 
-      it('should set JWT serialization', (done) => {
-        JWT.decode(json).should.eventually.have.property('serialization')
+      it('should set JWT serialization', () => {
+        JWT.decode(json).should.have.property('serialization')
           .that.equals('json')
-          .and.notify(done)
       })
 
-      it('should set JWT signatures', (done) => {
-        JWT.decode(json).should.eventually.have.property('signatures')
-          .and.notify(done)
+      it('should set JWT signatures', () => {
+        JWT.decode(json).should.have.property('signatures')
       })
 
       describe('signatures', () => {
 
-        it('should set JWT protected header', (done) => {
-          JWT.decode(json).then(token => token.signatures[0])
-            .should.eventually.have.property('protected')
-            .that.deep.equals({ alg: 'RS256', kid: 'r4nd0mbyt3s' }).and.notify(done)
+        it('should set JWT protected header', () => {
+          JWT.decode(json).signatures[0].should.have.property('protected')
+            .that.deep.equals({ alg: 'RS256', kid: 'r4nd0mbyt3s' })
         })
 
-        it('should set JWT signature', (done) => {
-          JWT.decode(json).then(token => token.signatures[0])
-            .should.eventually.have.property('signature')
-            .that.deep.equals(signature).and.notify(done)
+        it('should set JWT signature', () => {
+          JWT.decode(json).signatures[0].should.have.property('signature')
+            .that.deep.equals(signature)
         })
       })
     })
 
     describe('JWS Flattened JSON Serialization', () => {
-      it('should return a promise', (done) => {
-        JWT.decode(flattened).should.be.fulfilled.and.notify(done)
+      it('should throw malformed JWT', () => {
+        expect(() => {
+          JWT.decode('{wrong}')
+        }).to.throw('Invalid JWT serialization')
       })
 
-      it('should reject malformed JWT', (done) => {
-        JWT.decode('{wrong}')
-          .should.be.rejectedWith('Invalid JWT serialization')
-          .and.notify(done)
+      it('should return a JWT instance', () => {
+        JWT.decode(flattened).should.be.instanceof(JWT)
       })
 
-      it('should resolve a JWT instance', (done) => {
-        JWT.decode(flattened).should.eventually.be.instanceof(JWT)
-          .and.notify(done)
+      it('should set JWT type', () => {
+        JWT.decode(flattened).should.have.property('type').that.equals('JWS')
       })
 
-      it('should set JWT type', (done) => {
-        JWT.decode(flattened).should.eventually.have.property('type')
-          .that.equals('JWS').and.notify(done)
-      })
-
-      it('should set JWT protected header', (done) => {
-        JWT.decode(flattened).should.eventually.have.property('protected')
+      it('should set JWT protected header', () => {
+        JWT.decode(flattened).should.have.property('protected')
           .that.deep.equals({ alg: 'RS256', kid: 'r4nd0mbyt3s' })
-          .and.notify(done)
       })
 
-      it('should set JWT payload', (done) => {
-        JWT.decode(flattened).should.eventually.have.property('payload')
+      it('should set JWT payload', () => {
+        JWT.decode(flattened).should.have.property('payload')
           .that.deep.equals({ iss: 'https://forge.anvil.io' })
-          .and.notify(done)
+
       })
 
-      it('should set JWT signature', (done) => {
-        JWT.decode(flattened).should.eventually.have.property('signature')
+      it('should set JWT signature', () => {
+        JWT.decode(flattened).should.have.property('signature')
           .that.equals(signature)
-          .and.notify(done)
+
       })
 
-      it('should set JWT serialization', (done) => {
-        JWT.decode(flattened).should.eventually.have.property('serialization')
+      it('should set JWT serialization', () => {
+        JWT.decode(flattened).should.have.property('serialization')
           .that.equals('flattened')
-          .and.notify(done)
+
       })
     })
 
     describe('JWS Compact Serialization', () => {
-      it('should return a promise', (done) => {
-        JWT.decode(compact).should.be.fulfilled.and.notify(done)
+      it('should reject malformed JWT with a DataError', () => {
+        expect(() => {
+          JWT.decode('wrong')
+        }).to.throw('Invalid JWT compact serialization')
+
       })
 
-      it('should reject malformed JWT with a DataError', (done) => {
-        JWT.decode('wrong').should.be.rejectedWith('Malformed JWT')
-          .and.notify(done)
+      it('should return a JWT instance', () => {
+        JWT.decode(compact).should.be.instanceof(JWT)
       })
 
-      it('should return a JWT instance', (done) => {
-        JWT.decode(compact).should.eventually.be.instanceof(JWT)
-          .and.notify(done)
+      it('should set JWT type', () => {
+        JWT.decode(compact).should.have.property('type')
+          .that.equals('JWS')
       })
 
-      it('should set JWT type', (done) => {
-        JWT.decode(compact).should.eventually.have.property('type')
-          .that.equals('JWS').and.notify(done)
+      it('should set JWT segments', () => {
+        JWT.decode(compact).should.have.property('segments')
+          .that.deep.equals(compact.split('.'))
       })
 
-      it('should set JWT segments', (done) => {
-        JWT.decode(compact).should.eventually.have.property('segments')
-          .that.deep.equals(compact.split('.')).and.notify(done)
-      })
-
-      it('should set JWT header', (done) => {
-        JWT.decode(compact).should.eventually.have.property('header')
+      it('should set JWT header', () => {
+        JWT.decode(compact).should.have.property('header')
           .that.deep.equals({ alg: 'RS256', kid: 'r4nd0mbyt3s' })
-          .and.notify(done)
+
       })
 
-      it('should set JWT payload', (done) => {
-        JWT.decode(compact).should.eventually.have.property('payload')
+      it('should set JWT payload', () => {
+        JWT.decode(compact).should.have.property('payload')
           .that.deep.equals({ iss: 'https://forge.anvil.io' })
-          .and.notify(done)
+
       })
 
-      it('should set JWT signature', (done) => {
-        JWT.decode(compact).should.eventually.have.property('signature')
+      it('should set JWT signature', () => {
+        JWT.decode(compact).should.have.property('signature')
           .that.equals(signature)
-          .and.notify(done)
+
       })
 
-      it('should set JWT serialization', (done) => {
-        JWT.decode(compact).should.eventually.have.property('serialization')
+      it('should set JWT serialization', () => {
+        JWT.decode(compact).should.have.property('serialization')
           .that.equals('compact')
-          .and.notify(done)
+
       })
     })
   })
@@ -294,7 +275,8 @@ describe('JWT', () => {
   describe('verify', () => {
     it('should reject invalid JWT', (done) => {
       JWT.verify(RsaPublicCryptoKey, 'invalid')
-        .should.be.rejected.and.notify(done)
+        .should.be.rejectedWith('Invalid JWT compact serialization')
+        .and.notify(done)
     })
 
     it('should resolve a boolean', (done) => {

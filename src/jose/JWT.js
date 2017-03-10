@@ -27,14 +27,14 @@ class JWT extends JSONDocument {
    *
    * @param {String} data
    *
-   * @returns {Promise<JWT>}
+   * @returns {JWT}
    */
   static decode (data) {
     let ExtendedJWT = this
     let token
 
     if (typeof data !== 'string') {
-      return Promise.reject(new DataError('JWT must be a string'))
+      throw new DataError('JWT must be a string')
     }
 
     // JSON of Flattened JSON Serialization
@@ -42,7 +42,7 @@ class JWT extends JSONDocument {
       try {
         data = JSON.parse(data)
       } catch (error) {
-        return Promise.reject(new DataError('Invalid JWT serialization'))
+        throw new DataError('Invalid JWT serialization')
       }
 
       let { protected: protectedHeader, header: unprotectedHeader, payload, signature, signatures, recipients } = data
@@ -94,7 +94,7 @@ class JWT extends JSONDocument {
         let length = segments.length
 
         if (length !== 3 && length !== 5) {
-          return Promise.reject(new DataError('Malformed JWT'))
+          throw new DataError('Malformed JWT')
         }
 
         let decodedHeader = JSON.parse(base64url.decode(segments[0]))
@@ -130,11 +130,11 @@ class JWT extends JSONDocument {
           // Object.defineProperty(token, 'segments', { value: segments, enumerable: false })
         }
       } catch (error) {
-        return Promise.reject(new DataError('Invalid JWT compact serialization'))
+        throw new DataError('Invalid JWT compact serialization')
       }
     }
 
-    return Promise.resolve(token)
+    return token
   }
 
   /**
@@ -218,43 +218,45 @@ class JWT extends JSONDocument {
    */
   static verify (key, data, options={}) {
     let ExtendedJWT = this
-    let jwt
+    let token
 
-    // Decode
-    return ExtendedJWT.decode(data).then(token => {
-      let { signatures } = token
-      jwt = token
+    try {
+      token = ExtendedJWT.decode(data)
+    } catch (err) {
+      return Promise.reject(err)
+    }
 
-      // Assign options to JWT as nonenumerable properties
-      Object.keys(options).forEach(field => {
-        Object.defineProperty(token, field, { value: options[field], enumerable: false })
+    let { signatures } = token
+
+    // Assign options to JWT as nonenumerable properties
+    Object.keys(options).forEach(field => {
+      Object.defineProperty(token, field, { value: options[field], enumerable: false })
+    })
+
+    // Map keys to signatures by index
+    if (Array.isArray(key) && signatures) {
+      token.signatures = signatures.map((descriptor, index) => {
+        // TODO more sophisticated key mapping using hints like `kid'
+        if (index < key.length) {
+          Object.defineProperty(descriptor, 'key', { value: key[index], enumerable: false })
+        }
+
+        return descriptor
       })
 
-      // Map keys to signatures by index
-      if (Array.isArray(key) && signatures) {
-        token.signatures = signatures.map((descriptor, index) => {
-          // TODO more sophisticated key mapping using hints like `kid'
-          if (index < key.length) {
-            Object.defineProperty(descriptor, 'key', { value: key[index], enumerable: false })
-          }
+    // Assign single key to all signatures as nonenumerable property
+    } else if (signatures) {
+      token.signatures = signatures.map(descriptor => {
+        Object.defineProperty(descriptor, 'key', { value: key, enumerable: false })
+        return descriptor
+      })
 
-          return descriptor
-        })
+    // Assign key to token as nonenumerable property
+    } else {
+      Object.defineProperty(token, 'key', { value: key, enumerable: false })
+    }
 
-      // Assign single key to all signatures as nonenumerable property
-      } else if (signatures) {
-        token.signatures = signatures.map(descriptor => {
-          Object.defineProperty(descriptor, 'key', { value: key, enumerable: false })
-          return descriptor
-        })
-
-      // Assign key to token as nonenumerable property
-      } else {
-        Object.defineProperty(token, 'key', { value: key, enumerable: false })
-      }
-
-      return token.verify()
-    }).then(verified => jwt)
+    return token.verify().then(verified => token)
   }
 
   /**

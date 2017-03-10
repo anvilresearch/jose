@@ -27,19 +27,19 @@ class JWD extends JSONDocument {
    *
    * @param {String} data
    *
-   * @returns {Promise<JWD>}
+   * @returns {JWD}
    */
   static decode (data) {
     let ExtendedJWD = this
 
     if (typeof data !== 'string') {
-      return Promise.reject(new DataError('JWD must be a string'))
+      throw new DataError('JWD must be a string')
     }
 
     try {
       data = JSON.parse(data)
     } catch (error) {
-      return Promise.reject(new DataError('Invalid JWD'))
+      throw new DataError('Invalid JWD')
     }
 
     let doc = new ExtendedJWD(data)
@@ -47,7 +47,7 @@ class JWD extends JSONDocument {
     Object.defineProperty(doc, 'serialization', { value: 'document', enumerable: false })
     Object.defineProperty(doc, 'type', { value: 'JWS', enumerable: false })
 
-    return Promise.resolve(doc)
+    return doc
   }
 
   /**
@@ -119,43 +119,45 @@ class JWD extends JSONDocument {
    */
   static verify (key, data, options={}) {
     let ExtendedJWD = this
-    let jwd
+    let doc
 
-    // Decode
-    return ExtendedJWD.decode(data).then(doc => {
-      let { signatures } = doc
-      jwd = doc
+    try {
+      doc = ExtendedJWD.decode(data)
+    } catch (err) {
+      return Promise.reject(err)
+    }
 
-      // Assign options to JWD as nonenumerable properties
-      Object.keys(options).forEach(field => {
-        Object.defineProperty(doc, field, { value: options[field], enumerable: false })
+    let { signatures } = doc
+
+    // Assign options to JWD as nonenumerable properties
+    Object.keys(options).forEach(field => {
+      Object.defineProperty(doc, field, { value: options[field], enumerable: false })
+    })
+
+    // Map keys to signatures by index
+    if (Array.isArray(key) && signatures) {
+      doc.signatures = signatures.map((descriptor, index) => {
+        // TODO more sophisticated key mapping using hints like `kid'
+        if (index < key.length) {
+          Object.defineProperty(descriptor, 'key', { value: key[index], enumerable: false })
+        }
+
+        return descriptor
       })
 
-      // Map keys to signatures by index
-      if (Array.isArray(key) && signatures) {
-        doc.signatures = signatures.map((descriptor, index) => {
-          // TODO more sophisticated key mapping using hints like `kid'
-          if (index < key.length) {
-            Object.defineProperty(descriptor, 'key', { value: key[index], enumerable: false })
-          }
+    // Assign single key to all signatures as nonenumerable property
+    } else if (signatures) {
+      doc.signatures = signatures.map(descriptor => {
+        Object.defineProperty(descriptor, 'key', { value: key, enumerable: false })
+        return descriptor
+      })
 
-          return descriptor
-        })
+    // Assign key to document as nonenumerable property
+    } else {
+      Object.defineProperty(doc, 'key', { value: key, enumerable: false })
+    }
 
-      // Assign single key to all signatures as nonenumerable property
-      } else if (signatures) {
-        doc.signatures = signatures.map(descriptor => {
-          Object.defineProperty(descriptor, 'key', { value: key, enumerable: false })
-          return descriptor
-        })
-
-      // Assign key to document as nonenumerable property
-      } else {
-        Object.defineProperty(doc, 'key', { value: key, enumerable: false })
-      }
-
-      return doc.verify()
-    }).then(verified => jwd)
+    return doc.verify().then(verified => doc)
   }
 
   /**

@@ -61,58 +61,60 @@ describe('JWD', () => {
    */
   describe('static decode', () => {
     describe('non-string argument', () => {
-      it('should reject with a DataError', (done) => {
-        JWD.decode(false)
-          .should.be.rejectedWith('JWD must be a string').and.notify(done)
+      it('should throw with a DataError', () => {
+        expect(() => {
+          JWD.decode(false)
+        }).to.throw('JWD must be a string')
       })
     })
 
     describe('Document Serialization', () => {
-      it('should reject with a DataError', (done) => {
-        JWD.decode('wrong')
-          .should.be.rejectedWith('Invalid JWD').and.notify(done)
+      it('should throw with a DataError', () => {
+        expect(() => {
+          JWD.decode('wrong')
+        }).to.throw('Invalid JWD')
       })
 
-      it('should return a JWD instance', (done) => {
+      it('should return a JWD instance', () => {
         JWD.decode(serializedToken)
-          .should.eventually.be.instanceof(JWD).and.notify(done)
+          .should.be.instanceof(JWD)
       })
 
-      it('should set JWD type', (done) => {
-        JWD.decode(serializedToken).should.eventually.have.property('type')
-          .that.equals('JWS').and.notify(done)
+      it('should set JWD type', () => {
+        JWD.decode(serializedToken).should.have.property('type')
+          .that.equals('JWS')
       })
 
-      it('should set JWD payload', (done) => {
+      it('should set JWD payload', () => {
         JWD.decode(serializedToken)
-          .should.eventually.deep.have.property('payload')
-          .that.equals(payload).and.notify(done)
+          .should.deep.have.property('payload')
+          .that.equals(payload)
       })
 
-      it('should set JWD serialization', (done) => {
+      it('should set JWD serialization', () => {
         JWD.decode(serializedToken)
-          .should.eventually.deep.have.property('serialization')
-          .that.equals('document').and.notify(done)
+          .should.deep.have.property('serialization')
+          .that.equals('document')
       })
 
-      it('should set JWD signatures', (done) => {
+      it('should set JWD signatures', () => {
         JWD.decode(serializedToken)
-          .should.eventually.have.property('signatures')
-          .that.deep.includes(signatureDescriptor).and.notify(done)
+          .should.have.property('signatures')
+          .that.deep.includes(signatureDescriptor)
       })
 
       describe('signatures', () => {
 
-        it('should set JWD protected header', (done) => {
-          JWD.decode(serializedToken).then(token => token.signatures[0])
-            .should.eventually.have.property('protected')
-            .that.deep.equals(protectedHeader).and.notify(done)
+        it('should set JWD protected header', () => {
+          JWD.decode(serializedToken).signatures[0]
+            .should.have.property('protected')
+            .that.deep.equals(protectedHeader)
         })
 
-        it('should set JWD signature', (done) => {
-          JWD.decode(serializedToken).then(token => token.signatures[0])
-            .should.eventually.have.property('signature')
-            .that.deep.equals(signature).and.notify(done)
+        it('should set JWD signature', () => {
+          JWD.decode(serializedToken).signatures[0]
+            .should.have.property('signature')
+            .that.deep.equals(signature)
         })
       })
     })

@@ -14,29 +14,44 @@ class JWS {
    * sign
    *
    * @description
-   * Encode a JWT instance
+   * Encode a JWT or JWD instance
    *
-   * @param {Object} token
-   * @returns {Promise}
+   * @param {JWT|JWD} token
+   * @returns {Promise<SerializedToken>}
    */
   static sign (token) {
-    let payload = base64url(JSON.stringify(token.payload))
+    let { serialization, payload } = token
+    let encodedPayload = base64url(JSON.stringify(payload))
 
-    // compact serialization
-    if (token.serialization === 'compact') {
-      let { key, header: { alg } } = token
-      let header = base64url(JSON.stringify(token.header))
-      let data = `${header}.${payload}`
+    // Compact Serialization
+    if (serialization === 'compact') {
+      let { key, header: unprotectedHeader } = token
+      let { alg } = unprotectedHeader
+      let encodedHeader = base64url(JSON.stringify(unprotectedHeader))
+      let data = `${encodedHeader}.${encodedPayload}`
 
       return JWA.sign(alg, key, data).then(signature => `${data}.${signature}`)
     }
 
-    // JSON serialization
-    if (token.serialization === 'json') {
+    // Flattened Serialization
+    if (serialization === 'flattened') {
+      let { key, header: unprotectedHeader, protected: protectedHeader } = token
+      let { alg } = protectedHeader
+      let encodedHeader = base64url(JSON.stringify(protectedHeader))
+      let data = `${encodedHeader}.${encodedPayload}`
+
+      return JWA.sign(alg, key, data).then(signature => {
+        return JSON.stringify({ payload: encodedPayload, header: unprotectedHeader, protected: encodedHeader, signature })
+      })
+    }
+
+    // JSON General Serialization
+    if (serialization === 'json') {
       let { signatures } = token
 
       let promises = signatures.map(descriptor => {
-        let { header, signature, key } = descriptor
+        let { header: unprotectedHeader, protected: protectedHeader, signature, key } = descriptor
+        let { alg } = protectedHeader
 
         // Attempt to use existing signature
         if (signature && !key) {
@@ -47,30 +62,47 @@ class JWS {
 
         // Create new signature
         } else {
-          let { protected: { alg } } = descriptor
-          let protectedHeader = base64url(JSON.stringify(descriptor['protected']))
-          let data = `${protectedHeader}.${payload}`
+          let encodedHeader = base64url(JSON.stringify(protectedHeader))
+          let data = `${encodedHeader}.${encodedPayload}`
 
           return JWA.sign(alg, key, data).then(signature => {
-            return { protected: protectedHeader, header, signature }
+            return { protected: encodedHeader, header: unprotectedHeader, signature }
           })
         }
       })
 
       return Promise.all(promises).then(signatures => {
-        return JSON.stringify({ payload, signatures }, null, 2)
+        return JSON.stringify({ payload: encodedPayload, signatures })
       })
     }
 
-    // Flattened serialization
-    if (token.serialization === 'flattened') {
-      let { key, header } = token
-      let { alg } = header
-      let protectedHeader = base64url(JSON.stringify(token.protected))
-      let data = `${protectedHeader}.${payload}`
+    if (serialization === 'document') {
+      let { signatures } = token
 
-      return JWA.sign(alg, key, data).then(signature => {
-        return { payload, header, protected: protectedHeader, signature }
+      let promises = signatures.map(descriptor => {
+        let { header: unprotectedHeader, protected: protectedHeader, signature, key } = descriptor
+        let { alg } = protectedHeader
+
+        // Attempt to use existing signature
+        if (signature && !key) {
+          return Promise.resolve(descriptor)
+
+        } else if (signature && key) {
+          // TODO
+
+        // Create new signature
+        } else {
+          let encodedHeader = base64url(JSON.stringify(protectedHeader))
+          let data = `${encodedHeader}.${encodedPayload}`
+
+          return JWA.sign(alg, key, data).then(signature => {
+            return { protected: protectedHeader, header: unprotectedHeader, signature }
+          })
+        }
+      })
+
+      return Promise.all(promises).then(signatures => {
+        return JSON.stringify({ payload, signatures })
       })
     }
 
@@ -79,23 +111,71 @@ class JWS {
 
   /**
    * verify
+   *
+   * @description
+   * Verify JWT or JWD signature(s)
+   *
+   * @param {JWT|JWD} token
+   * @returns {Promise<Boolean>}
    */
-  static verify (jwt) {
-    // multiple signatures
-    if (jwt.signatures) {
-      // ...
+  static verify (token) {
+    let { signature, signatures, payload } = token
+
+    // JSON Serialization
+    if (signatures) {
+
+      return Promise.all(signatures.map((descriptor, index) => {
+        let { protected: protectedHeader, header, signature, key } = descriptor
+
+        // Ignore if key is not present.
+        if (!key) {
+          return Promise.resolve(true)
+        }
+
+        let { alg } = protectedHeader
+        let encodedHeader = base64url(JSON.stringify(protectedHeader))
+        let encodedPayload = base64url(JSON.stringify(payload))
+        let data = `${encodedHeader}.${encodedPayload}`
+
+        return JWA.verify(alg, key, signature, data).then(verified => {
+          Object.defineProperty(signatures[index], 'verified', { value: verified })
+          return verified
+        })
+
+      // Ensure that all signatures were succesfully verified
+      })).then(verified => {
+        return verified.reduce((prev, val) => prev ? val : false, true)
+      })
+
     }
 
-    // one signature
-    if (jwt.signature) {
-      let [header, payload] = jwt.segments
-      let data = `${header}.${payload}`
-      let {key, signature, header: {alg}} = jwt
+    // Compact and Flattened Serialization
+    if (signature) {
+      let { header: unprotectedHeader, protected: protectedHeader, segments, key } = token
 
-      return JWA.verify(alg, key, signature, data).then(verified => {
-        jwt.verified = verified
-        return verified
-      })
+      // Compact Serialization
+      if (segments) {
+        let { alg } = unprotectedHeader
+        let [encodedHeader, encodedPayload] = segments
+        let data = `${encodedHeader}.${encodedPayload}`
+
+        return JWA.verify(alg, key, signature, data).then(verified => {
+          Object.defineProperty(token, 'verified', { value: verified })
+          return verified
+        })
+
+      // Flattened Serialization
+      } else {
+        let { alg } = protectedHeader
+        let encodedHeader = base64url(JSON.stringify(protectedHeader))
+        let encodedPayload = base64url(JSON.stringify(payload))
+        let data = `${encodedHeader}.${encodedPayload}`
+
+        return JWA.verify(alg, key, signature, data).then(verified => {
+          Object.defineProperty(token, 'verified', { value: verified })
+          return verified
+        })
+      }
     }
 
     // no signatures to verify

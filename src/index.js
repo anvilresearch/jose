@@ -5,6 +5,7 @@ const JWA = require('./jose/JWA')
 const JWK = require('./jose/JWK')
 const JWKSet = require('./jose/JWKSet')
 const JWT = require('./jose/JWT')
+const JWD = require('./jose/JWD')
 const JWS = require('./jose/JWS')
 const Base64URLSchema = require('./schemas/Base64URLSchema')
 const JOSEHeaderSchema = require('./schemas/JOSEHeaderSchema')
@@ -22,6 +23,7 @@ module.exports = {
   JWK,
   JWKSet,
   JWT,
+  JWD,
   JWS,
   Base64URLSchema,
   JOSEHeaderSchema,

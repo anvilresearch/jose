@@ -34,6 +34,7 @@ crypto.subtle
 
   // verify the signature
   .then(tokens => {
+    console.log('TOKENS', tokens)
     let [compact, flattened, json] = tokens
 
     return Promise.all([

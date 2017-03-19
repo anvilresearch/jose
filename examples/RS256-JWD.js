@@ -30,6 +30,7 @@ crypto.subtle
 
   // verify the signature
   .then(doc => {
+    console.log('DOCUMENT', doc)
     return JWD.verify(publicKey, doc)
   })
 

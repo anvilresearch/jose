@@ -31,10 +31,10 @@ const doc = {
   signatures: [
     {
       protected: {
-        alg: "RS256",
-        typ: "JWS"
+        typ: "JWS",
+        alg: "RS256"
       },
-      signature: "hOKzfFHDXWfrOoJEj5LAB6LYgiu4jebRoUbsJFn7sNKgDh3aTMKE2t-oZAV9QxjfEiHzpQIrMSEa-Kl8sytkhSzi7m01zp178VhcIglL7JGLZVPDdpq7cBQ1wuAk5tPrRRfZxaU97bhA9g110BVP4fmQi4PDBhAroIUXizwIrSJ5Vpi74yEpJjHYB4_iZc576Eajqw3cZdLgFCGeDKEJ-Rzir6l7HrNm1SaOGjgMEmSE9KxRBvQcIo5OdjH0nX0mErCjbhJrvvBkYqy5mHfWbtnr_mfE9PRp6NLqVH99IKDeReoXHw6118x_27YsqnrGDQ4wMGzodVaonwRSW8Yanw"
+      signature: "Z9kDlLsluttzQKqd2HSHdNB6WNmjIcesP5DkfCeX7EqYNAugjBatXLOTV8w1FuYUQBxowox-Sem6xbecTLu8d8sESNEzrnF_BUtROJ8eA1vOjSvTzi_mW0DG6p-IXXOQ0UznVmo5hy87kJnYovnwCBY2ZmZT6SkKs4-_22Fnw8PvYG5zN_ev0Q3Hh4F6L8sa5Wk3Maa6UKt8yS0UZR42_vlTWK-10cFqKElbPbsCaU__0yx-O_LdmEo7fpd4n_9ghz58_OhFFZIZuXPxf8a4bZGZGLr0ZWeWzbs2igQ-AbynPibDs9MAyOLB82Y9ZC4i5gcWzThcEhAe9LrCQEf14A"
     }
   ]
 }

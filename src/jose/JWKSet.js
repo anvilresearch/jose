@@ -30,16 +30,28 @@ class JWKSet extends JSONDocument {
     let validation = this.schema.validate(jwks)
 
     if (!validation.valid) {
-      Promise.reject(validation)
+      return Promise.reject(new Error('Invalid JWKSet: ' +
+        JSON.stringify(validation, null, 2)))
     }
 
-    let imported = new JWKSet(jwks)
-    let importing = jwks.keys.map(key => JWK.importKey(key))
+    if (!jwks.keys) {
+      return Promise.reject(new Error('Cannot import JWKSet: keys property is empty'))
+    }
 
-    return Promise.all(importing).then(keys => {
-      imported.keys = keys
-      return imported
-    })
+    let imported, importing
+
+    try {
+      imported = new JWKSet(jwks)
+      importing = jwks.keys.map(key => JWK.importKey(key))
+    } catch (err) {
+      return Promise.reject(err)
+    }
+
+    return Promise.all(importing)
+      .then(keys => {
+        imported.keys = keys
+        return imported
+      })
   }
 }
 

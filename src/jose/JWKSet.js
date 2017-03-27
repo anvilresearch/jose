@@ -33,9 +33,6 @@ class JWKSet extends JSONDocument {
       .then(() => {
         let validation = this.schema.validate(jwks)
 
-        // TODO: fix
-        validation.valid = true
-
         if (!validation.valid) {
           throw new Error('Invalid JWKSet: ' +
             JSON.stringify(validation, null, 2))

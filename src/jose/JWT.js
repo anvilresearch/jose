@@ -45,7 +45,7 @@ class JWT extends JSONDocument {
 
     // Object input
     if (typeof data === 'object' && !Array.isArray(data)) {
-      params = data
+      // params = data
       serialized = data.serialized
 
     // String input
@@ -103,7 +103,7 @@ class JWT extends JSONDocument {
           }
 
           params.payload = payload
-          params.signatures = signatures.map(descriptor => {
+          let transformedSignatures = signatures.map(descriptor => {
             let { protected: protectedHeader, header: unprotectedHeader, signature, cryptoKey } = descriptor
 
             return {
@@ -114,6 +114,12 @@ class JWT extends JSONDocument {
             }
           })
 
+          if (Array.isArray(params.signatures)) {
+            params.signatures.unshift(transformedSignatures)
+          } else {
+            params.signatures = transformedSignatures
+          }
+
         // General JSON Serialization
         } else {
           if (!params.serialization) {
@@ -123,7 +129,7 @@ class JWT extends JSONDocument {
           let decodedPayload = JSON.parse(base64url.decode(payload))
 
           params.payload = decodedPayload
-          params.signatures = signatures.map(descriptor => {
+          let transformedSignatures = signatures.map(descriptor => {
             let { protected: protectedHeader, header: unprotectedHeader, signature, cryptoKey } = descriptor
             let decodedHeader = JSON.parse(base64url.decode(protectedHeader))
 
@@ -134,6 +140,12 @@ class JWT extends JSONDocument {
               cryptoKey
             }
           })
+
+          if (Array.isArray(params.signatures)) {
+            params.signatures.unshift(transformedSignatures)
+          } else {
+            params.signatures = transformedSignatures
+          }
         }
 
       // Flattened JSON or Flattened Document Serialization
@@ -146,14 +158,19 @@ class JWT extends JSONDocument {
           }
 
           params.payload = payload
-          params.signatures = [
-            {
-              protected: protectedHeader,
-              header: unprotectedHeader,
-              signature,
-              cryptoKey
-            }
-          ]
+          let transformedSignatures = {
+            protected: protectedHeader,
+            header: unprotectedHeader,
+            signature,
+            cryptoKey
+          }
+
+          if (Array.isArray(params.signatures)) {
+            params.signatures.unshift(transformedSignatures)
+          } else {
+            params.signatures = [transformedSignatures]
+          }
+
         // Flattened JSON Serialization
         } else {
           let decodedPayload = JSON.parse(base64url.decode(payload))
@@ -164,14 +181,18 @@ class JWT extends JSONDocument {
           }
 
           params.payload = decodedPayload
-          params.signatures = [
-            {
-              protected: decodedHeader,
-              header: unprotectedHeader,
-              signature,
-              cryptoKey
-            }
-          ]
+          let transformedSignatures = {
+            protected: decodedHeader,
+            header: unprotectedHeader,
+            signature,
+            cryptoKey
+          }
+
+          if (Array.isArray(params.signatures)) {
+            params.signatures.unshift(transformedSignatures)
+          } else {
+            params.signatures = [transformedSignatures]
+          }
         }
       }
 
@@ -206,6 +227,12 @@ class JWT extends JSONDocument {
             }
           ]
 
+          if (Array.isArray(params.signatures)) {
+            params.signatures.unshift(transformedSignatures)
+          } else {
+            params.signatures = [transformedSignatures]
+          }
+
         }
 
         // JSON Web Encryption
@@ -229,7 +256,105 @@ class JWT extends JSONDocument {
       }
     }
 
+    /**
+     * Transform object input if no serialization provided
+     */
+    if (!serialized) {
+      let { protected: protectedHeader, header: unprotectedHeader, payload, signature, signatures, cryptoKey } = data
+
+      // JSON or Document, default to Document
+      if (signatures) {
+        if (!params.serialization) {
+          params.serialization = 'document'
+        }
+
+        params.payload = payload
+        let transformedSignatures = signatures.map(descriptor => {
+          let { protected: protectedHeader, header: unprotectedHeader, signature, cryptoKey } = descriptor
+
+          return {
+            protected: protectedHeader,
+            header: unprotectedHeader,
+            signature,
+            cryptoKey
+          }
+        })
+
+        if (Array.isArray(params.signatures)) {
+          params.signatures.unshift(transformedSignatures)
+        } else {
+          params.signatures = transformedSignatures
+        }
+
+      // Flattened or Compact
+      } else {
+        // Flattened or Flattened Document, default to Flattened Document
+        if (protectedHeader) {
+          if (!params.serialization) {
+            params.serialization = 'flattened-document'
+          }
+
+          params.payload = payload
+          let transformedSignatures = {
+            protected: protectedHeader,
+            header: unprotectedHeader,
+            signature,
+            cryptoKey
+          }
+
+          if (Array.isArray(params.signatures)) {
+            params.signatures.unshift(transformedSignatures)
+          } else {
+            params.signatures = [transformedSignatures]
+          }
+
+        // Compact
+        } else if (unprotectedHeader) {
+          if (!params.serialization) {
+            params.serialization = 'compact'
+          }
+
+          params.payload = payload
+          let transformedSignatures = {
+            protected: unprotectedHeader,
+            signature,
+            cryptoKey
+          }
+
+          if (Array.isArray(params.signatures)) {
+            params.signatures.unshift(transformedSignatures)
+          } else {
+            params.signatures = [transformedSignatures]
+          }
+
+        }
+      }
+    }
+
+    console.log('PARAMS', JSON.stringify(params, null, 2))
     return new ExtendedJWT(params)
+  }
+
+  /**
+   * sign
+   *
+   * @description
+   * Sign a JSON Web Token
+   *
+   * @params {...Object} data - Token data
+   *
+   * @returns {Promise<SerializedToken>}
+   */
+  static sign (...data) {
+    // Shallow merge data
+    let params = Object.assign(...data)
+
+    let ExtendedJWT = this
+    let token = ExtendedJWT.decode(params)
+
+    console.log(token, token.serialization)
+
+    return token.sign(params)
   }
 
   /**

@@ -256,82 +256,6 @@ class JWT extends JSONDocument {
       }
     }
 
-    /**
-     * Transform object input if no serialization provided
-     */
-    if (!serialized) {
-      let { protected: protectedHeader, header: unprotectedHeader, payload, signature, signatures, cryptoKey } = data
-
-      // JSON or Document, default to Document
-      if (signatures) {
-        if (!params.serialization) {
-          params.serialization = 'document'
-        }
-
-        params.payload = payload
-        let transformedSignatures = signatures.map(descriptor => {
-          let { protected: protectedHeader, header: unprotectedHeader, signature, cryptoKey } = descriptor
-
-          return {
-            protected: protectedHeader,
-            header: unprotectedHeader,
-            signature,
-            cryptoKey
-          }
-        })
-
-        if (Array.isArray(params.signatures)) {
-          params.signatures.unshift(transformedSignatures)
-        } else {
-          params.signatures = transformedSignatures
-        }
-
-      // Flattened or Compact
-      } else {
-        // Flattened or Flattened Document, default to Flattened Document
-        if (protectedHeader) {
-          if (!params.serialization) {
-            params.serialization = 'flattened-document'
-          }
-
-          params.payload = payload
-          let transformedSignatures = {
-            protected: protectedHeader,
-            header: unprotectedHeader,
-            signature,
-            cryptoKey
-          }
-
-          if (Array.isArray(params.signatures)) {
-            params.signatures.unshift(transformedSignatures)
-          } else {
-            params.signatures = [transformedSignatures]
-          }
-
-        // Compact
-        } else if (unprotectedHeader) {
-          if (!params.serialization) {
-            params.serialization = 'compact'
-          }
-
-          params.payload = payload
-          let transformedSignatures = {
-            protected: unprotectedHeader,
-            signature,
-            cryptoKey
-          }
-
-          if (Array.isArray(params.signatures)) {
-            params.signatures.unshift(transformedSignatures)
-          } else {
-            params.signatures = [transformedSignatures]
-          }
-
-        }
-      }
-    }
-
-    console.log('PARAMS', JSON.stringify(params, null, 2))
     return new ExtendedJWT(params)
   }
 
@@ -352,9 +276,7 @@ class JWT extends JSONDocument {
     let ExtendedJWT = this
     let token = ExtendedJWT.decode(params)
 
-    console.log(token, token.serialization)
-
-    return token.sign(params)
+    return token.sign(token)
   }
 
   /**
@@ -483,11 +405,63 @@ class JWT extends JSONDocument {
    * constructor
    */
   constructor (data, options) {
-    super(data, options)
+    // Normalize input to JWD format
+    let descriptor = Object.assign({}, data)
+    let serialization
+    let { protected: protectedHeader, header: unprotectedHeader, signature, signatures, cryptoKey, segments } = descriptor
+
+    // JSON Document Hack (this should be removed once JSON Document is fixed)
+    delete descriptor.protected
+    delete descriptor.header
+    delete descriptor.signature
+    delete descriptor.cryptoKey
+    delete descriptor.segments
+
+    // Flat signature input
+    let signatureDescriptor
+
+    // Compact
+    if (!protectedHeader && unprotectedHeader) {
+      signatureDescriptor = {
+        protected: unprotectedHeader
+      }
+
+    // Other
+    } else if (protectedHeader) {
+      signatureDescriptor = {
+        protected: protectedHeader
+      }
+    }
+
+    if (signatureDescriptor) {
+      // Signature present
+      if (signature) {
+        signatureDescriptor.signature = signature
+      }
+
+      // Key present
+      if (cryptoKey) {
+        signatureDescriptor.cryptoKey = cryptoKey
+      }
+
+      // Move flat signature into the front of the signatures array
+      if (signatures && Array.isArray(signatures)) {
+        descriptor.signatures.unshift(signatureDescriptor)
+      } else {
+        descriptor.signatures = [signatureDescriptor]
+        signatures = descriptor.signatures
+      }
+    }
+
+    // Create instance
+    super(descriptor, options)
+
+    // Prioritize provided serialization over inferred serialization
+    if (data.serialization) {
+      serialization = data.serialization
+    }
 
     // Handle non-enumerable properties
-    let { serialization, segments, cryptoKey, signatures } = data
-
     // TODO Encryption. Always set JWS type in the meanwhile
     Object.defineProperty(this, 'type', { value: 'JWS', enumerable: false })
 
@@ -503,19 +477,18 @@ class JWT extends JSONDocument {
 
     // TODO import additional key types (pem, jwk, etc.) into cryptoKeys
 
-    // Flat Keys (for signature)
-    if (cryptoKey) {
-      Object.defineProperty(this, 'key', { value: cryptoKey, enumerable: false })
-    }
-
     // Nested Keys (for signatures)
     if (signatures) {
-      this.signatures.map((descriptor, index) => {
+      this.signatures.forEach((descriptor, index) => {
         // Get signature from input data
         let { cryptoKey: signatureKey } = signatures[index]
 
         // Mutate individual signature descriptor object to contain non-enumerable signature key
         if (signatureKey) {
+
+          // JSON Document Hack (this should be removed once JSON Document is fixed)
+          delete descriptor.cryptoKey
+
           Object.defineProperty(descriptor, 'key', { value: signatureKey, enumerable: false })
         }
       })

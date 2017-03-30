@@ -408,14 +408,40 @@ class JWT extends JSONDocument {
     // Normalize input to JWD format
     let descriptor = Object.assign({}, data)
     let serialization
-    let { protected: protectedHeader, header: unprotectedHeader, signature, signatures, cryptoKey, segments } = descriptor
+    let {
+      protected: protectedHeader,
+      header: unprotectedHeader,
+      signature,
+      signatures,
+      cryptoKey,
+      cryptoKeys,
+      pem,
+      pems,
+      jwk,
+      jwks,
+      jwkSet,
+      jwkSets,
+      segments,
+      validate,
+      result
+    } = descriptor
 
     // JSON Document Hack (this should be removed once JSON Document is fixed)
     delete descriptor.protected
     delete descriptor.header
     delete descriptor.signature
+    delete descriptor.serialization
     delete descriptor.cryptoKey
+    delete descriptor.cryptoKeys
+    delete descriptor.pem
+    delete descriptor.pems
+    delete descriptor.jwk
+    delete descriptor.jwks
+    delete descriptor.jwkSet
+    delete descriptor.jwkSets
     delete descriptor.segments
+    delete descriptor.validate
+    delete descriptor.result
 
     // Flat signature input
     let signatureDescriptor
@@ -475,9 +501,30 @@ class JWT extends JSONDocument {
       Object.defineProperty(this, 'segments', { value: segments, enumerable: false })
     }
 
+    // Validate
+    if (validate) {
+      Object.defineProperty(this, 'validate', { value: validate, enumerable: false })
+    }
+
+    // Result Type
+    if (result) {
+      Object.defineProperty(this, 'result', { value: result, enumerable: false })
+    }
+
     // TODO import additional key types (pem, jwk, etc.) into cryptoKeys
 
-    // Nested Keys (for signatures)
+    // Should these keys for verification rather be mapped directly to the signature?
+    // Crypto Key (Verification)
+    if (cryptoKey) {
+      Object.defineProperty(this, 'keys', { value: [cryptoKey], enumerable: false })
+    }
+
+    // Crypto Keys Array (Verification)
+    if (cryptoKeys) {
+      Object.defineProperty(this, 'keys', { value: cryptoKeys, enumerable: false })
+    }
+
+    // Nested Crypto Keys (for signatures)
     if (signatures) {
       this.signatures.forEach((descriptor, index) => {
         // Get signature from input data

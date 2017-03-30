@@ -45,7 +45,7 @@ class JWT extends JSONDocument {
 
     // Object input
     if (typeof data === 'object' && !Array.isArray(data)) {
-      // params = data
+      params = data
       serialized = data.serialized
 
     // String input
@@ -96,32 +96,8 @@ class JWT extends JSONDocument {
       if (signatures || recipients) {
         // TODO Encryption
 
-        // Document Serialization
-        if (base64url.toBase64(payload).match(BASE64_REGEX)) {
-          if (!params.serialization) {
-            params.serialization = 'document'
-          }
-
-          params.payload = payload
-          let transformedSignatures = signatures.map(descriptor => {
-            let { protected: protectedHeader, header: unprotectedHeader, signature, cryptoKey } = descriptor
-
-            return {
-              protected: protectedHeader,
-              header: unprotectedHeader,
-              signature,
-              cryptoKey
-            }
-          })
-
-          if (Array.isArray(params.signatures)) {
-            params.signatures.unshift(transformedSignatures)
-          } else {
-            params.signatures = transformedSignatures
-          }
-
         // General JSON Serialization
-        } else {
+        if (base64url.toBase64(payload).match(BASE64_REGEX)) {
           if (!params.serialization) {
             params.serialization = 'json'
           }
@@ -146,20 +122,47 @@ class JWT extends JSONDocument {
           } else {
             params.signatures = transformedSignatures
           }
+
+        // Document Serialization
+        } else {
+          if (!params.serialization) {
+            params.serialization = 'document'
+          }
+
+          params.payload = payload
+          let transformedSignatures = signatures.map(descriptor => {
+            let { protected: protectedHeader, header: unprotectedHeader, signature, cryptoKey } = descriptor
+
+            return {
+              protected: protectedHeader,
+              header: unprotectedHeader,
+              signature,
+              cryptoKey
+            }
+          })
+
+          if (Array.isArray(params.signatures)) {
+            params.signatures.unshift(transformedSignatures)
+          } else {
+            params.signatures = transformedSignatures
+          }
         }
 
       // Flattened JSON or Flattened Document Serialization
       } else {
 
-        // Flattened Document Serialization
+        // Flattened JSON Serialization
         if (base64url.toBase64(payload).match(BASE64_REGEX)) {
+          let decodedPayload = JSON.parse(base64url.decode(payload))
+          let decodedHeader = JSON.parse(base64url.decode(protectedHeader))
+
           if (!params.serialization) {
-            params.serialization = 'flattened-document'
+            params.serialization = 'flattened'
           }
 
-          params.payload = payload
+          params.payload = decodedPayload
           let transformedSignatures = {
-            protected: protectedHeader,
+            protected: decodedHeader,
             header: unprotectedHeader,
             signature,
             cryptoKey
@@ -171,18 +174,15 @@ class JWT extends JSONDocument {
             params.signatures = [transformedSignatures]
           }
 
-        // Flattened JSON Serialization
+        // Flattened Document Serialization
         } else {
-          let decodedPayload = JSON.parse(base64url.decode(payload))
-          let decodedHeader = JSON.parse(base64url.decode(protectedHeader))
-
           if (!params.serialization) {
-            params.serialization = 'flattened'
+            params.serialization = 'flattened-document'
           }
 
-          params.payload = decodedPayload
+          params.payload = payload
           let transformedSignatures = {
-            protected: decodedHeader,
+            protected: protectedHeader,
             header: unprotectedHeader,
             signature,
             cryptoKey

@@ -572,6 +572,20 @@ class JWT extends JSONDocument {
   }
 
   /**
+   * sign
+   *
+   * @description
+   * Sign a JWT instance
+   *
+   * @param {...Object} data
+   *
+   * @returns {Promise<SerializedToken>}
+   */
+  sign (...data) {
+    return Promise.resolve(Object.assign(...data))
+  }
+
+  /**
    * verify
    *
    * @description

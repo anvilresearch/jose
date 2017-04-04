@@ -8,9 +8,11 @@ const JWS = require('./JWS')
 const DataError = require('../errors/DataError')
 
 /**
- * Regular Expressions
+ * Helper Functions
  */
-const BASE64_REGEX = /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$/
+function clean (input) {
+  return JSON.parse(JSON.stringify(input))
+}
 
 /**
  * JWT
@@ -30,233 +32,232 @@ class JWT extends JSONDocument {
    * @description
    * Decode a JSON Web Token
    *
-   * @param {String|Object} data
-   * @param {String} data.serialized - The serialized token string
+   * @param {String|Object} token
    *
    * @returns {JWT}
    */
-  static decode (data) {
+  static decode (token) {
     let ExtendedJWT = this
-    let serialized, params = {}
 
-    /**
-     * Input Validation
-     */
+    if (typeof token === 'string') {
 
-    // Object input
-    if (typeof data === 'object' && !Array.isArray(data)) {
-      params = data
-      serialized = data.serialized
-
-    // String input
-    } else if (typeof data === 'string') {
-      serialized = data
-
-    // Other input
-    } else {
-      throw new DataError('data must be a string or an object')
-    }
-
-    // Serialized JWT input must be a string
-    if (serialized && typeof serialized !== 'string') {
-      throw new DataError('JWT must be a string')
-    }
-
-    /**
-     * Deserialize
-     *
-     * This infers serialization and builds up the `params' object. All JWTs are stored (in memory)
-     * in the document format, even if a single signature format (such as compact) is provided.
-     *
-     * i.e.
-     *
-     * let params = {
-     *   payload,
-     *   signatures: [
-     *     {
-     *       header: unprotectedHeader,
-     *       protected: protectedHeader,
-     *       signature
-     *     }
-     *   ]
-     * }
-     */
-
-    // JSON or Flattened JSON Serialization
-    if (serialized && serialized.startsWith('{')) {
-      try {
-        data = JSON.parse(serialized)
-      } catch (error) {
-        throw new DataError('Invalid JWT serialization')
-      }
-
-      let { protected: protectedHeader, header: unprotectedHeader, payload, signature, signatures, recipients, cryptoKey } = data
-
-      // General JSON Serialization or Document Serialization
-      if (signatures || recipients) {
-        // TODO Encryption
-
-        // General JSON Serialization
-        if (base64url.toBase64(payload).match(BASE64_REGEX)) {
-          if (!params.serialization) {
-            params.serialization = 'json'
-          }
-
-          let decodedPayload = JSON.parse(base64url.decode(payload))
-
-          params.payload = decodedPayload
-          let transformedSignatures = signatures.map(descriptor => {
-            let { protected: protectedHeader, header: unprotectedHeader, signature, cryptoKey } = descriptor
-            let decodedHeader = JSON.parse(base64url.decode(protectedHeader))
-
-            return {
-              protected: decodedHeader,
-              header: unprotectedHeader,
-              signature,
-              cryptoKey
-            }
-          })
-
-          if (Array.isArray(params.signatures)) {
-            params.signatures.unshift(transformedSignatures)
-          } else {
-            params.signatures = transformedSignatures
-          }
-
-        // Document Serialization
-        } else {
-          if (!params.serialization) {
-            params.serialization = 'document'
-          }
-
-          params.payload = payload
-          let transformedSignatures = signatures.map(descriptor => {
-            let { protected: protectedHeader, header: unprotectedHeader, signature, cryptoKey } = descriptor
-
-            return {
-              protected: protectedHeader,
-              header: unprotectedHeader,
-              signature,
-              cryptoKey
-            }
-          })
-
-          if (Array.isArray(params.signatures)) {
-            params.signatures.unshift(transformedSignatures)
-          } else {
-            params.signatures = transformedSignatures
-          }
-        }
-
-      // Flattened JSON or Flattened Document Serialization
-      } else {
-
-        // Flattened JSON Serialization
-        if (base64url.toBase64(payload).match(BASE64_REGEX)) {
-          let decodedPayload = JSON.parse(base64url.decode(payload))
-          let decodedHeader = JSON.parse(base64url.decode(protectedHeader))
-
-          if (!params.serialization) {
-            params.serialization = 'flattened'
-          }
-
-          params.payload = decodedPayload
-          let transformedSignatures = {
-            protected: decodedHeader,
-            header: unprotectedHeader,
-            signature,
-            cryptoKey
-          }
-
-          if (Array.isArray(params.signatures)) {
-            params.signatures.unshift(transformedSignatures)
-          } else {
-            params.signatures = [transformedSignatures]
-          }
-
-        // Flattened Document Serialization
-        } else {
-          if (!params.serialization) {
-            params.serialization = 'flattened-document'
-          }
-
-          params.payload = payload
-          let transformedSignatures = {
-            protected: protectedHeader,
-            header: unprotectedHeader,
-            signature,
-            cryptoKey
-          }
-
-          if (Array.isArray(params.signatures)) {
-            params.signatures.unshift(transformedSignatures)
-          } else {
-            params.signatures = [transformedSignatures]
-          }
-        }
-      }
-
-    // Compact Serialization
-    } else if (serialized) {
-      try {
-        let serialization = 'compact'
-        let segments = serialized.split('.')
-        let length = segments.length
-
-        if (length !== 3 && length !== 5) {
+      // Parse
+      if (token.startsWith('{')) {
+        try {
+          token = JSON.parse(token)
+        } catch (err) {
           throw new DataError('Malformed JWT')
         }
+      }
 
-        if (!params.serialization) {
-          params.serialization = 'compact'
+    } else if (typeof token !== 'object' || token === null || Array.isArray(token)) {
+      throw new DataError('Invalid JWT')
+    }
+
+    // Compact
+    if (typeof token === 'string') {
+      return this.fromCompact(token)
+    }
+
+    // JSON General
+    if (token.signatures) {
+      return this.fromGeneral(token)
+
+    // JSON Flattened
+    } else {
+      return this.fromFlattened(token)
+    }
+  }
+
+  /**
+   * fromCompact
+   *
+   * @description
+   * Deserialize a Compact JWT and instantiate an instance
+   *
+   * @param  {String} data
+   * @return {JWT}
+   */
+  static fromCompact (data) {
+    let ExtendedJWT = this
+    let protectedHeader, payload, signature
+
+    // Parse
+    if (typeof data === 'string') {
+      let segments = data.split('.')
+
+      if (![3, 5].includes(segments.length)) {
+        throw new DataError('Malformed JWT')
+      }
+
+      // Decode base64url
+      if (segments.length === 3) {
+        try {
+          protectedHeader = JSON.parse(base64url.decode(segments[0]))
+          payload = JSON.parse(base64url.decode(segments[1]))
+          signature = segments[2]
+        } catch (err) {
+          throw new DataError('Malformed JWS')
         }
+      }
 
-        let decodedHeader = JSON.parse(base64url.decode(segments[0]))
-
-        // JSON Web Signature
-        if (length === 3) {
-          let decodedPayload = JSON.parse(base64url.decode(segments[1]))
-          let signature = segments[2]
-
-          params.segments = segments
-          params.payload = decodedPayload
-          params.signatures = [
-            {
-              protected: decodedHeader,
-              signature
-            }
-          ]
-
-          if (Array.isArray(params.signatures)) {
-            params.signatures.unshift(transformedSignatures)
-          } else {
-            params.signatures = [transformedSignatures]
-          }
-
-        }
-
-        // JSON Web Encryption
-        if (length === 5) {
-          // TODO from previous iteration
-
-          // let type = 'JWE'
-          // let [protected: protectedHeader, encryption_key, iv, ciphertext, tag] = segments
-          // let decodedHeader = base64url.decode(JSON.parse(protected))
-
-          // token = new ExtendedJWT({
-          //  protected: decodedHeader,
-          //  encryption_key,
-          //  iv,
-          //  ciphertext,
-          //  tag,
-          // })
-        }
-      } catch (error) {
-        throw new DataError('Invalid JWT compact serialization')
+      if (segments.length === 5) {
+        // TODO JWE
       }
     }
 
-    return new ExtendedJWT(params)
+    // Sanity Check
+    if (typeof protectedHeader !== 'object' || protectedHeader === null || Array.isArray(protectedHeader)) {
+      throw new DataError('JWT Header must be an object')
+    }
+
+    // Normalize and return instance
+    return new ExtendedJWT(
+      clean({
+        payload,
+        signatures: [
+          { protected: protectedHeader, signature }
+        ],
+        serialization: 'compact',
+        type: 'JWS'
+      })
+    )
+  }
+
+  /**
+   * fromFlattened
+   *
+   * @description
+   * Deserialize a JSON Flattened JWT and instantiate an instance
+   *
+   * @param  {Object|String} data
+   * @return {JWT}
+   */
+  static fromFlattened (data) {
+    let ExtendedJWT = this
+    let protectedHeader, unprotectedHeader, payload, signature
+
+    // Parse
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data)
+      } catch (err) {
+        throw new DataError('Malformed JWT')
+      }
+    }
+
+    // Input should be an object by now
+    if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+      throw new DataError('Invalid JWT')
+    }
+
+    // Decode base64url
+    try {
+      payload = JSON.parse(base64url.decode(data.payload))
+      protectedHeader = JSON.parse(base64url.decode(data.protected))
+    } catch (err) {
+      throw new Error('Invalid JWT')
+    }
+
+    // Sanity Check
+    if (typeof protectedHeader !== 'object' || protectedHeader === null || Array.isArray(protectedHeader)) {
+      throw new DataError('JWT Header must be an object')
+    }
+
+    if (unprotectedHeader && (typeof unprotectedHeader !== 'object' || unprotectedHeader === null || Array.isArray(unprotectedHeader))) {
+      throw new DataError('JWT Header must be an object')
+    }
+
+    unprotectedHeader = data.header
+    signature = data.signature
+
+    // Normalize and return instance
+    return new ExtendedJWT(
+      clean({
+        protected: protectedHeader,
+        header: unprotectedHeader,
+        payload,
+        signature,
+        serialization: 'flattened',
+        type: 'JWS'
+      })
+    )
+  }
+
+  /**
+   * fromGeneral
+   *
+   * @description
+   * Deserialize a JSON General JWT and instantiate an instance
+   *
+   * @param  {Object|String} data
+   * @return {JWT}
+   */
+  static fromGeneral (data) {
+    let ExtendedJWT = this
+    let payload, signatures
+
+    // Parse
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data)
+      } catch (err) {
+        throw new DataError('Malformed JWT')
+      }
+    }
+
+    // Input should be an object by now
+    if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+      throw new DataError('Invalid JWT')
+    }
+
+    // Signatures must be present and an array
+    if (!Array.isArray(data.signatures)) {
+      throw new DataError('JWT signatures property must be an array')
+    }
+
+    // Decode payload
+    try {
+      payload = JSON.parse(base64url.decode(data.payload))
+    } catch (err) {
+      throw new Error('Invalid JWT')
+    }
+
+    // Decode signatures
+    signatures = data.signatures.map(descriptor => {
+      let { protected: protectedHeader, header: unprotectedHeader, signature } = descriptor
+      let decodedHeader
+
+      try {
+        decodedHeader = JSON.parse(base64url.decode(protectedHeader))
+      } catch (err) {
+        throw new DataError('Invalid JWT')
+      }
+
+      if (!decodedHeader || typeof decodedHeader !== 'object' || decodedHeader === null || Array.isArray(decodedHeader)) {
+        throw new DataError('JWT Protected Header must be an object')
+      }
+
+      if (unprotectedHeader && (typeof unprotectedHeader !== 'object' || unprotectedHeader === null || Array.isArray(unprotectedHeader))) {
+        throw new DataError('JWT Header must be an object')
+      }
+
+      return {
+        protected: decodedHeader,
+        header: unprotectedHeader,
+        signature
+      }
+    })
+
+    // Normalize and return instance
+    return new ExtendedJWT(
+      clean({
+        payload,
+        signatures,
+        serialization: 'json',
+        type: 'JWS'
+      })
+    )
   }
 
   /**
@@ -729,39 +730,6 @@ class JWT extends JSONDocument {
       } else {
         return JSON.stringify({ payload: encodedPayload })
       }
-    }
-  }
-
-  /**
-   * toFlattenedJWD
-   *
-   * @todo This needs some error checking: i.e. no signature or more than one signature?
-   */
-  toFlattenedJWD () {
-    let { payload, signatures: [{ protected: protectedHeader, header: unprotectedHeader, signature }] } = this
-
-    if (this.isJWE()) {
-      // TODO
-    } else {
-      // Return flattened JWD with signature
-      if (signature) {
-        return JSON.stringify({ payload, header: unprotectedHeader, protected: protectedHeader })
-
-      // Return flattened JWD without signature
-      } else {
-        return JSON.stringify({ payload, header: unprotectedHeader, protected: protectedHeader, signature })
-      }
-    }
-  }
-
-  /**
-   * toJWD
-   */
-  toJWD () {
-    if (this.isJWE()) {
-      // TODO
-    } else {
-      return JSON.stringify(this)
     }
   }
 }

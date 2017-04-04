@@ -174,10 +174,10 @@ class JWT extends JSONDocument {
     // Normalize and return instance
     return new ExtendedJWT(
       clean({
-        protected: protectedHeader,
-        header: unprotectedHeader,
         payload,
-        signature,
+        signatures: [
+          { protected: protectedHeader, header: unprotectedHeader, signature }
+        ],
         serialization: 'flattened',
         type: 'JWS'
       })
@@ -406,141 +406,13 @@ class JWT extends JSONDocument {
    * constructor
    */
   constructor (data, options) {
-    // Normalize input to JWD format
-    let descriptor = Object.assign({}, data)
-    let serialization
-    let {
-      protected: protectedHeader,
-      header: unprotectedHeader,
-      signature,
-      signatures,
-      cryptoKey,
-      cryptoKeys,
-      pem,
-      pems,
-      jwk,
-      jwks,
-      jwkSet,
-      jwkSets,
-      segments,
-      validate,
-      result
-    } = descriptor
+    super(data, options)
 
-    // JSON Document Hack (this should be removed once JSON Document is fixed)
-    delete descriptor.protected
-    delete descriptor.header
-    delete descriptor.signature
-    delete descriptor.serialization
-    delete descriptor.cryptoKey
-    delete descriptor.cryptoKeys
-    delete descriptor.pem
-    delete descriptor.pems
-    delete descriptor.jwk
-    delete descriptor.jwks
-    delete descriptor.jwkSet
-    delete descriptor.jwkSets
-    delete descriptor.segments
-    delete descriptor.validate
-    delete descriptor.result
-
-    // Flat signature input
-    let signatureDescriptor
-
-    // Compact
-    if (!protectedHeader && unprotectedHeader) {
-      signatureDescriptor = {
-        protected: unprotectedHeader
+    Object.keys(data).forEach(key => {
+      if (!this[key]) {
+        Object.defineProperty(this, key, { value: data[key], enumerable: false })
       }
-
-    // Other
-    } else if (protectedHeader) {
-      signatureDescriptor = {
-        protected: protectedHeader
-      }
-    }
-
-    if (signatureDescriptor) {
-      // Signature present
-      if (signature) {
-        signatureDescriptor.signature = signature
-      }
-
-      // Key present
-      if (cryptoKey) {
-        signatureDescriptor.cryptoKey = cryptoKey
-      }
-
-      // Move flat signature into the front of the signatures array
-      if (signatures && Array.isArray(signatures)) {
-        descriptor.signatures.unshift(signatureDescriptor)
-      } else {
-        descriptor.signatures = [signatureDescriptor]
-        signatures = descriptor.signatures
-      }
-    }
-
-    // Create instance
-    super(descriptor, options)
-
-    // Prioritize provided serialization over inferred serialization
-    if (data.serialization) {
-      serialization = data.serialization
-    }
-
-    // Handle non-enumerable properties
-    // TODO Encryption. Always set JWS type in the meanwhile
-    Object.defineProperty(this, 'type', { value: 'JWS', enumerable: false })
-
-    // Serialization
-    if (serialization) {
-      Object.defineProperty(this, 'serialization', { value: serialization, enumerable: false })
-    }
-
-    // Segments
-    if (segments) {
-      Object.defineProperty(this, 'segments', { value: segments, enumerable: false })
-    }
-
-    // Validate
-    if (validate) {
-      Object.defineProperty(this, 'validate', { value: validate, enumerable: false })
-    }
-
-    // Result Type
-    if (result) {
-      Object.defineProperty(this, 'result', { value: result, enumerable: false })
-    }
-
-    // TODO import additional key types (pem, jwk, etc.) into cryptoKeys
-
-    // Should these keys for verification rather be mapped directly to the signature?
-    // Crypto Key (Verification)
-    if (cryptoKey) {
-      Object.defineProperty(this, 'keys', { value: [cryptoKey], enumerable: false })
-    }
-
-    // Crypto Keys Array (Verification)
-    if (cryptoKeys) {
-      Object.defineProperty(this, 'keys', { value: cryptoKeys, enumerable: false })
-    }
-
-    // Nested Crypto Keys (for signatures)
-    if (signatures) {
-      this.signatures.forEach((descriptor, index) => {
-        // Get signature from input data
-        let { cryptoKey: signatureKey } = signatures[index]
-
-        // Mutate individual signature descriptor object to contain non-enumerable signature key
-        if (signatureKey) {
-
-          // JSON Document Hack (this should be removed once JSON Document is fixed)
-          delete descriptor.cryptoKey
-
-          Object.defineProperty(descriptor, 'key', { value: signatureKey, enumerable: false })
-        }
-      })
-    }
+    })
   }
 
   /**

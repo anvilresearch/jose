@@ -260,6 +260,53 @@ class JWT extends JSONDocument {
     )
   }
 
+  static fromJSON (data) {
+    let ExtendedJWT = this
+
+    // Decode serialized token
+    if (data.serialized) {
+      return this.decode(data.serialized)
+    }
+
+    let { payload, signatures, serialization } = data
+
+    if (!payload) {
+      throw new DataError('Invalid JWT')
+    }
+
+    // Include compelete signature descriptors only
+    if (signatures && Array.isArray(signatures)) {
+      signatures = signatures.filter(descriptor => !descriptor.cryptoKey)
+    } else {
+      signatures = []
+    }
+
+    // Normalize
+    if (!data.cryptoKey && data.signature) {
+      let { protected: protectedHeader, header: unprotectedHeader, signature } = data
+      let descriptor = {}
+
+      if (!protectedHeader && unprotectedHeader) {
+        descriptor.protected = unprotectedHeader
+      } else {
+        descriptor.protected = protectedHeader
+        descriptor.header = unprotectedHeader
+      }
+
+      descriptor.signature = signature
+      signatures.unshift(descriptor)
+    }
+
+    return new ExtendedJWT(
+      clean({
+        payload,
+        signatures,
+        serialization,
+        type: 'JWS'
+      })
+    )
+  }
+
   /**
    * sign
    *
@@ -273,11 +320,10 @@ class JWT extends JSONDocument {
   static sign (...data) {
     // Shallow merge data
     let params = Object.assign(...data)
-
     let ExtendedJWT = this
-    let token = ExtendedJWT.decode(params)
+    let token = this.fromJSON(params)
 
-    return token.sign(token)
+    return token.sign(params)
   }
 
   /**
@@ -502,7 +548,7 @@ class JWT extends JSONDocument {
    * @returns {Promise<SerializedToken>}
    */
   sign (...data) {
-    return Promise.resolve(Object.assign(...data))
+    return Promise.resolve(this)
   }
 
   /**

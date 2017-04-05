@@ -63,15 +63,14 @@ const JWTSchema = new JSONSchema({
      */
     signatures: {
       type: 'array',
-      // TODO pending JSON Document fix
-      // items: {
-      //   type: 'object',
-      //   properties: {
-      //     protected: JOSEHeaderSchema,
-      //     header: JOSEHeaderSchema,
-      //     signature: Base64URLSchema
-      //   }
-      // }
+      items: {
+        type: 'object',
+        properties: {
+          protected: JOSEHeaderSchema,
+          header: JOSEHeaderSchema,
+          signature: Base64URLSchema
+        }
+      }
     },
   }
 })

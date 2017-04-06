@@ -432,53 +432,21 @@ class JWT extends JSONDocument {
    * @description
    * Decode and verify a JSON Web Token
    *
-   * @param {CryptoKey|Array<CryptoKey>} key
-   * @param {String} data
-   * @param {Object} [options]
-   *
+   * @param {...Object} data
    * @returns {Promise<JWT>}
    */
-  static verify (key, data, options={}) {
+  static verify (...data) {
+    let params = Object.assign({}, ...data)
     let ExtendedJWT = this
-    let token
+    let { jwt } = params
 
-    try {
-      token = ExtendedJWT.decode(data)
-    } catch (err) {
-      return Promise.reject(err)
+    if (!jwt) {
+      throw new Error('JWT input required')
     }
 
-    let { signatures } = token
+    let token = this.decode(jwt)
 
-    // Assign options to JWT as nonenumerable properties
-    Object.keys(options).forEach(field => {
-      Object.defineProperty(token, field, { value: options[field], enumerable: false })
-    })
-
-    // Map keys to signatures by index
-    if (Array.isArray(key) && signatures) {
-      token.signatures = signatures.map((descriptor, index) => {
-        // TODO more sophisticated key mapping using hints like `kid'
-        if (index < key.length) {
-          Object.defineProperty(descriptor, 'key', { value: key[index], enumerable: false })
-        }
-
-        return descriptor
-      })
-
-    // Assign single key to all signatures as nonenumerable property
-    } else if (signatures) {
-      token.signatures = signatures.map(descriptor => {
-        Object.defineProperty(descriptor, 'key', { value: key, enumerable: false })
-        return descriptor
-      })
-
-    // Assign key to token as nonenumerable property
-    } else {
-      Object.defineProperty(token, 'key', { value: key, enumerable: false })
-    }
-
-    return token.verify().then(verified => token)
+    return token.verify(params).then(verified => token)
   }
 
   /**
@@ -665,10 +633,92 @@ class JWT extends JSONDocument {
    * @description
    * Verify a decoded JSON Web Token instance
    *
-   * @returns {Promise<Boolean>}
+   * @todo jwk, jwkSet and pem key types
+   *
+   * @param {...Object} data
+   * @returns {Promise<Boolean|Object>}
    */
-  verify () {
-    return JWS.verify(this)
+  verify (...data) {
+    let params = Object.assign({}, ...data)
+    let { signatures, payload, serialization } = this
+    let { validate, result, cryptoKey, cryptoKeys } = params
+
+    // Validate instance
+    if (validate) {
+      let validation = this.validate()
+
+      if (!validation.valid) {
+        throw new Error(validation)
+      }
+    }
+
+    // Encode payload
+    let encodedPayload = base64url(JSON.stringify(payload))
+
+    // Verify all signatures with a key present
+    let promises = signatures.map((descriptor, index) => {
+
+      // Get corresponding key
+      let key
+      if (cryptoKeys
+        && Array.isArray(cryptoKeys)
+        && index < cryptoKeys.length
+        && cryptoKeys[index]) {
+
+        key = cryptoKeys[index]
+
+      // Attempt to use the single key
+      } else if (cryptoKey) {
+        key = cryptoKey
+
+      // No key to verify signature
+      } else {
+        return Promise.resolve(false)
+      }
+
+      // no signatures to verify
+      if (!signatures) {
+        return Promise.reject(new DataError('Missing signature(s)'))
+      }
+
+      let {
+        protected: protectedHeader,
+        header: unprotectedHeader,
+        signature
+      } = descriptor
+      let { alg } = protectedHeader
+
+      // Encode header and assemble signature verification data
+      let encodedHeader = base64url(JSON.stringify(protectedHeader))
+      let data = `${encodedHeader}.${encodedPayload}`
+
+      // Verify signature and store result on the descriptor
+      return JWA.verify(alg, key, signature, data).then(verified => {
+        Object.defineProperty(signatures[index], 'verified', {
+          value: verified,
+          enumerable: false,
+          configurable: true
+        })
+        return verified
+      })
+    })
+
+    // Await verification results
+    return Promise.all(promises).then(verified => {
+      verified = verified.reduce((prev, val) => prev ? val : false, true)
+
+      Object.defineProperty(this, 'verified', {
+        value: verified,
+        enumerable: false,
+        configurable: true
+      })
+
+      if (!result || result === 'boolean') {
+        return verified
+      } else if (result === 'object' || result === 'instance') {
+        return this
+      }
+    })
   }
 
   /**

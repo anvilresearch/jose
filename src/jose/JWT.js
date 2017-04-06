@@ -4,7 +4,6 @@
 const base64url = require('base64url')
 const {JSONDocument} = require('json-document')
 const JWTSchema = require('../schemas/JWTSchema')
-const JWS = require('./JWS')
 const JWA = require('./JWA')
 const DataError = require('../errors/DataError')
 
@@ -19,6 +18,23 @@ function clean (input) {
  * JWT
  */
 class JWT extends JSONDocument {
+
+  /**
+   * constructor
+   */
+  constructor (data, options) {
+    super(data, options)
+
+    Object.keys(data).forEach(key => {
+      if (!this[key]) {
+        Object.defineProperty(this, key, {
+          value: data[key],
+          enumerable: false,
+          configurable: true
+        })
+      }
+    })
+  }
 
   /**
    * schema
@@ -288,12 +304,12 @@ class JWT extends JSONDocument {
 
     // Include compelete signature descriptors only
     if (signatures && Array.isArray(signatures)) {
-      signatures = signatures.filter(descriptor => !descriptor.cryptoKey)
+      signatures = signatures.filter(descriptor => !descriptor.cryptoKey || descriptor.signature)
     } else {
       signatures = []
     }
 
-    // Normalize
+    // Normalize existing flat signature
     if (!data.cryptoKey && data.signature) {
       let { protected: protectedHeader, header: unprotectedHeader, signature } = data
       let descriptor = {}
@@ -336,7 +352,7 @@ class JWT extends JSONDocument {
    */
   static sign (...data) {
     // Shallow merge data
-    let params = Object.assign(...data)
+    let params = Object.assign({}, ...data)
     let ExtendedJWT = this
     let token = this.fromJSON(params)
 
@@ -466,27 +482,15 @@ class JWT extends JSONDocument {
   }
 
   /**
-   * constructor
-   */
-  constructor (data, options) {
-    super(data, options)
-
-    Object.keys(data).forEach(key => {
-      if (!this[key]) {
-        Object.defineProperty(this, key, {
-          value: data[key],
-          enumerable: false,
-          configurable: true
-        })
-      }
-    })
-  }
-
-  /**
    * isJWE
    */
   isJWE () {
-    let { header: unprotectedHeader, protected: protectedHeader, recipients } = this
+    let {
+      header: unprotectedHeader,
+      protected: protectedHeader,
+      recipients
+    } = this
+
     return !!((unprotectedHeader && unprotectedHeader.enc)
       || (protectedHeader && protectedHeader.enc)
       || recipients)
@@ -561,22 +565,35 @@ class JWT extends JSONDocument {
    *
    * @todo import different types of key
    *
-   * @param {Object} data
+   * @param {...Object} data
    * @returns {Promise<SerializedToken>}
    */
-  sign (data) {
+  sign (...data) {
     let validation = this.validate()
 
     if (!validation.valid) {
       return Promise.reject(validation)
     }
 
-    let { protected: protectedHeader, header: unprotectedHeader, signature, signatures, serialization, cryptoKey } = data
+    let params = Object.assign({}, ...data)
     let { payload } = this
+
+    let {
+      protected: protectedHeader,
+      header: unprotectedHeader,
+      signature,
+      signatures,
+      serialization,
+      cryptoKey
+    } = params
 
     // Override serialization
     if (serialization) {
-      Object.defineProperty(this, 'serialization', { value: serialization, enumerable: false, configurable: true })
+      Object.defineProperty(this, 'serialization', {
+        value: serialization,
+        enumerable: false,
+        configurable: true
+      })
     }
 
     // Normalize new flat signature
@@ -600,17 +617,24 @@ class JWT extends JSONDocument {
       }
     }
 
+    // Create signatures
     let promises = []
     if (signatures && Array.isArray(signatures)) {
       // Ignore ambiguous/invalid descriptors
       promises = signatures.filter(descriptor => {
         return descriptor.cryptoKey && !descriptor.signature
 
-      // create new signatures
+      // assemble and sign
       }).map(descriptor => {
-        let { protected: protectedHeader, header: unprotectedHeader, signature, cryptoKey } = descriptor
+        let {
+          protected: protectedHeader,
+          header: unprotectedHeader,
+          signature,
+          cryptoKey
+        } = descriptor
         let { alg } = protectedHeader
 
+        // Encode signature content
         let encodedHeader = base64url(JSON.stringify(protectedHeader))
         let encodedPayload = base64url(JSON.stringify(payload))
         let data = `${encodedHeader}.${encodedPayload}`
@@ -621,6 +645,7 @@ class JWT extends JSONDocument {
       })
     }
 
+    // Await signatures
     return Promise.all(promises).then(signatures => {
       if (signatures.length > 0) {
         if (this.signatures && Array.isArray(this.signatures)) {
@@ -630,7 +655,7 @@ class JWT extends JSONDocument {
         }
       }
 
-      return this.serializeJWT()
+      return this.serialize()
     })
   }
 
@@ -680,7 +705,16 @@ class JWT extends JSONDocument {
    * @todo This needs some error checking: i.e. no signature or more than one signature?
    */
   toFlattened () {
-    let { payload, signatures: [{ protected: protectedHeader, header: unprotectedHeader, signature }] } = this
+    let {
+      payload,
+      signatures: [
+        {
+          protected: protectedHeader,
+          header: unprotectedHeader,
+          signature
+        }
+      ]
+    } = this
 
     // Encode protected header and payload
     let encodedPayload = base64url(JSON.stringify(payload))
@@ -689,14 +723,12 @@ class JWT extends JSONDocument {
     if (this.isJWE()) {
       // TODO
     } else {
-      // Return flattened JWT with signature
-      if (!signature) {
-        return JSON.stringify({ payload: encodedPayload, header: unprotectedHeader, protected: encodedHeader })
-
-      // Return flattened JWT without signature
-      } else {
-        return JSON.stringify({ payload: encodedPayload, header: unprotectedHeader, protected: encodedHeader, signature })
-      }
+      return JSON.stringify({
+        payload: encodedPayload,
+        header: unprotectedHeader,
+        protected: encodedHeader,
+        signature
+      })
     }
   }
 
@@ -717,7 +749,11 @@ class JWT extends JSONDocument {
 
         // Serialize signatures
         let serializedSignatures = signatures.map(descriptor => {
-          let { header: unprotectedHeader, protected: protectedHeader, signature } = descriptor
+          let {
+            header: unprotectedHeader,
+            protected: protectedHeader,
+            signature
+          } = descriptor
 
           // Encode protected header
           let encodedHeader = base64url(JSON.stringify(protectedHeader))
@@ -725,7 +761,10 @@ class JWT extends JSONDocument {
           return { header: unprotectedHeader, protected: encodedHeader, signature }
         })
 
-        return JSON.stringify({ payload: encodedPayload, signatures: serializedSignatures }, null, 2)
+        return JSON.stringify({
+          payload: encodedPayload,
+          signatures: serializedSignatures
+        })
 
       // Return without signatures
       } else {
@@ -735,14 +774,14 @@ class JWT extends JSONDocument {
   }
 
   /**
-   * serializeJWT
+   * serialize
    *
    * @description
    * Serialize a JWT instance to the preferred serialization
    *
    * @return {SerializedToken}
    */
-  serializeJWT () {
+  serialize () {
     let { serialization } = this
 
     switch (serialization) {

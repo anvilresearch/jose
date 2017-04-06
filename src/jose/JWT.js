@@ -5,6 +5,7 @@ const base64url = require('base64url')
 const {JSONDocument} = require('json-document')
 const JWTSchema = require('../schemas/JWTSchema')
 const JWS = require('./JWS')
+const JWA = require('./JWA')
 const DataError = require('../errors/DataError')
 
 /**
@@ -260,6 +261,17 @@ class JWT extends JSONDocument {
     )
   }
 
+  /**
+   * fromJSON
+   *
+   * @description
+   * Instanciate a JWT from an object descriptor
+   *
+   * @param {Object} data
+   * @param {String} [data.serialized] - Existing serialized JWT
+   *
+   * @return {JWT}
+   */
   static fromJSON (data) {
     let ExtendedJWT = this
 
@@ -294,7 +306,12 @@ class JWT extends JSONDocument {
       }
 
       descriptor.signature = signature
-      signatures.unshift(descriptor)
+
+      if (signatures && Array.isArray(signatures)) {
+        signatures.unshift(descriptor)
+      } else {
+        signatures = [descriptor]
+      }
     }
 
     return new ExtendedJWT(
@@ -456,7 +473,11 @@ class JWT extends JSONDocument {
 
     Object.keys(data).forEach(key => {
       if (!this[key]) {
-        Object.defineProperty(this, key, { value: data[key], enumerable: false })
+        Object.defineProperty(this, key, {
+          value: data[key],
+          enumerable: false,
+          configurable: true
+        })
       }
     })
   }
@@ -521,19 +542,14 @@ class JWT extends JSONDocument {
    * @description
    * Encode a JSON Web Token instance
    *
+   * @param {Object} data
    * @returns {Promise<SerializedToken>}
    */
-  encode () {
-    let validation = this.validate()
-
-    if (!validation.valid) {
-      return Promise.reject(validation)
-    }
-
+  encode (data) {
     if (this.isJWE()) {
       return JWE.encrypt(this)
     } else {
-      return JWS.sign(this)
+      return this.sign(data)
     }
   }
 
@@ -543,12 +559,79 @@ class JWT extends JSONDocument {
    * @description
    * Sign a JWT instance
    *
-   * @param {...Object} data
+   * @todo import different types of key
    *
+   * @param {Object} data
    * @returns {Promise<SerializedToken>}
    */
-  sign (...data) {
-    return Promise.resolve(this)
+  sign (data) {
+    let validation = this.validate()
+
+    if (!validation.valid) {
+      return Promise.reject(validation)
+    }
+
+    let { protected: protectedHeader, header: unprotectedHeader, signature, signatures, serialization, cryptoKey } = data
+    let { payload } = this
+
+    // Override serialization
+    if (serialization) {
+      Object.defineProperty(this, 'serialization', { value: serialization, enumerable: false, configurable: true })
+    }
+
+    // Normalize new flat signature
+    if (cryptoKey && !signature && (unprotectedHeader || protectedHeader)) {
+      let descriptor = {}
+
+      if (!protectedHeader && unprotectedHeader) {
+        descriptor.protected = unprotectedHeader
+      } else {
+        descriptor.protected = protectedHeader
+        descriptor.header = unprotectedHeader
+      }
+
+      descriptor.cryptoKey = cryptoKey
+
+      // Add to signatures array
+      if (signatures && Array.isArray(signatures)) {
+        signatures.push(descriptor)
+      } else {
+        signatures = [descriptor]
+      }
+    }
+
+    let promises = []
+    if (signatures && Array.isArray(signatures)) {
+      // Ignore ambiguous/invalid descriptors
+      promises = signatures.filter(descriptor => {
+        return descriptor.cryptoKey && !descriptor.signature
+
+      // create new signatures
+      }).map(descriptor => {
+        let { protected: protectedHeader, header: unprotectedHeader, signature, cryptoKey } = descriptor
+        let { alg } = protectedHeader
+
+        let encodedHeader = base64url(JSON.stringify(protectedHeader))
+        let encodedPayload = base64url(JSON.stringify(payload))
+        let data = `${encodedHeader}.${encodedPayload}`
+
+        return JWA.sign(alg, cryptoKey, data).then(signature => {
+          return { protected: protectedHeader, header: unprotectedHeader, signature }
+        })
+      })
+    }
+
+    return Promise.all(promises).then(signatures => {
+      if (signatures.length > 0) {
+        if (this.signatures && Array.isArray(this.signatures)) {
+          this.signatures = this.signatures.concat(signatures)
+        } else {
+          this.signatures = signatures
+        }
+      }
+
+      return this.serializeJWT()
+    })
   }
 
   /**
@@ -564,11 +647,11 @@ class JWT extends JSONDocument {
   }
 
   /**
-   * toCompactJWT
+   * toCompact
    *
    * @todo This needs some error checking: i.e. no signature or more than one signature?
    */
-  toCompactJWT () {
+  toCompact () {
     let { payload, signatures } = this
     let [{ protected: protectedHeader, signature }] = signatures
 
@@ -592,11 +675,11 @@ class JWT extends JSONDocument {
   }
 
   /**
-   * toFlattenedJWT
+   * toFlattened
    *
    * @todo This needs some error checking: i.e. no signature or more than one signature?
    */
-  toFlattenedJWT () {
+  toFlattened () {
     let { payload, signatures: [{ protected: protectedHeader, header: unprotectedHeader, signature }] } = this
 
     // Encode protected header and payload
@@ -607,7 +690,7 @@ class JWT extends JSONDocument {
       // TODO
     } else {
       // Return flattened JWT with signature
-      if (signature) {
+      if (!signature) {
         return JSON.stringify({ payload: encodedPayload, header: unprotectedHeader, protected: encodedHeader })
 
       // Return flattened JWT without signature
@@ -618,9 +701,9 @@ class JWT extends JSONDocument {
   }
 
   /**
-   * toGeneralJWT
+   * toGeneral
    */
-  toGeneralJWT () {
+  toGeneral () {
     let { payload, signatures } = this
 
     // Encode payload
@@ -642,12 +725,35 @@ class JWT extends JSONDocument {
           return { header: unprotectedHeader, protected: encodedHeader, signature }
         })
 
-        return JSON.stringify({ payload: encodedPayload, signatures: serializedSignatures })
+        return JSON.stringify({ payload: encodedPayload, signatures: serializedSignatures }, null, 2)
 
       // Return without signatures
       } else {
         return JSON.stringify({ payload: encodedPayload })
       }
+    }
+  }
+
+  /**
+   * serializeJWT
+   *
+   * @description
+   * Serialize a JWT instance to the preferred serialization
+   *
+   * @return {SerializedToken}
+   */
+  serializeJWT () {
+    let { serialization } = this
+
+    switch (serialization) {
+      case 'compact':
+        return this.toCompact()
+      case 'flattened':
+        return this.toFlattened()
+      case 'json':
+        return this.toGeneral()
+      default:
+        throw new Error('Invalid serialization')
     }
   }
 }

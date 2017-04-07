@@ -26,22 +26,20 @@ crypto.subtle
     publicKey = keypair.publicKey
 
     return Promise.all([
-      JWT.encode(privateKey, { header, payload }, { serialization: 'compact' }),
-      JWT.encode(privateKey, { protected: header, payload }, { serialization: 'flattened' }),
-      JWT.encode(privateKey, { signatures: [{ protected: header }], payload }, { serialization: 'json' })
+      JWT.encode({ header, payload }, { serialization: 'compact', cryptoKey: privateKey }),
+      JWT.encode({ protected: header, payload }, { serialization: 'flattened', cryptoKey: privateKey }),
+      JWT.encode({ signatures: [{ protected: header, cryptoKey: privateKey }, { protected: header, cryptoKey: privateKey }], payload }, { serialization: 'json' }),
     ])
   })
 
   // verify the signature
   .then(tokens => {
     console.log('TOKENS', tokens)
-    let [compact, flattened, json] = tokens
+    let promises = tokens.map(token => {
+      return JWT.verify({ cryptoKey: publicKey, jwt: token, result: 'instance' })
+    })
 
-    return Promise.all([
-      JWT.verify(publicKey, compact),
-      JWT.verify(publicKey, flattened),
-      JWT.verify([publicKey], json)
-    ])
+    return Promise.all(promises)
   })
 
   // look at the output

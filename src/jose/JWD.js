@@ -1,23 +1,23 @@
 /**
  * Dependencies
+ * @ignore
  */
 const base64url = require('base64url')
-const {JSONDocument} = require('json-document')
-const JWDSchema = require('../schemas/JWDSchema')
-const JWS = require('./JWS')
+const JWT = require('./JWT')
 const DataError = require('../errors/DataError')
+
+/**
+ * Helper Functions
+ * @ignore
+ */
+function clean (input) {
+  return JSON.parse(JSON.stringify(input))
+}
 
 /**
  * JWD
  */
-class JWD extends JSONDocument {
-
-  /**
-   * schema
-   */
-  static get schema () {
-    return JWDSchema
-  }
+class JWD extends JWT {
 
   /**
    * decode
@@ -25,227 +25,208 @@ class JWD extends JSONDocument {
    * @description
    * Decode a JSON Web Document
    *
-   * @param {String} data
+   * @param {String} token
    *
-   * @returns {JWD}
+   * @returns {JWT}
    */
-  static decode (data) {
+  static decode (token) {
     let ExtendedJWD = this
 
-    if (typeof data !== 'string') {
-      throw new DataError('JWD must be a string')
-    }
-
-    try {
-      data = JSON.parse(data)
-    } catch (error) {
+    if (typeof token !== 'string' || !token.startsWith('{')) {
       throw new DataError('Invalid JWD')
     }
 
-    let doc = new ExtendedJWD(data)
-
-    Object.defineProperty(doc, 'serialization', { value: 'document', enumerable: false })
-    Object.defineProperty(doc, 'type', { value: 'JWS', enumerable: false })
-
-    return doc
-  }
-
-  /**
-   * encode
-   *
-   * @description
-   * Encode a JSON Web Document
-   *
-   * @param {CryptoKey|Object} key
-   * @param {CryptoKey} key.sign
-   * @param {CryptoKey} key.encrypt
-   * @param {Object} data
-   * @param {Object} [options]
-   *
-   * @returns {Promise<SerializedToken>}
-   */
-  static encode (key, data, options={}) {
-    let ExtendedJWD = this
-    let doc = new ExtendedJWD(data)
-
-    if (!key) {
-      return Promise.reject(new DataError('Key required to encode JWD'))
-    }
-
-    // Assign options to JWD as nonenumerable properties
-    Object.keys(options).forEach(field => {
-      Object.defineProperty(doc, field, { value: options[field], enumerable: false })
-    })
-
-    if (key.encrypt) {
-      // TODO Encryption
-      // Object.defineProperty(descriptor, 'encryption_key', {
-      //   value: key.encrypt,
-      //   enumerable: false
-      // })
-    }
-
-    let { signatures } = doc
-
-    // Assign key to new signature
-    doc.signatures = signatures.map(descriptor => {
-
-      if (!descriptor.signature) {
-        Object.defineProperty(descriptor, 'key', { value: key.sign ? key.sign : key, enumerable: false })
-      }
-
-      return descriptor
-    })
-
-    if (!doc.serialzation) {
-      Object.defineProperty(doc, 'serialization', { value: 'document', enumerable: false })
-    }
-
-    return doc.encode()
-  }
-
-
-  /**
-   * verify
-   *
-   * @description
-   * Decode and verify a JSON Web Token
-   *
-   * @param {CryptoKey|Array<CryptoKey>} key
-   * @param {String} data
-   * @param {Object} [options]
-   *
-   * @returns {Promise<JWD>}
-   */
-  static verify (key, data, options={}) {
-    let ExtendedJWD = this
-    let doc
-
+    // Parse
     try {
-      doc = ExtendedJWD.decode(data)
+      token = JSON.parse(token)
     } catch (err) {
-      return Promise.reject(err)
+      throw new DataError('Malformed JWD')
     }
 
-    let { signatures } = doc
+    // Document General
+    if (token.signatures) {
+      return this.fromDocumentGeneral(token)
 
-    // Assign options to JWD as nonenumerable properties
-    Object.keys(options).forEach(field => {
-      Object.defineProperty(doc, field, { value: options[field], enumerable: false })
-    })
-
-    // Map keys to signatures by index
-    if (Array.isArray(key) && signatures) {
-      doc.signatures = signatures.map((descriptor, index) => {
-        // TODO more sophisticated key mapping using hints like `kid'
-        if (index < key.length) {
-          Object.defineProperty(descriptor, 'key', { value: key[index], enumerable: false })
-        }
-
-        return descriptor
-      })
-
-    // Assign single key to all signatures as nonenumerable property
-    } else if (signatures) {
-      doc.signatures = signatures.map(descriptor => {
-        Object.defineProperty(descriptor, 'key', { value: key, enumerable: false })
-        return descriptor
-      })
-
-    // Assign key to document as nonenumerable property
+    // Document Flattened
     } else {
-      Object.defineProperty(doc, 'key', { value: key, enumerable: false })
-    }
-
-    return doc.verify().then(verified => doc)
-  }
-
-  /**
-   * isJWE
-   */
-  isJWE () {
-    let { header: unprotectedHeader, protected: protectedHeader, recipients } = this
-    return !!((unprotectedHeader && unprotectedHeader.enc)
-      || (protectedHeader && protectedHeader.enc)
-      || recipients)
-  }
-
-  /**
-   * resolveKeys
-   */
-  resolveKeys (jwks) {
-    let kid = this.header.kid
-    let keys, match
-
-    // treat an array as the "keys" property of a JWK Set
-    if (Array.isArray(jwks)) {
-      keys = jwks
-    }
-
-    // presence of keys indicates object is a JWK Set
-    if (jwks.keys) {
-      keys = jwks.keys
-    }
-
-    // wrap a plain object they is not a JWK Set in Array
-    if (!jwks.keys && typeof jwks === 'object') {
-      keys = [jwks]
-    }
-
-    // ensure there are keys to search
-    if (!keys) {
-      throw new DataError('Invalid JWK argument')
-    }
-
-    // match by "kid" or "use" header
-    if (kid) {
-      match = keys.find(jwk => jwk.kid === kid)
-    } else {
-      match = keys.find(jwk => jwk.use === 'sig')
-    }
-
-    // assign matching key to JWD and return a boolean
-    if (match) {
-      console.log(match)
-      this.key = match.cryptoKey
-      return true
-    } else {
-      return false
+      return this.fromDocumentFlattened(token)
     }
   }
 
   /**
-   * encode
+   * fromDocumentFlattened
    *
    * @description
-   * Encode a JSON Web Token instance
+   * Deserialize a Compact JWT and instantiate an instance
    *
-   * @returns {Promise<SerializedToken>}
+   * @param  {String} data
+   * @return {JWT}
    */
-  encode () {
-    let validation = this.validate()
+  static fromDocumentFlattened (data) {
+    let ExtendedJWD = this
 
-    if (!validation.valid) {
-      return Promise.reject(validation)
+    // Parse
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data)
+      } catch (err) {
+        throw new DataError('Malformed JWD')
+      }
+    }
+
+    // Input should be an object by now
+    if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+      throw new DataError('Invalid JWD')
+    }
+
+    let { protected: protectedHeader, header: unprotectedHeader, payload, signature } = data
+
+    // Sanity Check
+    if (typeof protectedHeader !== 'object' || protectedHeader === null || Array.isArray(protectedHeader)) {
+      throw new DataError('JWT Header must be an object')
+    }
+
+    if (unprotectedHeader && (typeof unprotectedHeader !== 'object' || unprotectedHeader === null || Array.isArray(unprotectedHeader))) {
+      throw new DataError('JWT Header must be an object')
+    }
+
+    // Normalize and return instance
+    return new ExtendedJWD(
+      clean({
+        payload,
+        signatures: [
+          { protected: protectedHeader, header: unprotectedHeader, signature }
+        ],
+        serialization: 'document-flattened',
+        type: 'JWS'
+      })
+    )
+  }
+
+  /**
+   * fromDocumentGeneral
+   *
+   * @description
+   * Deserialize a General JWD and instantiate an instance
+   *
+   * @param  {String} data
+   * @return {JWD}
+   */
+  static fromDocumentGeneral (data) {
+    let ExtendedJWD = this
+
+    // Parse
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data)
+      } catch (err) {
+        throw new DataError('Malformed JWD')
+      }
+    }
+
+    // Input should be an object by now
+    if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+      throw new DataError('Invalid JWD')
+    }
+
+    // Signatures must be present and an array
+    if (!Array.isArray(data.signatures)) {
+      throw new DataError('JWD signatures property must be an array')
+    }
+
+    let { payload, signatures } = data
+
+    // Normalize and return instance
+    return new ExtendedJWD(
+      clean({
+        payload,
+        signatures,
+        serialization: 'json',
+        type: 'JWS'
+      })
+    )
+  }
+
+  /**
+   * toDocumentFlattened
+   */
+  toDocumentFlattened () {
+    let { payload, signatures } = this
+    let protectedHeader, unprotectedHeader, signature
+
+    // Signatures present
+    if (signatures && Array.isArray(signatures) && signatures.length > 0) {
+      protectedHeader = signatures[0].protected
+      unprotectedHeader = signatures[0].header
+      signature = signatures[0].signature
+    }
+
+    if (!protectedHeader) {
+      throw new DataError('Protected header is required')
     }
 
     if (this.isJWE()) {
-      return JWE.encrypt(this)
+      // TODO
     } else {
-      return JWS.sign(this)
+      return JSON.stringify({
+        payload,
+        header: unprotectedHeader,
+        protected: protectedHeader,
+        signature
+      })
     }
   }
 
   /**
-   * verify
+   * toDocumentGeneral
+   */
+  toDocumentGeneral () {
+    let { payload, signatures } = this
+
+    if (this.isJWE()) {
+      // TODO
+    } else {
+      return JSON.stringify({ payload, signatures })
+    }
+  }
+
+  /**
+   * toJWT
    *
    * @description
-   * Verify a decoded JSON Web Token instance
+   * Convert a JWD to a JWT
    *
-   * @returns {Promise<Boolean>}
+   * @return {JWT}
    */
-  verify () {
-    return JWS.verify(this)
+  toJWT () {
+    return require('./Converter').toJWT(this)
+  }
+
+  /**
+   * serialize
+   *
+   * @description
+   * Serialize a JWD instance to the preferred serialization
+   *
+   * @return {SerializedToken}
+   */
+  serialize () {
+    let { serialization } = this
+
+    switch (serialization) {
+      case 'compact':
+        return this.toJWT().toCompact()
+      case 'flattened':
+        return this.toJWT().toFlattened()
+      case 'json':
+        return this.toJWT().toGeneral()
+      case 'document':
+        return this.toDocumentGeneral()
+      case 'flattened-document':
+        return this.toDocumentFlattened()
+      default:
+        return this.toDocumentGeneral()
+    }
   }
 }
 

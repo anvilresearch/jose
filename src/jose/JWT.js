@@ -354,7 +354,6 @@ class JWT extends JSONDocument {
   static sign (...data) {
     // Shallow merge data
     let params = Object.assign({}, ...data)
-    let ExtendedJWT = this
     let token = this.from(params)
 
     return token.sign(params)
@@ -366,64 +365,16 @@ class JWT extends JSONDocument {
    * @description
    * Encode a JSON Web Token
    *
-   * @param {CryptoKey|Object} key
-   * @param {CryptoKey} key.sign
-   * @param {CryptoKey} key.encrypt
-   * @param {Object} data
-   * @param {Object} [options]
+   * @param {...Object} data
    *
    * @returns {Promise<SerializedToken>}
    */
-  static encode (key, data, options={}) {
-    let ExtendedJWT = this
-    let token = new ExtendedJWT(data)
+  static encode (...data) {
+    // Shallow merge data
+    let params = Object.assign({}, ...data)
+    let token = this.from(params)
 
-    if (!key) {
-      return Promise.reject(new DataError('Key required to encode JWT'))
-    }
-
-    if (key.encrypt) {
-      // TODO JSON Web Encryption
-      // Object.defineProperty(descriptor, 'encryption_key', {
-      //   value: key.encrypt,
-      //   enumerable: false
-      // })
-    }
-
-    // Assign options to JWT as nonenumerable properties
-    Object.keys(options).forEach(field => {
-      Object.defineProperty(token, field, { value: options[field], enumerable: false })
-    })
-
-    // Default to compact serialization or json serialization (multiple signatures)
-    if (!token.serialization) {
-      if (token.signatures) {
-        Object.defineProperty(token, 'serialization', { value: 'json', enumerable: false })
-      } else {
-        Object.defineProperty(token, 'serialization', { value: 'compact', enumerable: false })
-      }
-    }
-
-    // Multiple Signatures/Keys
-    if (token.signatures) {
-      let { signatures } = token
-
-      // Assign key to new signature
-      token.signatures = signatures.map(descriptor => {
-
-        if (!descriptor.signature) {
-          Object.defineProperty(descriptor, 'key', { value: key.sign ? key.sign : key, enumerable: false })
-        }
-
-        return descriptor
-      })
-
-    // Single Signature/Key
-    } else {
-      Object.defineProperty(token, 'key', { value: key.sign ? key.sign : key, enumerable: false })
-    }
-
-    return token.encode()
+    return token.encode(params)
   }
 
 
@@ -515,14 +466,16 @@ class JWT extends JSONDocument {
    * @description
    * Encode a JSON Web Token instance
    *
-   * @param {Object} data
+   * @param {...Object} data
    * @returns {Promise<SerializedToken>}
    */
-  encode (data) {
+  encode (...data) {
+    let params = Object.assign({}, ...data)
+
     if (this.isJWE()) {
-      return JWE.encrypt(this)
+      // TODO
     } else {
-      return this.sign(data)
+      return this.sign(params)
     }
   }
 

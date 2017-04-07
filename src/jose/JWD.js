@@ -199,7 +199,8 @@ class JWD extends JWT {
    * @return {JWT}
    */
   toJWT () {
-    return require('./Converter').toJWT(this)
+    const JWT = require('./JWT')
+    return new JWT(this)
   }
 
   /**

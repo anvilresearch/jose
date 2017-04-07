@@ -796,7 +796,8 @@ class JWT extends JSONDocument {
    * @return {JWD}
    */
   toJWD () {
-    return require('./Converter').toJWD(this)
+    const JWD = require('./JWD')
+    return new JWD(this)
   }
 
   /**

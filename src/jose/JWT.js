@@ -9,6 +9,7 @@ const DataError = require('../errors/DataError')
 
 /**
  * Helper Functions
+ * @ignore
  */
 function clean (input) {
   return JSON.parse(JSON.stringify(input))
@@ -446,7 +447,7 @@ class JWT extends JSONDocument {
 
     let token = this.decode(jwt)
 
-    return token.verify(params).then(verified => token)
+    return token.verify(params)
   }
 
   /**
@@ -671,9 +672,9 @@ class JWT extends JSONDocument {
       } else if (cryptoKey) {
         key = cryptoKey
 
-      // No key to verify signature
+      // No key to verify signature; ignore
       } else {
-        return Promise.resolve(false)
+        return Promise.resolve(true)
       }
 
       // no signatures to verify
@@ -728,7 +729,17 @@ class JWT extends JSONDocument {
    */
   toCompact () {
     let { payload, signatures } = this
-    let [{ protected: protectedHeader, signature }] = signatures
+    let protectedHeader, signature
+
+    // Signatures present
+    if (signatures && Array.isArray(signatures) && signatures.length > 0) {
+      protectedHeader = signatures[0].protected
+      signature = signatures[0].signature
+    }
+
+    if (!protectedHeader) {
+      throw new DataError('Protected header is required')
+    }
 
     // Encode protected header and payload
     let encodedPayload = base64url(JSON.stringify(payload))
@@ -755,16 +766,19 @@ class JWT extends JSONDocument {
    * @todo This needs some error checking: i.e. no signature or more than one signature?
    */
   toFlattened () {
-    let {
-      payload,
-      signatures: [
-        {
-          protected: protectedHeader,
-          header: unprotectedHeader,
-          signature
-        }
-      ]
-    } = this
+    let { payload, signatures } = this
+    let protectedHeader, unprotectedHeader, signature
+
+    // Signatures present
+    if (signatures && Array.isArray(signatures) && signatures.length > 0) {
+      protectedHeader = signatures[0].protected
+      unprotectedHeader = signatures[0].header
+      signature = signatures[0].signature
+    }
+
+    if (!protectedHeader) {
+      throw new DataError('Protected header is required')
+    }
 
     // Encode protected header and payload
     let encodedPayload = base64url(JSON.stringify(payload))
@@ -818,7 +832,7 @@ class JWT extends JSONDocument {
 
       // Return without signatures
       } else {
-        return JSON.stringify({ payload: encodedPayload })
+        return JSON.stringify({ payload: encodedPayload }, null, 2)
       }
     }
   }

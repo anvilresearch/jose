@@ -50,26 +50,23 @@ class JWT extends JSONDocument {
    * @description
    * Decode a JSON Web Token
    *
-   * @param {String|Object} token
-   *
+   * @param {String} token
    * @returns {JWT}
    */
   static decode (token) {
     let ExtendedJWT = this
 
-    if (typeof token === 'string') {
-
-      // Parse
-      if (token.startsWith('{')) {
-        try {
-          token = JSON.parse(token)
-        } catch (err) {
-          throw new DataError('Malformed JWT')
-        }
-      }
-
-    } else if (typeof token !== 'object' || token === null || Array.isArray(token)) {
+    if (typeof token !== 'string') {
       throw new DataError('Invalid JWT')
+    }
+
+    // Parse
+    if (token.startsWith('{')) {
+      try {
+        token = JSON.parse(token)
+      } catch (err) {
+        throw new DataError('Malformed JWT')
+      }
     }
 
     // Compact
@@ -284,7 +281,7 @@ class JWT extends JSONDocument {
    * @description
    * Instanciate a JWT from an object descriptor
    *
-   * @param {Object} data
+   * @param {Object|String} data
    * @param {String} [data.serialized] - Existing serialized JWT
    *
    * @return {JWT}
@@ -293,8 +290,8 @@ class JWT extends JSONDocument {
     let ExtendedJWT = this
 
     // Decode serialized token
-    if (data.serialized) {
-      return this.decode(data.serialized)
+    if (typeof data === 'string' || data.serialized) {
+      return this.decode(data.serialized || data)
     }
 
     let { payload, signatures, serialization } = data
@@ -389,14 +386,13 @@ class JWT extends JSONDocument {
    */
   static verify (...data) {
     let params = Object.assign({}, ...data)
-    let ExtendedJWT = this
-    let { jwt } = params
+    let { token } = params
 
-    if (!jwt) {
+    if (!token) {
       throw new Error('JWT input required')
     }
 
-    let token = this.decode(jwt)
+    token = this.from(token)
 
     return token.verify(params)
   }
@@ -682,8 +678,6 @@ class JWT extends JSONDocument {
 
   /**
    * toCompact
-   *
-   * @todo This needs some error checking: i.e. no signature or more than one signature?
    */
   toCompact () {
     let { payload, signatures } = this
@@ -720,8 +714,6 @@ class JWT extends JSONDocument {
 
   /**
    * toFlattened
-   *
-   * @todo This needs some error checking: i.e. no signature or more than one signature?
    */
   toFlattened () {
     let { payload, signatures } = this
@@ -796,6 +788,18 @@ class JWT extends JSONDocument {
   }
 
   /**
+   * toJWD
+   *
+   * @description
+   * Convert a JWT to a JWD
+   *
+   * @return {JWD}
+   */
+  toJWD () {
+    return require('./Converter').toJWD(this)
+  }
+
+  /**
    * serialize
    *
    * @description
@@ -813,8 +817,12 @@ class JWT extends JSONDocument {
         return this.toFlattened()
       case 'json':
         return this.toGeneral()
+      case 'document':
+        return this.toJWD().toDocumentGeneral()
+      case 'flattened-document':
+        return this.toJWD().toDocumentFlattened()
       default:
-        throw new Error('Invalid serialization')
+        return this.toGeneral()
     }
   }
 }

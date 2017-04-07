@@ -36,14 +36,14 @@ crypto.subtle
   .then(tokens => {
     console.log('TOKENS', tokens)
     let promises = tokens.map(token => {
-      return JWT.verify({ cryptoKey: publicKey, jwt: token, result: 'instance' })
+      return JWT.verify({ cryptoKey: publicKey, token, result: 'instance' })
     })
 
     return Promise.all(promises)
   })
 
   // look at the output
-  .then(tokens => tokens.map(token => console.log(JSON.stringify(token, null, 2))))
+  .then(console.log)
   // .then(console.log)
 
   // look at the out

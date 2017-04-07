@@ -4,7 +4,7 @@ const { JWT, JWD } = require('../src')
 let privateKey, publicKey
 
 let payload = { iss: 'hello world!' }
-let header = { alg: 'RS256', typ: 'JWS' }
+let header = { typ: 'JWS', alg: 'RS256' }
 
 crypto.subtle
 
@@ -26,53 +26,42 @@ crypto.subtle
     publicKey = keypair.publicKey
 
     return Promise.all([
-      JWT.encode(privateKey, { header, payload }, { serialization: 'compact' }),
-      JWT.encode(privateKey, { protected: header, payload }, { serialization: 'flattened' }),
-      JWT.encode(privateKey, { signatures: [{ protected: header }], payload }, { serialization: 'json' }),
-      JWD.encode(privateKey, { signatures: [{ protected: header }], payload })
+      JWT.encode({ header, payload }, { serialization: 'compact', cryptoKey: privateKey }),
+      JWT.encode({ protected: header, payload }, { serialization: 'flattened', cryptoKey: privateKey }),
+      JWT.encode({ signatures: [{ protected: header, cryptoKey: privateKey }], payload }, { serialization: 'json' }),
+      JWD.encode({ protected: header, cryptoKey: privateKey }, { payload }, { serialization: 'flattened-document' }),
+      JWD.encode({ signatures: [{ protected: header, cryptoKey: privateKey }], payload }, { serialization: 'document' }),
     ])
   })
 
   // verify the signature
   .then(tokens => {
-    console.log('TOKENS', tokens)
-    let [compact, flattened, json, doc] = tokens
+    let [compact, flattened, json, flatdoc, doc] = tokens
+    console.log(tokens)
 
     return Promise.all([
-      JWT.verify(publicKey, compact),
-      JWT.verify(publicKey, flattened),
-      JWT.verify([publicKey], json),
-      JWD.verify([publicKey], doc)
+      JWT.verify({ cryptoKey: publicKey, token: compact, result: 'instance' }),
+      JWT.verify({ cryptoKey: publicKey, token: flattened, result: 'instance' }),
+      JWT.verify({ cryptoKey: publicKey, token: json, result: 'instance' }),
+      JWD.verify({ cryptoKey: publicKey, token: flatdoc, result: 'instance' }),
+      JWD.verify({ cryptoKey: publicKey, token: doc, result: 'instance' }),
     ])
   })
 
   // look at the output
   .then(tokens => {
-    // Print out tokens
-    tokens.map(token => console.log(JSON.stringify(token, null, 2)))
-
     // Test if signatures match
-    console.log(tokens.reduce((prev, curr) => {
-      if (prev === false) {
-        return prev
+    let result = true
+    tokens.forEach(token => {
+      if (result && tokens[0].signatures[0].signature === token.signatures[0].signature) {
+        result = true
       }
+      result = false
+    })
 
-      let { signature, signatures } = curr
-
-      if (prev === true) {
-        if (signatures) {
-          return signatures[0].signature
-        } else {
-          return signature
-        }
-      } else {
-        if (prev === signature || (signatures && signatures[0].signature === prev)) {
-          return prev
-        } else {
-          return false
-        }
-      }
-    }, true) ? 'PASS: Signatures Match' : 'FAIL: Mismatched')
+    console.log(result
+      ? 'PASS: Signatures Match'
+      : 'FAIL: Mismatched')
   })
 
   // look at the out

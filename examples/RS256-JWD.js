@@ -25,13 +25,13 @@ crypto.subtle
     privateKey = keypair.privateKey
     publicKey = keypair.publicKey
 
-    return JWD.encode(privateKey, { signatures: [{ protected: header }], payload })
+    return JWD.encode({ signatures: [{ protected: header, cryptoKey: privateKey }], payload }, { serialization: 'document' })
   })
 
   // verify the signature
   .then(doc => {
     console.log('DOCUMENT', doc)
-    return JWD.verify(publicKey, doc)
+    return JWD.verify({ cryptoKey: publicKey, token: doc, result: 'instance' })
   })
 
   // look at the output

@@ -39,7 +39,7 @@ crypto.subtle
   // verify the signature
   .then(tokens => {
     let promises = tokens.map(token => {
-      return JWT.verify({ cryptoKey: publicKey, jwt: token, result: 'instance' })
+      return JWT.verify({ cryptoKey: publicKey, token, result: 'instance' })
     })
 
     return Promise.all(promises)

@@ -279,7 +279,7 @@ class JWT extends JSONDocument {
   }
 
   /**
-   * fromJSON
+   * from
    *
    * @description
    * Instanciate a JWT from an object descriptor
@@ -289,7 +289,7 @@ class JWT extends JSONDocument {
    *
    * @return {JWT}
    */
-  static fromJSON (data) {
+  static from (data) {
     let ExtendedJWT = this
 
     // Decode serialized token
@@ -355,7 +355,7 @@ class JWT extends JSONDocument {
     // Shallow merge data
     let params = Object.assign({}, ...data)
     let ExtendedJWT = this
-    let token = this.fromJSON(params)
+    let token = this.from(params)
 
     return token.sign(params)
   }
@@ -659,9 +659,13 @@ class JWT extends JSONDocument {
     // Verify all signatures with a key present
     let promises = signatures.map((descriptor, index) => {
 
-      // Get corresponding key
       let key
-      if (cryptoKeys
+      // Get manually mapped key
+      if (descriptor.cryptoKey) {
+        key = descriptor.cryptoKey
+
+      // Get corresponding key
+      } else if (cryptoKeys
         && Array.isArray(cryptoKeys)
         && index < cryptoKeys.length
         && cryptoKeys[index]) {
@@ -677,16 +681,17 @@ class JWT extends JSONDocument {
         return Promise.resolve(true)
       }
 
-      // no signatures to verify
-      if (!signatures) {
-        return Promise.reject(new DataError('Missing signature(s)'))
-      }
-
       let {
         protected: protectedHeader,
         header: unprotectedHeader,
         signature
       } = descriptor
+
+      // no signature to verify
+      if (!signature) {
+        return Promise.reject(new DataError('Missing signature(s)'))
+      }
+
       let { alg } = protectedHeader
 
       // Encode header and assemble signature verification data
@@ -832,7 +837,7 @@ class JWT extends JSONDocument {
 
       // Return without signatures
       } else {
-        return JSON.stringify({ payload: encodedPayload }, null, 2)
+        return JSON.stringify({ payload: encodedPayload })
       }
     }
   }

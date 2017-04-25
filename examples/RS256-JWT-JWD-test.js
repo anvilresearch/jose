@@ -40,11 +40,11 @@ crypto.subtle
     console.log(tokens)
 
     return Promise.all([
-      JWT.verify({ cryptoKey: publicKey, token: compact, result: 'instance' }),
-      JWT.verify({ cryptoKey: publicKey, token: flattened, result: 'instance' }),
-      JWT.verify({ cryptoKey: publicKey, token: json, result: 'instance' }),
-      JWD.verify({ cryptoKey: publicKey, token: flatdoc, result: 'instance' }),
-      JWD.verify({ cryptoKey: publicKey, token: doc, result: 'instance' }),
+      JWT.verify({ cryptoKey: publicKey, serialized: compact, result: 'instance' }),
+      JWT.verify({ cryptoKey: publicKey, serialized: flattened, result: 'instance' }),
+      JWT.verify({ cryptoKey: publicKey, serialized: json, result: 'instance' }),
+      JWD.verify({ cryptoKey: publicKey, serialized: flatdoc, result: 'instance' }),
+      JWD.verify({ cryptoKey: publicKey, serialized: doc, result: 'instance' }),
     ])
   })
 

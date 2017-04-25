@@ -150,7 +150,7 @@ class JWT extends JSONDocument {
    */
   static fromFlattened (data) {
     let ExtendedJWT = this
-    let protectedHeader, unprotectedHeader, payload, signature
+    let protectedHeader, payload
 
     // Parse
     if (typeof data === 'string') {
@@ -174,6 +174,9 @@ class JWT extends JSONDocument {
       throw new Error('Invalid JWT')
     }
 
+    // Fetch decoded values
+    let { header: unprotectedHeader, signature } = data
+
     // Sanity Check
     if (typeof protectedHeader !== 'object' || protectedHeader === null || Array.isArray(protectedHeader)) {
       throw new DataError('JWT Header must be an object')
@@ -182,9 +185,6 @@ class JWT extends JSONDocument {
     if (unprotectedHeader && (typeof unprotectedHeader !== 'object' || unprotectedHeader === null || Array.isArray(unprotectedHeader))) {
       throw new DataError('JWT Header must be an object')
     }
-
-    unprotectedHeader = data.header
-    signature = data.signature
 
     // Normalize and return instance
     return new ExtendedJWT(
@@ -351,9 +351,9 @@ class JWT extends JSONDocument {
   static sign (...data) {
     // Shallow merge data
     let params = Object.assign({}, ...data)
-    let token = this.from(params)
+    let instance = this.from(params)
 
-    return token.sign(params)
+    return instance.sign(params)
   }
 
   /**
@@ -369,9 +369,9 @@ class JWT extends JSONDocument {
   static encode (...data) {
     // Shallow merge data
     let params = Object.assign({}, ...data)
-    let token = this.from(params)
+    let instance = this.from(params)
 
-    return token.encode(params)
+    return instance.encode(params)
   }
 
 
@@ -386,15 +386,15 @@ class JWT extends JSONDocument {
    */
   static verify (...data) {
     let params = Object.assign({}, ...data)
-    let { token } = params
+    let { serialized } = params
 
-    if (!token) {
+    if (!serialized) {
       throw new Error('JWT input required')
     }
 
-    token = this.from(token)
+    let instance = this.from(serialized)
 
-    return token.verify(params)
+    return instance.verify(params)
   }
 
   /**

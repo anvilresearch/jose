@@ -351,7 +351,14 @@ class JWT extends JSONDocument {
   static sign (...data) {
     // Shallow merge data
     let params = Object.assign({}, ...data)
-    let instance = this.from(params)
+
+    // Try decode
+    let instance
+    try {
+      instance = this.from(params)
+    } catch (e) {
+      return Promise.reject(e)
+    }
 
     return instance.sign(params)
   }
@@ -369,7 +376,14 @@ class JWT extends JSONDocument {
   static encode (...data) {
     // Shallow merge data
     let params = Object.assign({}, ...data)
-    let instance = this.from(params)
+
+    // Try decode
+    let instance
+    try {
+      instance = this.from(params)
+    } catch (e) {
+      return Promise.reject(e)
+    }
 
     return instance.encode(params)
   }
@@ -392,7 +406,13 @@ class JWT extends JSONDocument {
       throw new Error('JWT input required')
     }
 
-    let instance = this.from(serialized)
+    // Try decode
+    let instance
+    try {
+      instance = this.from(serialized)
+    } catch (e) {
+      return Promise.reject(e)
+    }
 
     return instance.verify(params)
   }

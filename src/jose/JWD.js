@@ -32,8 +32,12 @@ class JWD extends JWT {
   static decode (token) {
     let ExtendedJWD = this
 
-    if (typeof token !== 'string' || !token.startsWith('{')) {
+    if (typeof token !== 'string') {
       throw new DataError('Invalid JWD')
+    }
+
+    if (!token.startsWith('{')) {
+      throw new DataError('Malformed JWD')
     }
 
     // Parse
@@ -141,7 +145,7 @@ class JWD extends JWT {
       clean({
         payload,
         signatures,
-        serialization: 'json',
+        serialization: 'document',
         type: 'JWS'
       })
     )

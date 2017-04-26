@@ -45,7 +45,7 @@ const serializedToken = JSON.stringify(doc)
 /**
  * Tests
  */
-describe.only('JWD', () => {
+describe('JWD', () => {
 
   /**
    * schema

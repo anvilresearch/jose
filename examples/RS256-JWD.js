@@ -31,7 +31,7 @@ crypto.subtle
   // verify the signature
   .then(doc => {
     console.log('DOCUMENT', doc)
-    return JWD.verify({ cryptoKey: publicKey, token: doc, result: 'instance' })
+    return JWD.verify({ cryptoKey: publicKey, serialized: doc, result: 'instance' })
   })
 
   // look at the output

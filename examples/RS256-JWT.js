@@ -36,7 +36,7 @@ crypto.subtle
   .then(tokens => {
     console.log('TOKENS', tokens)
     let promises = tokens.map(token => {
-      return JWT.verify({ cryptoKey: publicKey, token, result: 'instance' })
+      return JWT.verify({ cryptoKey: publicKey, serialized: token, result: 'instance' })
     })
 
     return Promise.all(promises)

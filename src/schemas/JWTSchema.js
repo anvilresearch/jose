@@ -20,16 +20,6 @@ const JWTSchema = new JSONSchema({
   properties: {
 
     /**
-     * header
-     */
-    header: JOSEHeaderSchema,
-
-    /**
-     * protected
-     */
-    protected: JOSEHeaderSchema,
-
-    /**
      * iv
      */
     iv: Base64URLSchema,
@@ -73,20 +63,15 @@ const JWTSchema = new JSONSchema({
      */
     signatures: {
       type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          protected: JOSEHeaderSchema,
-          header: JOSEHeaderSchema,
-          signature: Base64URLSchema
-        }
-      }
+      // items: {
+      //   type: 'object',
+      //   properties: {
+      //     protected: JOSEHeaderSchema,
+      //     header: JOSEHeaderSchema,
+      //     signature: Base64URLSchema
+      //   }
+      // }
     },
-
-    /**
-     * signature
-     */
-    signature: Base64URLSchema,
   }
 })
 

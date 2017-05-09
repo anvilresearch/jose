@@ -3,7 +3,7 @@
  */
 const JOSEHeaderSchema = require('./JOSEHeaderSchema')
 const JWTClaimsSetSchema = require('./JWTClaimsSetSchema')
-const {JSONSchema} = require('json-document')
+const {JSONSchema} = require('@trust/json-document')
 
 /**
  * JWSJSONSerializationSchema

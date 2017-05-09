@@ -4,7 +4,7 @@
 const Base64URLSchema = require('./Base64URLSchema')
 const JWTClaimsSetSchema = require('./JWTClaimsSetSchema')
 const JOSEHeaderSchema = require('./JOSEHeaderSchema')
-const {JSONSchema} = require('json-document')
+const {JSONSchema} = require('@trust/json-document')
 
 /**
  * JWTSchema

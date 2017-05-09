@@ -187,11 +187,11 @@ describe('JWK', () => {
     })
 
     it.skip('should define format of "key_ops"', () => {
-      properties.key_ops.format.should.equal('case-sensitive')
+      properties.key_ops.items.format.should.equal('case-sensitive')
     })
 
     it('should define enum of "key_ops"', () => {
-      properties.key_ops.enum.should.eql([
+      properties.key_ops.items.enum.should.eql([
         'sign',
         'verify',
         'encrypt',

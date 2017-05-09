@@ -2,7 +2,7 @@
  * Dependencies
  */
 const JOSEHeaderSchema = require('./JOSEHeaderSchema')
-const {JSONSchema} = require('json-document')
+const {JSONSchema} = require('@trust/json-document')
 
 /**
  * JWEJSONSerializationSchema

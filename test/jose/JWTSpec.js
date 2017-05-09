@@ -14,7 +14,7 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const crypto = require('webcrypto')
+const crypto = require('@trust/webcrypto')
 const JWT = require('../../src/jose/JWT')
 const JWTSchema = require('../../src/schemas/JWTSchema')
 const {RsaPrivateCryptoKey, RsaPublicCryptoKey} = require('../keys')

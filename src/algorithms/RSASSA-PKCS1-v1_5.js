@@ -5,7 +5,7 @@
  * @ignore
  */
 const base64url = require('base64url')
-const crypto = require('webcrypto')
+const crypto = require('@trust/webcrypto')
 const TextEncoder = require('../text-encoder')
 
 /**

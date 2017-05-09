@@ -1,5 +1,5 @@
 require('../src/formats')
-const crypto = require('webcrypto')
+const crypto = require('@trust/webcrypto')
 const JWT = require('../src/jose/JWT')
 
 let key, jwt

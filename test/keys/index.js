@@ -1,4 +1,4 @@
-const CryptoKey = require('webcrypto/src/keys/CryptoKey')
+const CryptoKey = require('@trust/webcrypto/src/keys/CryptoKey')
 
 /**
  * RsaPrivateKey

@@ -1,5 +1,5 @@
 {
-  "name": "jose",
+  "name": "@trust/jose",
   "version": "0.0.0",
   "description": "JSON Object Signing and Encryption",
   "main": "lib/index.js",

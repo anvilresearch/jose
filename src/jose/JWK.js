@@ -4,7 +4,7 @@
  * Dependencies
  * @ignore
  */
-const {JSONDocument} = require('json-document')
+const {JSONDocument} = require('@trust/json-document')
 const JWKSchema = require('../schemas/JWKSchema')
 const JWA = require('./JWA')
 

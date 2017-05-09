@@ -3,7 +3,7 @@
 /**
  * Dependencies
  */
-const {JSONDocument} = require('json-document')
+const {JSONDocument} = require('@trust/json-document')
 const JWKSetSchema = require('../schemas/JWKSetSchema')
 const JWK = require('./JWK')
 

@@ -2,7 +2,7 @@
  * Dependencies
  */
 const base64url = require('base64url')
-const {JSONDocument} = require('json-document')
+const {JSONDocument} = require('@trust/json-document')
 const JWTSchema = require('../schemas/JWTSchema')
 const JWA = require('./JWA')
 const DataError = require('../errors/DataError')

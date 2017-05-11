@@ -1,7 +1,7 @@
 /**
  * Dependencies
  */
-const {JSONSchema} = require('json-document')
+const {JSONSchema} = require('@trust/json-document')
 
 /**
  * Base64URLSchema

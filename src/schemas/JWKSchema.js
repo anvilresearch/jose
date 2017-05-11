@@ -4,7 +4,7 @@
  * Dependencies
  * @ignore
  */
-const {JSONSchema} = require('json-document')
+const {JSONSchema} = require('@trust/json-document')
 const {BASE64_REGEXP} = require('../formats')
 
 /**
@@ -36,16 +36,18 @@ const JWKSchema = new JSONSchema({
     key_ops: {
       type: 'array',
       //format: 'case-sensitive',
-      enum: [
-        'sign',
-        'verify',
-        'encrypt',
-        'decrypt',
-        'wrapKey',
-        'unwrapKey',
-        'deriveKey',
-        'deriveBits'
-      ] // other values MAY be used
+      items: {
+        enum: [
+          'sign',
+          'verify',
+          'encrypt',
+          'decrypt',
+          'wrapKey',
+          'unwrapKey',
+          'deriveKey',
+          'deriveBits'
+        ] // other values MAY be used
+      }
     },
 
     alg: {

@@ -1,7 +1,7 @@
 /**
  * Package dependencies
  */
-const {JSONDocument} = require('json-document')
+const {JSONDocument} = require('@trust/json-document')
 const {JOSEHeaderSchema} = require('../schemas')
 
 /**

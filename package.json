@@ -1,6 +1,6 @@
 {
-  "name": "jose",
-  "version": "0.0.0",
+  "name": "@trust/jose",
+  "version": "0.1.1",
   "description": "JSON Object Signing and Encryption",
   "main": "lib/index.js",
   "directories": {
@@ -14,7 +14,7 @@
     "build-lib": "babel src -d lib",
     "build": "npm run clean-lib && npm run build-lib",
     "clean-lib": "rm -rf lib/*",
-    "build-dist": "webpack --progress --colors --optimize-minimize --optimize-occurrence-order --optimize-dedupe",
+    "build-dist": "webpack --progress --colors --optimize-minimize",
     "dist": "npm run build && npm run build-dist",
     "prepublish": "npm run build && npm run build-dist",
     "test": "mocha test -w",
@@ -36,6 +36,10 @@
       "name": "Greg Linklater",
       "email": "greglink49@gmail.com",
       "url": "https://github.com/EternalDeiwos"
+    },
+    {
+      "name": "Dmitri Zagidulin",
+      "url": "https://github.com/dmitrizagidulin"
     }
   ],
   "license": "MIT",
@@ -45,15 +49,15 @@
   "homepage": "https://github.com/anvilresearch/jose#README",
   "dependencies": {
     "base64url": "^2.0.0",
-    "json-document": "^0.1.1",
+    "@trust/json-document": "^0.1.3",
     "text-encoding": "^0.6.1",
-    "webcrypto": "git://github.com/anvilresearch/webcrypto.git"
+    "@trust/webcrypto": "^0.0.2"
   },
   "devDependencies": {
-    "babel-cli": "^6.16.0",
-    "babel-core": "^6.17.0",
-    "babel-loader": "^6.2.5",
-    "babel-preset-es2015": "^6.16.0",
+    "babel-cli": "^6.24.1",
+    "babel-core": "^6.24.1",
+    "babel-loader": "^6.4.1",
+    "babel-preset-es2015": "^6.24.1",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
     "karma": "^1.1.2",
@@ -61,6 +65,6 @@
     "karma-mocha": "^1.1.1",
     "karma-webpack": "^1.7.0",
     "mocha": "^3.0.0",
-    "webpack": "^1.13.1"
+    "webpack": "^2.5.1"
   }
 }

@@ -1,4 +1,4 @@
-const crypto = require('webcrypto')
+const crypto = require('@trust/webcrypto')
 const { JWT } = require('../src')
 
 let privateKey, publicKey

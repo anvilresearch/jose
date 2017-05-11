@@ -1,4 +1,4 @@
-const crypto = require('webcrypto')
+const crypto = require('@trust/webcrypto')
 const { JWT } = require('../src')
 const base64url = require('base64url')
 

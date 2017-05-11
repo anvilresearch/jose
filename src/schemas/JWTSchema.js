@@ -20,36 +20,6 @@ const JWTSchema = new JSONSchema({
   properties: {
 
     /**
-     * type
-     */
-    type: {
-      type: 'string',
-      enum: ['JWS', 'JWE']
-    },
-
-    /**
-     * segments
-     */
-    segments: {
-      type: 'array'
-    },
-
-    /**
-     * header
-     */
-    header: JOSEHeaderSchema,
-
-    /**
-     * protected
-     */
-    protected: JOSEHeaderSchema,
-
-    /**
-     * unprotected
-     */
-    unprotected: JOSEHeaderSchema,
-
-    /**
      * iv
      */
     iv: Base64URLSchema,
@@ -93,45 +63,15 @@ const JWTSchema = new JSONSchema({
      */
     signatures: {
       type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          protected: JOSEHeaderSchema,
-          header: JOSEHeaderSchema,
-          signature: Base64URLSchema,
-          key: { type: 'object' }
-        }
-      }
+      // items: {
+      //   type: 'object',
+      //   properties: {
+      //     protected: JOSEHeaderSchema,
+      //     header: JOSEHeaderSchema,
+      //     signature: Base64URLSchema
+      //   }
+      // }
     },
-
-    /**
-     * signature
-     */
-    signature: Base64URLSchema,
-
-    /**
-     * verified
-     */
-    verified: {
-      type: 'boolean',
-      default: false
-    },
-
-    /**
-     * key
-     */
-    key: {
-      type: 'object'
-    },
-
-    /**
-     * serialization
-     */
-    serialization: {
-      type: 'string',
-      enum: ['compact', 'json', 'flattened'],
-      default: 'compact'
-    }
   }
 })
 

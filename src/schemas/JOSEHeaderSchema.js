@@ -159,7 +159,7 @@ const JOSEHeaderSchema = new JSONSchema({
      */
     cty: {
       type: 'string',
-      enum: ['JWT']
+      enum: ['JWT', 'JWD']
     },
 
     /**

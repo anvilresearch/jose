@@ -29,6 +29,7 @@ const {JSONSchema} = require('@trust/json-document')
  *   Public Claim Names, and Private Claim Names.
  */
 const JWTClaimsSetSchema = new JSONSchema({
+  // additionalProperties: true,
   properties: {
 
     /**

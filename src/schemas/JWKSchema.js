@@ -36,16 +36,18 @@ const JWKSchema = new JSONSchema({
     key_ops: {
       type: 'array',
       //format: 'case-sensitive',
-      enum: [
-        'sign',
-        'verify',
-        'encrypt',
-        'decrypt',
-        'wrapKey',
-        'unwrapKey',
-        'deriveKey',
-        'deriveBits'
-      ] // other values MAY be used
+      items: {
+        enum: [
+          'sign',
+          'verify',
+          'encrypt',
+          'decrypt',
+          'wrapKey',
+          'unwrapKey',
+          'deriveKey',
+          'deriveBits'
+        ] // other values MAY be used
+      }
     },
 
     alg: {

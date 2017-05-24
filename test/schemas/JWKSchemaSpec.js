@@ -191,7 +191,7 @@ describe('JWK', () => {
     })
 
     it('should define enum of "key_ops"', () => {
-      properties.key_ops.enum.should.eql([
+      properties.key_ops.items.enum.should.eql([
         'sign',
         'verify',
         'encrypt',

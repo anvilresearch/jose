@@ -2,7 +2,7 @@ var path = require('path')
 
 module.exports = {
   entry: [
-    './lib/index.js'
+    './src/index.js'
   ],
   output: {
     path: path.join(__dirname, '/dist/'),
@@ -10,9 +10,20 @@ module.exports = {
     library: 'JOSE',
     libraryTarget: 'var'
   },
+  module: {
+    loaders: [
+      {
+        test: /\.js$/,
+        loader: 'babel-loader',
+        query: {
+          presets: ['es2015']
+        }
+      }
+    ]
+  },
   externals: {
     'text-encoding': 'TextEncoder',
-    webcrypto: 'crypto'
+    '@trust/webcrypto': 'crypto'
   },
   devtool: 'source-map'
 }

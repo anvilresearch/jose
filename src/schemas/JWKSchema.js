@@ -4,7 +4,7 @@
  * Dependencies
  * @ignore
  */
-const {JSONSchema} = require('json-document')
+const {JSONSchema} = require('@trust/json-document')
 const {BASE64_REGEXP} = require('../formats')
 
 /**

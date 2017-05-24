@@ -1,7 +1,7 @@
 /**
  * Package dependencies
  */
-const {Formats} = require('json-document')
+const {Formats} = require('@trust/json-document')
 
 /**
  * Format extensions

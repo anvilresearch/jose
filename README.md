@@ -30,12 +30,14 @@ validation][json-doc] with JWT and JWD.
 ## Table of Contents
 
 * [Security](#security)
-* [Background](#background)
 * [Install](#install)
 * [Usage](#usage)
 * [Develop](#develop)
 * [API](#api)
-* [Maintainers](#maintainers)
+  * [JWK](#jwk)
+  * [JWKSet](#jwkset)
+  * [JWT](#jwt)
+  * [JWD](#jwd)
 * [Contribute](#contribute)
 * [MIT License](#mit-license)
 
@@ -107,7 +109,50 @@ $ npm run karma   // Karma (browser)
 
 ## API
 
-...
+### JWK
+
+#### new JWK()
+#### (static) importKey()
+
+### JWKSet
+
+#### new JWKSet()
+#### (static) importKeys()
+
+### JWT
+
+#### new JWT()
+#### (static) decode(token) → {JWT}
+#### (static) encode(…data) → {Promise.&lt;SerializedToken&gt;}
+#### (static) from(data) → {JWT}
+#### (static) fromCompact(data) → {JWT}
+#### (static) fromFlattened(data) → {JWT}
+#### (static) fromGeneral(data) → {JWT}
+#### (static) sign() → {Promise.&lt;SerializedToken&gt;}
+#### (static) verify(…data) → {Promise.&lt;JWT&gt;}
+#### encode(…data) → {Promise.&lt;SerializedToken&gt;}
+#### isJWE()
+#### resolveKeys()
+#### serialize() → {SerializedToken}
+#### sign(…data) → {Promise.&lt;SerializedToken&gt;}
+#### toCompact()
+#### toFlattened()
+#### toGeneral()
+#### toJWD() → {JWD}
+#### verify(…data) → {Promise.&lt;(Boolean|Object)&gt;}
+
+### JWD
+
+JWD inherits from JWT.
+
+#### new JWD()
+#### (static) decode(token) → {JWD}
+#### (static) fromDocumentFlattened(data) → {JWD}
+#### (static) fromDocumentGeneral(data) → {JWD}
+#### serialize() → {SerializedToken}
+#### toDocumentFlattened()
+#### toDocumentGeneral()
+#### toJWT() → {JWT}
 
 ## Contribute
 

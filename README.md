@@ -1,45 +1,63 @@
-# JSON Object Signing and Encryption (JOSE)
+# JOSE _(@trust/jose)_
 
-## Planned Features
+[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 
-- [x] Based on Webcrypto API
-- [ ] CryptoKey as expected key argument
-- [x] Isomorphic (Node.js and Browser)
-- [ ] JWT Header and Payload Validation with JSON Schema
-- [ ] Extensible JWT/JWS/JWE classes
+> JSON Object Signing and Encryption for Node.js and Browsers
 
-## Dependencies
+The JOSE suite of specifications standardizes various mechanisms required for
+integrity protection and encryption of data structured and serialized as JSON.
+This package implements [JWT][jwt], [JWD][jwd], [JWS][jws], [JWE][jwe] (in progress),
+[JWA][jwa], [JWK][jwk], and [JWK Set][jwkset] for use in JavaScript applications.
 
-This package is a work in progress, dependent on other ongoing projects. Code
-contained herein will be completed when the following dependencies are ready to
-release:
+Underlying cryptography is provided by [W3C Web Cryptography API][w3c-webcrypto],
+available natively in browsers and [via npm][node-webcrypto] in Node.js.
+Additionally, [JSON Schema][json-schema] is used for [object initialization and
+validation][json-doc] with JWT and JWD.
 
-- [anvilresearch/webcrypto](https://github.com/anvilresearch/webcrypto)
-
-The current contents of the repository should be considered a "sketch".
-
-## Scope of implementation
-
-- [JWA][jwa] – **RFC7518**
-  - [ ] Cryptographic Algorithms for Digital Signatures and MACs
-  - [ ] Cryptographic Algorithms for Key Management
-  - [ ] Cryptographic Algorithms for Content Encryption
-- [JWK][jwk] – **RFC7517**
-  - [ ] JSON Web Key (JWK) Format
-  - [ ] JWK Set Format
-  - [ ] JSON Web Key (JWK) Thumbprint (RFC7638)
-  - [ ] Conversion from JWK to PEM and PEM to JWK
-- [JWT][jwt] – **RFC7519**
-- [JWS][jws] – **RFC7515**
-- [JWE][jwe] – **RFC7516**
-
-[jwa]: https://tools.ietf.org/html/rfc7518
-[jwk]: https://tools.ietf.org/html/rfc7517
 [jwt]: https://tools.ietf.org/html/rfc7519
+[jwd]: https://tools.ietf.org/html/draft-smith-oauth-json-web-document-00
 [jws]: https://tools.ietf.org/html/rfc7515
 [jwe]: https://tools.ietf.org/html/rfc7516
+[jwa]: https://tools.ietf.org/html/rfc7518
+[jwk]: https://tools.ietf.org/html/rfc7517
+[jwkset]: https://tools.ietf.org/html/rfc7517#section-5
+[w3c-webcrypto]: https://www.w3.org/TR/WebCryptoAPI/
+[node-webcrypto]: https://www.npmjs.com/package/@trust/webcrypto
+[json-schema]: http://json-schema.org/
+[json-doc]: https://www.npmjs.com/package/@trust/json-document
 
-## Usage in Browser
+
+## Table of Contents
+
+* [Security](#security)
+* [Background](#background)
+* [Install](#install)
+* [Usage](#usage)
+* [Develop](#develop)
+* [API](#api)
+* [Maintainers](#maintainers)
+* [Contribute](#contribute)
+* [MIT License](#mit-license)
+
+## Security
+
+TBD
+
+## Install
+
+```bash
+$ npm install @trust/jose --save
+```
+
+## Usage
+
+### Node.js
+
+```
+const { JWT, JWD, JWA, JWKSet } = require('@trust/jose')
+```
+
+### Browser
 
 If you `npm install jose` as a dependency, the Webpack'd minified bundle will be
 available in the `dist/` directory as `jose.min.js`.
@@ -70,19 +88,84 @@ Sample usage of JOSE lib in a browser.
 </html>
 ```
 
-## Running tests
+## Develop
 
-### Nodejs
-
-```bash
-$ npm test
-```
-
-### Browser (karma)
+### Install
 
 ```bash
-$ npm run karma
+$ git clone git@github.com:anvilresearch/jose.git
+$ cd jose
+$ npm install
 ```
+
+### Test
+
+```bash
+$ npm test        // Node.js
+$ npm run karma   // Karma (browser)
+```
+
+## API
+
+...
+
+## Contribute
+
+### Issues
+
+* please file [issues](https://github.com/anvilresearch/jose/issues) :)
+* for bug reports, include relevant details such as platform, version, relevant data, and stack traces
+* be sure to check for existing issues before opening new ones
+* read the documentation before asking questions
+* it's strongly recommended to open an issue before hacking and submitting a PR
+* we reserve the right to close an issue for excessive bikeshedding
+
+### Pull requests
+
+#### Policy
+
+* we're not presently accepting *unsolicited* pull requests
+* create an issue to discuss proposed features before submitting a pull request
+* create an issue to propose changes of code style or introduce new tooling
+* ensure your work is harmonious with the overall direction of the project
+* ensure your work does not duplicate existing effort
+* keep the scope compact; avoid PRs with more than one feature or fix
+* code review with maintainers is required before any merging of pull requests
+* new code must respect the style guide and overall architecture of the project
+* be prepared to defend your work
+
+#### Style guide
+
+* ES6
+* Standard JavaScript
+* jsdocs
+
+#### Code reviews
+
+* required before merging PRs
+* reviewers SHOULD run the code under review
+
+### Collaborating
+
+#### Weekly project meeting
+
+* Thursdays from 1:00 PM to 2:00 Eastern US time at [TBD]
+* Join remotely with Google Hangouts
+
+#### Pair programming
+
+* Required for new contributors
+* Work directly with one or more members of the core development team
+
+### Code of conduct
+
+* @trust/jose follows the [Contributor Covenant](http://contributor-covenant.org/version/1/3/0/) Code of Conduct.
+
+### Contributors
+
+* Christian Smith [@christiansmith](https://github.com/christiansmith)
+* Greg Linklater [@EternalDeiwos](https://github.com/EternalDeiwos)
+* Dmitri Zagidulin [@dmitrizagidulin](https://github.com/dmitrizagidulin)
 
 ## MIT License
 

@@ -23,18 +23,14 @@ class JWT extends JSONDocument {
   /**
    * constructor
    */
-  constructor (data, options) {
+  constructor (data, options = {}) {
+    options.filter = options.filter || false
     super(data, options)
 
-    Object.keys(data).forEach(key => {
-      if (!this[key]) {
-        Object.defineProperty(this, key, {
-          value: data[key],
-          enumerable: false,
-          configurable: true
-        })
-      }
-    })
+    let { type, serialization } = data
+
+    Object.defineProperty(this, 'type', { value: type, configurable: true, enumerable: false })
+    Object.defineProperty(this, 'serialization', { value: serialization, configurable: true, enumerable: false })
   }
 
   /**
@@ -135,7 +131,8 @@ class JWT extends JSONDocument {
         ],
         serialization: 'compact',
         type: 'JWS'
-      })
+      }),
+      { filter: ExtendedJWT.name !== 'JWT' && ExtendedJWT.name !== 'JWD' }
     )
   }
 
@@ -195,7 +192,8 @@ class JWT extends JSONDocument {
         ],
         serialization: 'flattened',
         type: 'JWS'
-      })
+      }),
+      { filter: ExtendedJWT.name !== 'JWT' && ExtendedJWT.name !== 'JWD' }
     )
   }
 
@@ -271,7 +269,8 @@ class JWT extends JSONDocument {
         signatures,
         serialization: 'json',
         type: 'JWS'
-      })
+      }),
+      { filter: ExtendedJWT.name !== 'JWT' && ExtendedJWT.name !== 'JWD' }
     )
   }
 
@@ -334,7 +333,8 @@ class JWT extends JSONDocument {
         signatures,
         serialization,
         type: 'JWS'
-      })
+      }),
+      { filter: ExtendedJWT.name !== 'JWT' && ExtendedJWT.name !== 'JWD' }
     )
   }
 

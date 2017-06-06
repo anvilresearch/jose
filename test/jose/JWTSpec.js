@@ -277,6 +277,16 @@ describe('JWT', () => {
           serialization: 'general'
         }).should.eventually.contain('eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIn0')
       })
+
+      it('should not filter unspecified properties when filter is false', () => {
+        return JWT.encode({
+          cryptoKey: RsaPrivateCryptoKey,
+          header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
+          payload: { iss: 'https://forge.anvil.io', foo: 'bar' },
+          serialization: 'general',
+          filter: false
+        }).should.eventually.contain('eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIiwiZm9vIjoiYmFyIn0')
+      })
     })
 
     describe('with Base JWT', () => {
@@ -303,6 +313,16 @@ describe('JWT', () => {
           payload: { iss: 'https://forge.anvil.io', foo: 'bar' },
           serialization: 'general'
         }).should.eventually.contain('eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIiwiZm9vIjoiYmFyIn0')
+      })
+
+      it('should filter unspecified properties when filter is true', () => {
+        return JWT.encode({
+          cryptoKey: RsaPrivateCryptoKey,
+          header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
+          payload: { iss: 'https://forge.anvil.io', foo: 'bar' },
+          serialization: 'general',
+          filter: true
+        }).should.eventually.contain('eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIn0')
       })
     })
   })

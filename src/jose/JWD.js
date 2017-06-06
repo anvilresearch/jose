@@ -30,8 +30,6 @@ class JWD extends JWT {
    * @returns {JWT}
    */
   static decode (token) {
-    let ExtendedJWD = this
-
     if (typeof token !== 'string') {
       throw new DataError('Invalid JWD')
     }

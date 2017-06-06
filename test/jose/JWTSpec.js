@@ -185,7 +185,7 @@ describe('JWT', () => {
   describe('static sign', () => {})
   describe('static verify', () => {})
 
-  describe('isJWE', () => {
+  describe.skip('isJWE', () => {
     it('should return true with "enc" header', () => {
       let token = new JWT({ header: { enc: 'A128GCM' } })
       token.isJWE().should.equal(true)
@@ -200,7 +200,7 @@ describe('JWT', () => {
   /**
    * resolveKeys
    */
-  describe('resolveKeys', () => {
+  describe.skip('resolveKeys', () => {
     let jwks, token
 
     beforeEach(() => {
@@ -249,20 +249,81 @@ describe('JWT', () => {
    * encode
    */
   describe('encode', () => {
-    it('should reject invalid JWT', (done) => {
-      JWT.encode(RsaPrivateCryptoKey, {
-        header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
-        payload: { iss: null }
-      }).should.be.rejected.and.notify(done)
+    describe('with Extended JWT', () => {
+
+      class ExtendedJWT extends JWT {}
+
+      it('should reject invalid JWT', (done) => {
+        ExtendedJWT.encode(RsaPrivateCryptoKey, {
+          header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
+          payload: { iss: null }
+        }).should.be.rejected.and.notify(done)
+      })
+
+      it('should resolve a JWS Compact Serialization', (done) => {
+        ExtendedJWT.encode({
+          cryptoKey: RsaPrivateCryptoKey,
+          header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
+          payload: { iss: 'https://forge.anvil.io' },
+          serialization: 'compact'
+        }).should.eventually.equal(compact).and.notify(done)
+      })
+
+      it('should filter unspecified properties', () => {
+        return ExtendedJWT.encode({
+          cryptoKey: RsaPrivateCryptoKey,
+          header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
+          payload: { iss: 'https://forge.anvil.io', foo: 'bar' },
+          serialization: 'general'
+        }).should.eventually.contain('eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIn0')
+      })
+
+      it('should not filter unspecified properties when filter is false', () => {
+        return JWT.encode({
+          cryptoKey: RsaPrivateCryptoKey,
+          header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
+          payload: { iss: 'https://forge.anvil.io', foo: 'bar' },
+          serialization: 'general',
+          filter: false
+        }).should.eventually.contain('eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIiwiZm9vIjoiYmFyIn0')
+      })
     })
 
-    it('should resolve a JWS Compact Serialization', (done) => {
-      JWT.encode({
-        cryptoKey: RsaPrivateCryptoKey,
-        header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
-        payload: { iss: 'https://forge.anvil.io' },
-        serialization: 'compact'
-      }).should.eventually.equal(compact).and.notify(done)
+    describe('with Base JWT', () => {
+      it('should reject invalid JWT', (done) => {
+        JWT.encode(RsaPrivateCryptoKey, {
+          header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
+          payload: { iss: null }
+        }).should.be.rejected.and.notify(done)
+      })
+
+      it('should resolve a JWS Compact Serialization', (done) => {
+        JWT.encode({
+          cryptoKey: RsaPrivateCryptoKey,
+          header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
+          payload: { iss: 'https://forge.anvil.io' },
+          serialization: 'compact'
+        }).should.eventually.equal(compact).and.notify(done)
+      })
+
+      it('should not filter unspecified properties', () => {
+        return JWT.encode({
+          cryptoKey: RsaPrivateCryptoKey,
+          header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
+          payload: { iss: 'https://forge.anvil.io', foo: 'bar' },
+          serialization: 'general'
+        }).should.eventually.contain('eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIiwiZm9vIjoiYmFyIn0')
+      })
+
+      it('should filter unspecified properties when filter is true', () => {
+        return JWT.encode({
+          cryptoKey: RsaPrivateCryptoKey,
+          header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
+          payload: { iss: 'https://forge.anvil.io', foo: 'bar' },
+          serialization: 'general',
+          filter: true
+        }).should.eventually.contain('eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIn0')
+      })
     })
   })
 

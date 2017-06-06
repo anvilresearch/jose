@@ -23,18 +23,14 @@ class JWT extends JSONDocument {
   /**
    * constructor
    */
-  constructor (data, options) {
+  constructor (data, options = {}) {
+    options.filter = options.filter || false
     super(data, options)
 
-    Object.keys(data).forEach(key => {
-      if (!this[key]) {
-        Object.defineProperty(this, key, {
-          value: data[key],
-          enumerable: false,
-          configurable: true
-        })
-      }
-    })
+    let { type, serialization } = data
+
+    Object.defineProperty(this, 'type', { value: type, configurable: true, enumerable: false })
+    Object.defineProperty(this, 'serialization', { value: serialization, configurable: true, enumerable: false })
   }
 
   /**
@@ -54,8 +50,6 @@ class JWT extends JSONDocument {
    * @returns {JWT}
    */
   static decode (token) {
-    let ExtendedJWT = this
-
     if (typeof token !== 'string') {
       throw new DataError('Invalid JWT')
     }
@@ -294,7 +288,7 @@ class JWT extends JSONDocument {
       return this.decode(data.serialized || data)
     }
 
-    let { payload, signatures, serialization } = data
+    let { payload, signatures, serialization, filter } = data
 
     if (!payload) {
       throw new DataError('Invalid JWT')
@@ -334,7 +328,8 @@ class JWT extends JSONDocument {
         signatures,
         serialization,
         type: 'JWS'
-      })
+      }),
+      { filter: filter || (ExtendedJWT.name !== 'JWT' && ExtendedJWT.name !== 'JWD') }
     )
   }
 
@@ -419,62 +414,59 @@ class JWT extends JSONDocument {
 
   /**
    * isJWE
+   *
+   * @todo
    */
   isJWE () {
-    let {
-      header: unprotectedHeader,
-      protected: protectedHeader,
-      recipients
-    } = this
-
-    return !!((unprotectedHeader && unprotectedHeader.enc)
-      || (protectedHeader && protectedHeader.enc)
-      || recipients)
+    return false
   }
 
   /**
    * resolveKeys
+   *
+   * @todo  This needs to be updated for use with the new API
    */
-  resolveKeys (jwks) {
-    let kid = this.header.kid
-    let keys, match
+  // resolveKeys (jwks) {
+  //   let kid = this.header.kid
 
-    // treat an array as the "keys" property of a JWK Set
-    if (Array.isArray(jwks)) {
-      keys = jwks
-    }
+  //   let keys, match
 
-    // presence of keys indicates object is a JWK Set
-    if (jwks.keys) {
-      keys = jwks.keys
-    }
+  //   // treat an array as the "keys" property of a JWK Set
+  //   if (Array.isArray(jwks)) {
+  //     keys = jwks
+  //   }
 
-    // wrap a plain object they is not a JWK Set in Array
-    if (!jwks.keys && typeof jwks === 'object') {
-      keys = [jwks]
-    }
+  //   // presence of keys indicates object is a JWK Set
+  //   if (jwks.keys) {
+  //     keys = jwks.keys
+  //   }
 
-    // ensure there are keys to search
-    if (!keys) {
-      throw new DataError('Invalid JWK argument')
-    }
+  //   // wrap a plain object they is not a JWK Set in Array
+  //   if (!jwks.keys && typeof jwks === 'object') {
+  //     keys = [jwks]
+  //   }
 
-    // match by "kid" or "use" header
-    if (kid) {
-      match = keys.find(jwk => jwk.kid === kid)
-    } else {
-      match = keys.find(jwk => jwk.use === 'sig')
-    }
+  //   // ensure there are keys to search
+  //   if (!keys) {
+  //     throw new DataError('Invalid JWK argument')
+  //   }
 
-    // assign matching key to JWT and return a boolean
-    if (match) {
-      console.log(match)
-      this.key = match.cryptoKey
-      return true
-    } else {
-      return false
-    }
-  }
+  //   // match by "kid" or "use" header
+  //   if (kid) {
+  //     match = keys.find(jwk => jwk.kid === kid)
+  //   } else {
+  //     match = keys.find(jwk => jwk.use === 'sig')
+  //   }
+
+  //   // assign matching key to JWT and return a boolean
+  //   if (match) {
+  //     console.log(match)
+  //     this.key = match.cryptoKey
+  //     return true
+  //   } else {
+  //     return false
+  //   }
+  // }
 
   /**
    * encode

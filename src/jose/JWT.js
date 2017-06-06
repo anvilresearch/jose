@@ -50,8 +50,6 @@ class JWT extends JSONDocument {
    * @returns {JWT}
    */
   static decode (token) {
-    let ExtendedJWT = this
-
     if (typeof token !== 'string') {
       throw new DataError('Invalid JWT')
     }
@@ -419,62 +417,59 @@ class JWT extends JSONDocument {
 
   /**
    * isJWE
+   *
+   * @todo
    */
   isJWE () {
-    let {
-      header: unprotectedHeader,
-      protected: protectedHeader,
-      recipients
-    } = this
-
-    return !!((unprotectedHeader && unprotectedHeader.enc)
-      || (protectedHeader && protectedHeader.enc)
-      || recipients)
+    return false
   }
 
   /**
    * resolveKeys
+   *
+   * @todo  This needs to be updated for use with the new API
    */
-  resolveKeys (jwks) {
-    let kid = this.header.kid
-    let keys, match
+  // resolveKeys (jwks) {
+  //   let kid = this.header.kid
 
-    // treat an array as the "keys" property of a JWK Set
-    if (Array.isArray(jwks)) {
-      keys = jwks
-    }
+  //   let keys, match
 
-    // presence of keys indicates object is a JWK Set
-    if (jwks.keys) {
-      keys = jwks.keys
-    }
+  //   // treat an array as the "keys" property of a JWK Set
+  //   if (Array.isArray(jwks)) {
+  //     keys = jwks
+  //   }
 
-    // wrap a plain object they is not a JWK Set in Array
-    if (!jwks.keys && typeof jwks === 'object') {
-      keys = [jwks]
-    }
+  //   // presence of keys indicates object is a JWK Set
+  //   if (jwks.keys) {
+  //     keys = jwks.keys
+  //   }
 
-    // ensure there are keys to search
-    if (!keys) {
-      throw new DataError('Invalid JWK argument')
-    }
+  //   // wrap a plain object they is not a JWK Set in Array
+  //   if (!jwks.keys && typeof jwks === 'object') {
+  //     keys = [jwks]
+  //   }
 
-    // match by "kid" or "use" header
-    if (kid) {
-      match = keys.find(jwk => jwk.kid === kid)
-    } else {
-      match = keys.find(jwk => jwk.use === 'sig')
-    }
+  //   // ensure there are keys to search
+  //   if (!keys) {
+  //     throw new DataError('Invalid JWK argument')
+  //   }
 
-    // assign matching key to JWT and return a boolean
-    if (match) {
-      console.log(match)
-      this.key = match.cryptoKey
-      return true
-    } else {
-      return false
-    }
-  }
+  //   // match by "kid" or "use" header
+  //   if (kid) {
+  //     match = keys.find(jwk => jwk.kid === kid)
+  //   } else {
+  //     match = keys.find(jwk => jwk.use === 'sig')
+  //   }
+
+  //   // assign matching key to JWT and return a boolean
+  //   if (match) {
+  //     console.log(match)
+  //     this.key = match.cryptoKey
+  //     return true
+  //   } else {
+  //     return false
+  //   }
+  // }
 
   /**
    * encode

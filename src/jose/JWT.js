@@ -129,8 +129,7 @@ class JWT extends JSONDocument {
         ],
         serialization: 'compact',
         type: 'JWS'
-      }),
-      { filter: ExtendedJWT.name !== 'JWT' && ExtendedJWT.name !== 'JWD' }
+      })
     )
   }
 
@@ -190,8 +189,7 @@ class JWT extends JSONDocument {
         ],
         serialization: 'flattened',
         type: 'JWS'
-      }),
-      { filter: ExtendedJWT.name !== 'JWT' && ExtendedJWT.name !== 'JWD' }
+      })
     )
   }
 
@@ -267,8 +265,7 @@ class JWT extends JSONDocument {
         signatures,
         serialization: 'json',
         type: 'JWS'
-      }),
-      { filter: ExtendedJWT.name !== 'JWT' && ExtendedJWT.name !== 'JWD' }
+      })
     )
   }
 
@@ -291,7 +288,7 @@ class JWT extends JSONDocument {
       return this.decode(data.serialized || data)
     }
 
-    let { payload, signatures, serialization } = data
+    let { payload, signatures, serialization, filter } = data
 
     if (!payload) {
       throw new DataError('Invalid JWT')
@@ -332,7 +329,7 @@ class JWT extends JSONDocument {
         serialization,
         type: 'JWS'
       }),
-      { filter: ExtendedJWT.name !== 'JWT' && ExtendedJWT.name !== 'JWD' }
+      { filter: filter || (ExtendedJWT.name !== 'JWT' && ExtendedJWT.name !== 'JWD') }
     )
   }
 

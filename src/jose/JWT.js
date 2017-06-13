@@ -499,13 +499,14 @@ class JWT extends JSONDocument {
    * @returns {Promise<SerializedToken>}
    */
   sign (...data) {
+    let params = Object.assign({}, ...data)
+
     let validation = this.validate()
 
-    if (!validation.valid) {
+    if (params.validate && !validation.valid) {
       return Promise.reject(validation)
     }
 
-    let params = Object.assign({}, ...data)
     let { payload } = this
 
     let {

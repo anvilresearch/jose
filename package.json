@@ -17,7 +17,7 @@
     "build-dist": "webpack --progress --colors --optimize-minimize",
     "dist": "npm run build && npm run build-dist",
     "prepublish": "npm run build && npm run build-dist",
-    "test": "mocha test -w",
+    "test": "mocha test",
     "karma": "karma start",
     "jsdoc": "jsdoc -c jsdoc.json -r"
   },

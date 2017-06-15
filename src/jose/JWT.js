@@ -501,12 +501,6 @@ class JWT extends JSONDocument {
   sign (...data) {
     let params = Object.assign({}, ...data)
 
-    let validation = this.validate()
-
-    if (params.validate && !validation.valid) {
-      return Promise.reject(validation)
-    }
-
     let { payload } = this
 
     let {
@@ -515,8 +509,17 @@ class JWT extends JSONDocument {
       signature,
       signatures,
       serialization,
-      cryptoKey
+      cryptoKey,
+      validate = true
     } = params
+
+    if (validate) {
+      let validation = this.validate()
+
+      if (!validation.valid) {
+        return Promise.reject(validation)
+      }
+    }
 
     // Override serialization
     if (serialization) {

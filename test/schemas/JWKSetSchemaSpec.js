@@ -9,20 +9,34 @@ const chai = require('chai')
  * Assertions
  */
 chai.should()
-let expect = chai.expect
 
 /**
  * Code under test
  */
-const JWKSetSchema = require('../../src/schemas/JWKSetSchema')
+const {JSONSchema} = require('@trust/json-document')
+const {JWKSet, JWKSchema} = require('../../src/index')
+const JWKSetSchema = JWKSet.schema
 
 /**
  * Tests
  */
 describe('JWKSetSchema', () => {
-  it('should be an instance of JSONSchema')
-  it('should define type')
-  it('should define "keys" type')
-  it('should define "keys" items')
+  const { properties } = JWKSetSchema
+
+  it('should be an instance of JSONSchema', () => {
+    JWKSetSchema.should.be.an.instanceof(JSONSchema)
+  })
+
+  it('should define type', () => {
+    JWKSetSchema.type.should.equal('object')
+  })
+
+  it('should define "keys" type', () => {
+    properties.keys.type.should.equal('array')
+  })
+
+  it('should define "keys" items', () => {
+    properties.keys.items.should.equal(JWKSchema)
+  })
 })
 

@@ -50,7 +50,7 @@ class JWT extends JSONDocument {
         data.serialization = 'flattened'
       }
 
-      jwt = new ExtendedJWT(data)
+      jwt = new ExtendedJWT(data, { filter: false })
 
     // Compact Serialization
     } else {
@@ -71,7 +71,10 @@ class JWT extends JSONDocument {
           let payload = JSON.parse(base64url.decode(segments[1]))
           let signature = segments[2]
 
-          jwt = new ExtendedJWT({type, segments, header, payload, signature, serialization})
+          jwt = new ExtendedJWT(
+              { type, segments, header, payload, signature, serialization },
+              { filter: false }
+            )
         }
 
         // JSON Web Encryption

@@ -1,6 +1,6 @@
 {
   "name": "@trust/jose",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "JSON Object Signing and Encryption",
   "main": "lib/index.js",
   "directories": {

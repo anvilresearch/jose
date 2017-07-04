@@ -592,7 +592,7 @@ class JWT extends JSONDocument {
 
       if (!result || result === 'string') {
         return this.serialize()
-      } else {
+      } else if (result === 'object' || result === 'instance') {
         return this
       }
     })

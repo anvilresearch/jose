@@ -510,7 +510,8 @@ class JWT extends JSONDocument {
       signatures,
       serialization,
       cryptoKey,
-      validate = true
+      validate = true,
+      result
     } = params
 
     if (validate) {
@@ -589,7 +590,11 @@ class JWT extends JSONDocument {
         }
       }
 
-      return this.serialize()
+      if (!result || result === 'string') {
+        return this.serialize()
+      } else {
+        return this
+      }
     })
   }
 

@@ -20,7 +20,6 @@ class AES_CBC {
    */
   constructor (params) {
     this.params = params
-    this.params.iv = crypto.getRandomValues(new Uint8Array(16))
   }
 
   /**
@@ -35,12 +34,58 @@ class AES_CBC {
    * @returns {Promise}
    */
   encrypt (key, data) {
+    // ensure each encryption has a new iv
+    this.params.iv = crypto.getRandomValues(new Uint8Array(16))
     let algorithm = this.params
     data = new TextEncoder().encode(data)
 
     return crypto.subtle
       .encrypt(algorithm, key, data)
-      .then(ciphertext => base64url(Buffer.from(ciphertext)))
+      .then(ciphertext => Buffer.from(ciphertext))
+  }
+
+  /**
+   * decrypt
+   *
+   * @description
+   * .
+   *
+   * @param {CryptoKey} key
+   * @param {BufferSource} data
+   *
+   * @returns {Promise}
+   */
+  decrypt (key, data) {
+    let algorithm = this.params
+
+    return crypto.subtle
+      .decrypt(algorithm, key, data)
+      .then(plaintext => Buffer.from(plaintext));
+  }
+
+  /**
+   * importKey
+   *
+   * @param {JWK} key
+   * @returns {Promise}
+   */
+  importKey (key) {
+    let jwk = Object.assign({}, key)
+    let algorithm = this.params
+    // usages are specified by the key_ops field ONLY in this case
+    // empty usages breaks the api
+    let usages = key['key_ops'] || ['encrypt', 'decrypt']
+
+    return crypto.subtle
+      .importKey('jwk', jwk, algorithm, true, usages)
+      .then(cryptoKey => {
+        Object.defineProperty(jwk, 'cryptoKey', {
+          enumerable: false,
+          value: cryptoKey
+        })
+
+        return jwk
+      })
   }
 
 }

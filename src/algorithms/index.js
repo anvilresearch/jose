@@ -4,12 +4,41 @@
 const HMAC = require('./HMAC')
 const ECDSA = require('./ECDSA')
 const RSASSA_PKCS1_v1_5 = require('./RSASSA-PKCS1-v1_5')
+const AES_GCM = require('./AES-GCM')
+const AES_CBC = require('./AES-CBC')
 const SupportedAlgorithms = require('./SupportedAlgorithms')
 
 /**
  * Register Supported Algorithms
  */
 const supportedAlgorithms = new SupportedAlgorithms
+
+/**
+ * Encrypt
+ */
+supportedAlgorithms.define('AES-GCM', 'encrypt', new AES_GCM({
+  name: 'AES-GCM',
+  hash: {
+    name: 'AES-GCM'
+  }
+}))
+
+supportedAlgorithms.define('AES-CBC', 'encrypt', new AES_CBC({
+  name: 'AES-CBC',
+  hash: {
+    name: 'AES-CBC'
+  }
+}))
+
+/**
+ * Decrypt
+ */
+supportedAlgorithms.define('AES-CBC', 'decrypt', new AES_GCM({
+  name: 'AES-CBC',
+  hash: {
+    name: 'AES-CBC'
+  }
+}))
 
 /**
  * Sign
@@ -228,9 +257,14 @@ supportedAlgorithms.define('ES512', 'importKey', new ECDSA({
   }
 }))
 
+supportedAlgorithms.define('AES-CBC', 'importKey', new AES_CBC({
+  name: 'AES-CBC',
+  hash: {
+    name: 'AES-CBC'
+  }
+}))
+
 /**
  * Export
  */
 module.exports = supportedAlgorithms
-
-

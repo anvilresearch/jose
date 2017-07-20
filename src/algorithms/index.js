@@ -16,29 +16,26 @@ const supportedAlgorithms = new SupportedAlgorithms
 /**
  * Encrypt
  */
-supportedAlgorithms.define('AES-GCM', 'encrypt', new AES_GCM({
-  name: 'AES-GCM',
-  hash: {
-    name: 'AES-GCM'
-  }
-}))
+// supportedAlgorithms.define('A128GCM', 'encrypt', new AES_GCM({
+//   name: 'AES-GCM',
+// }))
 
-supportedAlgorithms.define('AES-CBC', 'encrypt', new AES_CBC({
-  name: 'AES-CBC',
-  hash: {
-    name: 'AES-CBC'
-  }
-}))
+// supportedAlgorithms.define('A128CBC-HS256', 'encrypt', new AES_CBC({
+//   name: 'AES_128_CBC_HMAC_SHA_256',
+//   hash: {
+//     name: 'HS256'
+//   }
+// }))
 
 /**
  * Decrypt
  */
-supportedAlgorithms.define('AES-CBC', 'decrypt', new AES_GCM({
-  name: 'AES-CBC',
-  hash: {
-    name: 'AES-CBC'
-  }
-}))
+ // supportedAlgorithms.define('A128CBC-HS256', 'decrypt', new AES_CBC({
+ //   name: 'AES_128_CBC_HMAC_SHA_256',
+ //   hash: {
+ //     name: 'HS256'
+ //   }
+ // }))
 
 /**
  * Sign
@@ -257,12 +254,12 @@ supportedAlgorithms.define('ES512', 'importKey', new ECDSA({
   }
 }))
 
-supportedAlgorithms.define('AES-CBC', 'importKey', new AES_CBC({
-  name: 'AES-CBC',
-  hash: {
-    name: 'AES-CBC'
-  }
-}))
+// supportedAlgorithms.define('A128CBC-HS256', 'importKey', new AES_CBC({
+//   name: 'AES_128_CBC_HMAC_SHA_256',
+//   hash: {
+//     name: 'HS256'
+//   }
+// }))
 
 /**
  * Export

@@ -95,49 +95,77 @@ class JWT extends JSONDocument {
    */
   static fromCompact (data) {
     let ExtendedJWT = this
-    let protectedHeader, payload, signature
 
     // Parse
     if (typeof data === 'string') {
       let segments = data.split('.')
+      let protectedHeader
 
       if (![3, 5].includes(segments.length)) {
         throw new DataError('Malformed JWT')
       }
 
+      try {
+        protectedHeader = JSON.parse(base64url.decode(segments[0]))
+      } catch (err) {
+        throw new DataError('Malformed JWS')
+      }
+
+      // Sanity Check
+      if (typeof protectedHeader !== 'object' || protectedHeader === null || Array.isArray(protectedHeader)) {
+        throw new DataError('JWT Header must be an object')
+      }
+
       // Decode base64url
       if (segments.length === 3) {
+        let payload, signature
+
         try {
-          protectedHeader = JSON.parse(base64url.decode(segments[0]))
           payload = JSON.parse(base64url.decode(segments[1]))
           signature = segments[2]
         } catch (err) {
           throw new DataError('Malformed JWS')
         }
+
+        // Normalize and return instance
+        return new ExtendedJWT(
+          clean({
+            payload,
+            signatures: [
+              { protected: protectedHeader, signature }
+            ],
+            serialization: 'compact',
+            type: 'JWS'
+          })
+        )
       }
 
       if (segments.length === 5) {
-        // TODO JWE
+        let encrypted_key, iv, ciphertext, tag
+        
+        try {
+          encrypted_key = base64url.decode(segments[1])
+          iv = new TextEncoder().encode(base64url.decode(segments[2]))
+          ciphertext = segments[3]
+          tag = new TextEncoder().encode(base64url.decode(segments[4]))
+        } catch (err) {
+          throw new DataError('Malformed JWE')
+        }
+
+        return new ExtendedJWT(
+          clean({
+            protect: protectedHeader,
+            encrypted_key,
+            iv,
+            ciphertext,
+            tag,
+            serialization: 'compact',
+            type: 'JWE'
+          })
+        )
       }
     }
 
-    // Sanity Check
-    if (typeof protectedHeader !== 'object' || protectedHeader === null || Array.isArray(protectedHeader)) {
-      throw new DataError('JWT Header must be an object')
-    }
-
-    // Normalize and return instance
-    return new ExtendedJWT(
-      clean({
-        payload,
-        signatures: [
-          { protected: protectedHeader, signature }
-        ],
-        serialization: 'compact',
-        type: 'JWS'
-        // this should not be always a JWS !!!!!!!!!!!!!!!
-      })
-    )
   }
 
   /**

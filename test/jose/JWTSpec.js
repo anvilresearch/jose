@@ -127,8 +127,8 @@ describe('JWT', () => {
       it('should set JWE iv', () => {
         JWT.decode(jsonJwe).should.have.property('iv')
           .that.deep.equals(new Uint8Array(
-            [3, 22, 60, 12, 43, 67, 104, 105, 108, 108, 105, 99, 111, 116, 104, 101]
-          ))
+            [3, 22, 60, 12, 43, 67, 104, 105, 108, 108, 105, 99,
+            111, 116, 104, 101]))
       })
 
       it('should set JWE ciphertext', () => {
@@ -237,8 +237,8 @@ describe('JWT', () => {
       it('should set JWE iv', () => {
         JWT.decode(flattenedJwe).should.have.property('iv')
           .that.deep.equals(new Uint8Array(
-            [3, 22, 60, 12, 43, 67, 104, 105, 108, 108, 105, 99, 111, 116, 104, 101]
-          ))
+            [3, 22, 60, 12, 43, 67, 104, 105, 108, 108, 105, 99,
+            111, 116, 104, 101]))
       })
 
       it('should set JWE ciphertext', () => {
@@ -272,33 +272,73 @@ describe('JWT', () => {
         JWT.decode(compact).should.be.instanceof(JWT)
       })
 
-      it('should set JWT type', () => {
+      it('should return a JWT instance', () => {
+        JWT.decode(compactJwe).should.be.instanceof(JWT)
+      })
+
+      it('should set JWS type', () => {
         JWT.decode(compact).should.have.property('type')
           .that.equals('JWS')
+      })
+
+      it('should set JWE type', () => {
+        JWT.decode(compactJwe).should.have.property('type')
+          .that.equals('JWE')
       })
 
       it('should set JWT protected header', () => {
         JWT.decode(compact).signatures[0].should.have.property('protected')
           .that.deep.equals({ alg: 'RS256', kid: 'r4nd0mbyt3s' })
-
       })
 
       it('should set JWT payload', () => {
         JWT.decode(compact).should.have.property('payload')
           .that.deep.equals({ iss: 'https://forge.anvil.io' })
-
       })
 
       it('should set JWT signature', () => {
         JWT.decode(compact).signatures[0].should.have.property('signature')
           .that.equals(signature)
-
       })
 
       it('should set JWT serialization', () => {
         JWT.decode(compact).should.have.property('serialization')
           .that.equals('compact')
+      })
 
+      it('should set JWE protected header', () => {
+        JWT.decode(flattenedJwe).should.have.property('protect')
+          .that.deep.equals({enc:"A128CBC-HS256"})
+      })
+
+      it('should set JWE encrypted key', () => {
+        JWT.decode(flattenedJwe).should.have.property('encrypted_key')
+          .that.equals("6KB707dM9YTIgHtLvtgWQ8mKwboJW3of9locizkDTHzBC2IlrT1oOQ")
+      })
+
+      it('should set JWE iv', () => {
+        JWT.decode(flattenedJwe).should.have.property('iv')
+          .that.deep.equals(new Uint8Array(
+            [3, 22, 60, 12, 43, 67, 104, 105, 108, 108, 105, 99,
+            111, 116, 104, 101]))
+      })
+
+      it('should set JWE ciphertext', () => {
+        JWT.decode(flattenedJwe).should.have.property('ciphertext')
+          .that.deep.equals(ciphertext)
+      })
+
+      it('should set JWE tag', () => {
+        JWT.decode(flattenedJwe).should.have.property('tag')
+          .that.deep.equals(new Uint8Array(
+            [51, 63, 239, 191, 189, 60, 239, 191, 189, 239, 191, 189,
+            239, 191, 189, 25, 92, 239, 191, 189, 239, 191, 189, 239,
+            191, 189, 35, 2, 47, 239, 191, 189]))
+      })
+
+      it('should set JWT serialization', () => {
+        JWT.decode(compactJwe).should.have.property('serialization')
+          .that.equals('compact')
       })
     })
   })

@@ -8,6 +8,7 @@ const {JSONDocument} = require('@trust/json-document')
 const JWTSchema = require('../schemas/JWTSchema')
 const JWA = require('./JWA')
 const DataError = require('../errors/DataError')
+const TextEncoder = require('../text-encoder')
 
 /**
  * Helper Functions
@@ -30,6 +31,9 @@ class JWT extends JSONDocument {
     super(data, options)
 
     let { type, serialization } = data
+    // console.log(type)
+    // console.log(serialization)
+    // console.log(data)
 
     Object.defineProperty(this, 'type', { value: type, configurable: true, enumerable: false })
     Object.defineProperty(this, 'serialization', { value: serialization, configurable: true, enumerable: false })
@@ -71,7 +75,7 @@ class JWT extends JSONDocument {
     }
 
     // JSON General
-    if (token.signatures) {
+    if (token.signatures || token.recipients) {
       return this.fromGeneral(token)
 
     // JSON Flattened
@@ -131,6 +135,7 @@ class JWT extends JSONDocument {
         ],
         serialization: 'compact',
         type: 'JWS'
+        // this should not be always a JWS !!!!!!!!!!!!!!!
       })
     )
   }
@@ -146,7 +151,6 @@ class JWT extends JSONDocument {
    */
   static fromFlattened (data) {
     let ExtendedJWT = this
-    let protectedHeader, payload
 
     // Parse
     if (typeof data === 'string') {
@@ -162,37 +166,86 @@ class JWT extends JSONDocument {
       throw new DataError('Invalid JWT')
     }
 
-    // Decode base64url
-    try {
-      payload = JSON.parse(base64url.decode(data.payload))
-      protectedHeader = JSON.parse(base64url.decode(data.protected))
-    } catch (err) {
-      throw new Error('Invalid JWT')
+    // decide if JWT is JWS(has payload) or JWE(has ciphertext)
+    if(data.payload) {
+      let protectedHeader, payload
+
+      // Decode base64url
+      try {
+        payload = JSON.parse(base64url.decode(data.payload))
+        protectedHeader = JSON.parse(base64url.decode(data.protected))
+      } catch (err) {
+        throw new Error('Invalid JWT')
+      }
+
+      // Fetch decoded values
+      let { header: unprotectedHeader, signature } = data
+
+      // Sanity Check
+      if (typeof protectedHeader !== 'object' || protectedHeader === null || Array.isArray(protectedHeader)) {
+        throw new DataError('JWT Header must be an object')
+      }
+
+      if (unprotectedHeader && (typeof unprotectedHeader !== 'object' || unprotectedHeader === null || Array.isArray(unprotectedHeader))) {
+        throw new DataError('JWT Header must be an object')
+      }
+
+      // Normalize and return instance
+      return new ExtendedJWT(
+        clean({
+          payload,
+          signatures: [
+            { protected: protectedHeader, header: unprotectedHeader, signature }
+          ],
+          serialization: 'flattened',
+          type: 'JWS'
+        })
+      )
+    } else {
+      let protect, unprotect, iv, aad, ciphertext, tag, encrypted_key, header
+
+      try {
+        if(data.protected) {
+          protect = JSON.parse(base64url.decode(data.protected))
+        }
+        if(data.unprotected) {
+          unprotect = data.unprotected
+        }
+        if(data.iv) {
+          iv = new TextEncoder().encode(base64url.decode(data.iv))
+        }
+        if(data.aad) {
+          aad = base64url.decode(data.aad)
+        }
+        ciphertext = data.ciphertext
+        header = data.header;
+        encrypted_key = data.encrypted_key;
+        if(data.tag) {
+          tag = new TextEncoder().encode(base64url.decode(data.tag))
+        }
+      } catch (err) {
+        throw new Error('Invalid JWT')
+      }
+
+      if (data.recipients) {
+        throw new DataError('JWT recipients property must not be present')
+      }
+
+      return new ExtendedJWT(
+        clean({
+          protect,
+          unprotect,
+          header,
+          encrypted_key,
+          iv,
+          aad,
+          ciphertext,
+          tag,
+          serialization: 'flattened',
+          type: 'JWE'
+        })
+      )
     }
-
-    // Fetch decoded values
-    let { header: unprotectedHeader, signature } = data
-
-    // Sanity Check
-    if (typeof protectedHeader !== 'object' || protectedHeader === null || Array.isArray(protectedHeader)) {
-      throw new DataError('JWT Header must be an object')
-    }
-
-    if (unprotectedHeader && (typeof unprotectedHeader !== 'object' || unprotectedHeader === null || Array.isArray(unprotectedHeader))) {
-      throw new DataError('JWT Header must be an object')
-    }
-
-    // Normalize and return instance
-    return new ExtendedJWT(
-      clean({
-        payload,
-        signatures: [
-          { protected: protectedHeader, header: unprotectedHeader, signature }
-        ],
-        serialization: 'flattened',
-        type: 'JWS'
-      })
-    )
   }
 
   /**
@@ -206,7 +259,6 @@ class JWT extends JSONDocument {
    */
   static fromGeneral (data) {
     let ExtendedJWT = this
-    let payload, signatures
 
     // Parse
     if (typeof data === 'string') {
@@ -222,53 +274,112 @@ class JWT extends JSONDocument {
       throw new DataError('Invalid JWT')
     }
 
-    // Signatures must be present and an array
-    if (!Array.isArray(data.signatures)) {
-      throw new DataError('JWT signatures property must be an array')
-    }
+    // decide if JWT is JWS(has payload) or JWE(has ciphertext)
+    if(data.payload) {
+      let payload, signatures
 
-    // Decode payload
-    try {
-      payload = JSON.parse(base64url.decode(data.payload))
-    } catch (err) {
-      throw new Error('Invalid JWT')
-    }
+      // Signatures must be present and an array
+      if (!Array.isArray(data.signatures)) {
+        throw new DataError('JWT signatures property must be an array')
+      }
 
-    // Decode signatures
-    signatures = data.signatures.map(descriptor => {
-      let { protected: protectedHeader, header: unprotectedHeader, signature } = descriptor
-      let decodedHeader
+      // Decode payload
+      try {
+        payload = JSON.parse(base64url.decode(data.payload))
+      } catch (err) {
+        throw new Error('Invalid JWT')
+      }
+
+      // Decode signatures
+      signatures = data.signatures.map(descriptor => {
+        let { protected: protectedHeader, header: unprotectedHeader, signature } = descriptor
+        let decodedHeader
+
+        try {
+          decodedHeader = JSON.parse(base64url.decode(protectedHeader))
+        } catch (err) {
+          throw new DataError('Invalid JWT')
+        }
+
+        if (!decodedHeader || typeof decodedHeader !== 'object' || decodedHeader === null || Array.isArray(decodedHeader)) {
+          throw new DataError('JWT Protected Header must be an object')
+        }
+
+        if (unprotectedHeader && (typeof unprotectedHeader !== 'object' || unprotectedHeader === null || Array.isArray(unprotectedHeader))) {
+          throw new DataError('JWT Header must be an object')
+        }
+
+        return {
+          protected: decodedHeader,
+          header: unprotectedHeader,
+          signature
+        }
+      })
+
+      // Normalize and return instance
+      return new ExtendedJWT(
+        clean({
+          payload,
+          signatures,
+          serialization: 'json',
+          type: 'JWS'
+        })
+      )
+    } else {
+      let protect, unprotect, iv, aad, ciphertext, tag, recipients
 
       try {
-        decodedHeader = JSON.parse(base64url.decode(protectedHeader))
+        if(data.protected) {
+          protect = JSON.parse(base64url.decode(data.protected))
+        }
+        if(data.unprotected) {
+          unprotect = data.unprotected
+        }
+        if(data.iv) {
+          iv = new TextEncoder().encode(base64url.decode(data.iv))
+        }
+        if(data.aad) {
+          aad = base64url.decode(data.aad)
+        }
+        ciphertext = data.ciphertext
+        if(data.tag) {
+          tag = new TextEncoder().encode(base64url.decode(data.tag))
+        }
       } catch (err) {
-        throw new DataError('Invalid JWT')
+        throw new Error('Invalid JWT')
       }
 
-      if (!decodedHeader || typeof decodedHeader !== 'object' || decodedHeader === null || Array.isArray(decodedHeader)) {
-        throw new DataError('JWT Protected Header must be an object')
+      if (!Array.isArray(data.recipients)) {
+        throw new DataError('JWT recipients property must be an array')
       }
 
-      if (unprotectedHeader && (typeof unprotectedHeader !== 'object' || unprotectedHeader === null || Array.isArray(unprotectedHeader))) {
-        throw new DataError('JWT Header must be an object')
-      }
+      recipients = data.recipients.map(descriptor => {
+        let { header, encrypted_key } = descriptor
 
-      return {
-        protected: decodedHeader,
-        header: unprotectedHeader,
-        signature
-      }
-    })
+        if (!header || typeof header !== 'object' || header === null || Array.isArray(header)) {
+          throw new DataError('JWE Header must be an object')
+        }
 
-    // Normalize and return instance
-    return new ExtendedJWT(
-      clean({
-        payload,
-        signatures,
-        serialization: 'json',
-        type: 'JWS'
+        return {
+          header: header,
+          encrypted_key: encrypted_key
+        }
       })
-    )
+
+      return new ExtendedJWT(
+        clean({
+          protect,
+          unprotect,
+          iv,
+          aad,
+          ciphertext,
+          tag,
+          recipients,
+          serialization: 'json',
+          type: 'JWE'
+        })
+      )
+    }
   }
 
   /**

@@ -13,12 +13,16 @@ const SupportedAlgorithms = require('./SupportedAlgorithms')
  */
 const supportedAlgorithms = new SupportedAlgorithms
 
+const A128GCM = new AES_GCM({
+  name: 'AES-GCM',
+  length: 128,
+  tagLength: 128
+})
+
 /**
  * Encrypt
  */
-// supportedAlgorithms.define('A128GCM', 'encrypt', new AES_GCM({
-//   name: 'AES-GCM',
-// }))
+supportedAlgorithms.define('A128GCM', 'encrypt', A128GCM)
 
 // supportedAlgorithms.define('A128CBC-HS256', 'encrypt', new AES_CBC({
 //   name: 'AES_128_CBC_HMAC_SHA_256',
@@ -30,12 +34,7 @@ const supportedAlgorithms = new SupportedAlgorithms
 /**
  * Decrypt
  */
- // supportedAlgorithms.define('A128CBC-HS256', 'decrypt', new AES_CBC({
- //   name: 'AES_128_CBC_HMAC_SHA_256',
- //   hash: {
- //     name: 'HS256'
- //   }
- // }))
+ supportedAlgorithms.define('A128GCM', 'decrypt', A128GCM)
 
 /**
  * Sign

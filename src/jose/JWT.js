@@ -177,7 +177,6 @@ class JWT extends JSONDocument {
 
     // assign matching key to JWT and return a boolean
     if (match) {
-      console.log(match)
       this.key = match.cryptoKey
       return true
     } else {

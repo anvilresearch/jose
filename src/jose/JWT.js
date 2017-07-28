@@ -577,6 +577,62 @@ class JWT extends JSONDocument {
   }
 
   /**
+   * encrypt
+   *
+   * @description
+   * Encrypt the contents of a JSON Web Token
+   *
+   * @param {...Object} data
+   * @returns {Promise<JWT>}
+   */
+  static encrypt (...data) {
+    let params = Object.assign({}, ...data)
+    let { serialized } = params
+
+    if (!serialized) {
+      throw new Error('JWT input required')
+    }
+
+    // Try decode
+    let instance
+    try {
+      instance = this.from(serialized)
+    } catch (e) {
+      return Promise.reject(e)
+    }
+
+    return instance.encrypt(params)
+  }
+
+  /**
+   * decrypt
+   *
+   * @description
+   * Decrypt the contents of a JSON Web Token
+   *
+   * @param {...Object} data
+   * @returns {Promise<JWT>}
+   */
+  static decrypt (...data) {
+    let params = Object.assign({}, ...data)
+    let { serialized } = params
+
+    if (!serialized) {
+      throw new Error('JWT input required')
+    }
+
+    // Try decode
+    let instance
+    try {
+      instance = this.from(serialized)
+    } catch (e) {
+      return Promise.reject(e)
+    }
+
+    return instance.decrypt(params)
+  }
+
+  /**
    * isJWE
    *
    * @todo
@@ -865,6 +921,127 @@ class JWT extends JSONDocument {
         return this
       }
     })
+  }
+
+  /**
+   * encrypt
+   *
+   * @description
+   * Encrypt the contents of a JSON Web Token instance
+   *
+   * @param {...Object} data
+   * @returns {Promise<SerializedToken>}
+   */
+  encrypt (...data) {
+    let params = Object.assign({}, ...data)
+
+    let { payload } = this
+
+    let {
+      protected: protectedHeader,
+      header: unprotectedHeader,
+      signature,
+      signatures,
+      serialization,
+      cryptoKey,
+      validate = true,
+      result
+    } = params
+
+    if (validate) {
+      let validation = this.validate()
+
+      if (!validation.valid) {
+        return Promise.reject(validation)
+      }
+    }
+
+    // Override serialization
+    if (serialization) {
+      Object.defineProperty(this, 'serialization', {
+        value: serialization,
+        enumerable: false,
+        configurable: true
+      })
+    }
+
+    // Normalize new flat signature
+    if (cryptoKey && !signature && (unprotectedHeader || protectedHeader)) {
+      let descriptor = {}
+
+      if (!protectedHeader && unprotectedHeader) {
+        descriptor.protected = unprotectedHeader
+      } else {
+        descriptor.protected = protectedHeader
+        descriptor.header = unprotectedHeader
+      }
+
+      descriptor.cryptoKey = cryptoKey
+
+      // Add to signatures array
+      if (signatures && Array.isArray(signatures)) {
+        signatures.push(descriptor)
+      } else {
+        signatures = [descriptor]
+      }
+    }
+
+    // Create signatures
+    let promises = []
+    if (signatures && Array.isArray(signatures)) {
+      // Ignore ambiguous/invalid descriptors
+      promises = signatures.filter(descriptor => {
+        return descriptor.cryptoKey && !descriptor.signature
+
+      // assemble and sign
+      }).map(descriptor => {
+        let {
+          protected: protectedHeader,
+          header: unprotectedHeader,
+          signature,
+          cryptoKey
+        } = descriptor
+        let { alg } = protectedHeader
+
+        // Encode signature content
+        let encodedHeader = base64url(JSON.stringify(protectedHeader))
+        let encodedPayload = base64url(JSON.stringify(payload))
+        let data = `${encodedHeader}.${encodedPayload}`
+
+        return JWA.sign(alg, cryptoKey, data).then(signature => {
+          return { protected: protectedHeader, header: unprotectedHeader, signature }
+        })
+      })
+    }
+
+    // Await signatures
+    return Promise.all(promises).then(signatures => {
+      if (signatures.length > 0) {
+        if (this.signatures && Array.isArray(this.signatures)) {
+          this.signatures = this.signatures.concat(signatures)
+        } else {
+          this.signatures = signatures
+        }
+      }
+
+      if (!result || result === 'string') {
+        return this.serialize()
+      } else if (result === 'object' || result === 'instance') {
+        return this
+      }
+    })
+  }
+
+  /**
+   * decrypt
+   *
+   * @description
+   * Decrypt the contents of a JSON Web Token instance
+   *
+   * @param {...Object} data
+   * @returns {Promise<Object>}
+   */
+  decrypt (...data) {
   }
 
   /**

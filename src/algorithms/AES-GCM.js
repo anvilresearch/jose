@@ -42,7 +42,12 @@ class AES_GCM {
 
     return crypto.subtle
       .encrypt(algorithm, key, data)
-      .then(ciphertext => Buffer.from(ciphertext))
+      .then(ciphertext => {
+        return {
+          iv: base64url(Buffer.from(algorithm.iv)),
+          ciphertext: base64url(Buffer.from(ciphertext))
+        }
+      })
   }
 
   /**
@@ -53,17 +58,21 @@ class AES_GCM {
    *
    * @param {CryptoKey} key
    * @param {BufferSource} data
+   * @param {BufferSource} iv
    *
    * @returns {Promise}
    */
-  decrypt (key, data) {
+  decrypt (key, data, iv) {
     let algorithm = this.params
+    algorithm.iv = Uint8Array.from(base64url.toBuffer(iv))
+
+    data = base64url.toBuffer(data)
 
     return crypto.subtle
       .decrypt(algorithm, key, data)
-      .then(plaintext => Buffer.from(plaintext))
+      .then(plaintext => Buffer.from(plaintext).toString())
   }
-  
+
   /**
    * importKey
    *

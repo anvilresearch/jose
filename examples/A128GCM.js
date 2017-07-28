@@ -21,17 +21,14 @@ crypto.subtle
   .then(result => {
     key = result
     console.log(key)
-    console.log(key.handle)
 
     return JWA.encrypt('A128GCM', key, 'encryptthisplaintext')
   })
 
   // print the ciphertext
-  .then(ciphertext => {
-    return Promise.all([
-      Promise.resolve(base64url(ciphertext)),
-      JWA.decrypt('A128GCM', key, ciphertext)
-    ])
+  .then(({iv, ciphertext}) => {
+      console.log(ciphertext)
+      return JWA.decrypt('A128GCM', key, ciphertext, iv)
   })
 
   // get back the plaintext

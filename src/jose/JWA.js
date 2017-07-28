@@ -84,21 +84,20 @@ class JWA {
       return Promise.reject(new NotSupportedError(alg))
     }
     // validate key ?
-    // generate a random CEK ?
     return normalizedAlgorithm.encrypt(key, data)
   }
 
   /**
    * Decrypt
    */
-  static decrypt (alg, key, data) {
+  static decrypt (alg, key, data, iv) {
     let normalizedAlgorithm = supportedAlgorithms.normalize('decrypt', alg)
 
     if (normalizedAlgorithm instanceof Error) {
       return Promise.reject(new NotSupportedError(alg))
     }
     // validate key ?
-    return normalizedAlgorithm.decrypt(key, data)
+    return normalizedAlgorithm.decrypt(key, data, iv)
   }
 
   /**

@@ -29,7 +29,7 @@ const A128GCMKey = {
  */
 describe('AES-GCM', () => {
 
-  let alg, ec, encryptedDataBuffer
+  let alg, ec, encryptedData
 
   before(() => {
     alg = { name: 'AES-GCM', length: 128, tagLength: 128 }
@@ -77,7 +77,7 @@ describe('AES-GCM', () => {
     it('should perform encryption', () => {
       return ec.encrypt(key, data)
         .then(result => {
-          encryptedDataBuffer = result
+          encryptedData = result
           result.should.not.eql(Buffer.from(data))
         })
     })
@@ -104,13 +104,14 @@ describe('AES-GCM', () => {
      })
 
      it('should return a promise', () => {
-       ec.decrypt(key, encryptedDataBuffer).should.be.instanceof(Promise)
+       ec.decrypt(key, encryptedData.ciphertext, encryptedData.iv)
+       .should.be.instanceof(Promise)
      })
 
      it('should recover plaintext', () => {
-       return ec.decrypt(key, encryptedDataBuffer)
+       return ec.decrypt(key, encryptedData.ciphertext, encryptedData.iv)
        .then(result => {
-         result.should.eql(Buffer.from(data))
+         result.should.eql(data)
        })
      })
 

@@ -408,7 +408,7 @@ class JWT extends JSONDocument {
       return this.decode(data.serialized || data)
     }
 
-    if (data.ciphertext) {
+    if (data.ciphertext || data.plaintext) {
 
       let {protected: protect, unprotected, iv, aad,
         ciphertext, tag, recipients, serialization, filter} = data
@@ -587,16 +587,11 @@ class JWT extends JSONDocument {
    */
   static encrypt (...data) {
     let params = Object.assign({}, ...data)
-    let { serialized } = params
-
-    if (!serialized) {
-      throw new Error('JWT input required')
-    }
 
     // Try decode
     let instance
     try {
-      instance = this.from(serialized)
+      instance = this.from(params)
     } catch (e) {
       return Promise.reject(e)
     }
@@ -927,7 +922,7 @@ class JWT extends JSONDocument {
    * encrypt
    *
    * @description
-   * Encrypt the contents of a JSON Web Token instance
+   * Encrypt the given data and create a JSON Web Encryption instance
    *
    * @param {...Object} data
    * @returns {Promise<SerializedToken>}
@@ -935,100 +930,54 @@ class JWT extends JSONDocument {
   encrypt (...data) {
     let params = Object.assign({}, ...data)
 
-    let { payload } = this
+    let { key, plaintext } = params
 
     let {
       protected: protectedHeader,
-      header: unprotectedHeader,
-      signature,
-      signatures,
-      serialization,
-      cryptoKey,
-      validate = true,
-      result
-    } = params
+      unprotected: unprotectedHeader,
+      aad,
+      tag
+    } = this
 
-    if (validate) {
-      let validation = this.validate()
+    // TODO Figure out the Key management mode for the alg and act accordingly
+    // header.alg
 
-      if (!validation.valid) {
-        return Promise.reject(validation)
-      }
+    // For now, implement direct encryption
+    let cek = key
+    let encrypted_key = new Uint8Array()
+    let encodedKey = base64url(encrypted_key)
+
+    // TODO this must be done for each recipent
+
+    // iv is generated and encoded in the specific class
+
+    // check and apply compression algorithm
+    if(protectedHeader.zip) {
+
     }
 
-    // Override serialization
-    if (serialization) {
-      Object.defineProperty(this, 'serialization', {
-        value: serialization,
-        enumerable: false,
-        configurable: true
-      })
+    if(!protectedHeader) {
+      protectedHeader = ""
+    }
+    let encodedHeader = base64url(JSON.stringify(protectedHeader))
+    if(aad) {
+      let encodedAad = base64url(aad)
+      aad = `${encodedHeader}.${encodedAad}`
+      aad = base64url(aad)
+    } else {
+      aad = encodedHeader
     }
 
-    // Normalize new flat signature
-    if (cryptoKey && !signature && (unprotectedHeader || protectedHeader)) {
-      let descriptor = {}
+    // Normalize new encryption
+    this.recipients = []
 
-      if (!protectedHeader && unprotectedHeader) {
-        descriptor.protected = unprotectedHeader
-      } else {
-        descriptor.protected = protectedHeader
-        descriptor.header = unprotectedHeader
-      }
-
-      descriptor.cryptoKey = cryptoKey
-
-      // Add to signatures array
-      if (signatures && Array.isArray(signatures)) {
-        signatures.push(descriptor)
-      } else {
-        signatures = [descriptor]
-      }
-    }
-
-    // Create signatures
-    let promises = []
-    if (signatures && Array.isArray(signatures)) {
-      // Ignore ambiguous/invalid descriptors
-      promises = signatures.filter(descriptor => {
-        return descriptor.cryptoKey && !descriptor.signature
-
-      // assemble and sign
-      }).map(descriptor => {
-        let {
-          protected: protectedHeader,
-          header: unprotectedHeader,
-          signature,
-          cryptoKey
-        } = descriptor
-        let { alg } = protectedHeader
-
-        // Encode signature content
-        let encodedHeader = base64url(JSON.stringify(protectedHeader))
-        let encodedPayload = base64url(JSON.stringify(payload))
-        let data = `${encodedHeader}.${encodedPayload}`
-
-        return JWA.sign(alg, cryptoKey, data).then(signature => {
-          return { protected: protectedHeader, header: unprotectedHeader, signature }
-        })
-      })
-    }
-
-    // Await signatures
-    return Promise.all(promises).then(signatures => {
-      if (signatures.length > 0) {
-        if (this.signatures && Array.isArray(this.signatures)) {
-          this.signatures = this.signatures.concat(signatures)
-        } else {
-          this.signatures = signatures
-        }
-      }
-
-      if (!result || result === 'string') {
-        return this.serialize()
-      } else if (result === 'object' || result === 'instance') {
-        return this
-      }
+    return Promise.resolve(
+      JWA.encrypt(protectedHeader.enc, key, plaintext)
+    ).then(({iv, ciphertext}) => {
+      this.iv = iv
+      this.ciphertext = ciphertext
+    }).then(() => {
+      return this.serialize()
     })
   }
 
@@ -1042,6 +991,7 @@ class JWT extends JSONDocument {
    * @returns {Promise<Object>}
    */
   decrypt (...data) {
+
   }
 
   /**

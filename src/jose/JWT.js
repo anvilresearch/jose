@@ -524,6 +524,10 @@ class JWT extends JSONDocument {
       }
     }
 
+    if (!serialization && unprotectedHeader) {
+      serialization = 'compact'
+    }
+
     // Override serialization
     if (serialization) {
       Object.defineProperty(this, 'serialization', {
@@ -534,7 +538,7 @@ class JWT extends JSONDocument {
     }
 
     // Normalize new flat signature
-    if (cryptoKey && !signature && (unprotectedHeader || protectedHeader)) {
+    if (!signature && (unprotectedHeader || protectedHeader)) {
       let descriptor = {}
 
       if (!protectedHeader && unprotectedHeader) {
@@ -544,7 +548,9 @@ class JWT extends JSONDocument {
         descriptor.header = unprotectedHeader
       }
 
-      descriptor.cryptoKey = cryptoKey
+      if (descriptor.protected.alg !== 'none') {
+        descriptor.cryptoKey = cryptoKey
+      }
 
       // Add to signatures array
       if (signatures && Array.isArray(signatures)) {
@@ -559,7 +565,8 @@ class JWT extends JSONDocument {
     if (signatures && Array.isArray(signatures)) {
       // Ignore ambiguous/invalid descriptors
       promises = signatures.filter(descriptor => {
-        return descriptor.cryptoKey && !descriptor.signature
+        return (descriptor.cryptoKey && !descriptor.signature)
+          || descriptor.protected.alg === 'none'
 
       // assemble and sign
       }).map(descriptor => {
@@ -570,6 +577,10 @@ class JWT extends JSONDocument {
           cryptoKey
         } = descriptor
         let { alg } = protectedHeader
+
+        if (alg === 'none') {
+          return descriptor
+        }
 
         // Encode signature content
         let encodedHeader = base64url(JSON.stringify(protectedHeader))

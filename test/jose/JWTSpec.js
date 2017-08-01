@@ -4,6 +4,7 @@
  * Test dependencies
  */
 const chai = require('chai')
+chai.use(require('dirty-chai'))
 
 /**
  * Assertions
@@ -14,7 +15,6 @@ let expect = chai.expect
 /**
  * Code under test
  */
-const crypto = require('@trust/webcrypto')
 const JWT = require('../../src/jose/JWT')
 const JWTSchema = require('../../src/schemas/JWTSchema')
 const {RsaPrivateCryptoKey, RsaPublicCryptoKey} = require('../keys')
@@ -179,7 +179,7 @@ describe('JWT', () => {
         key: RsaPrivateCryptoKey
       })
 
-      return jwt.encode().should.be.rejected
+      return jwt.encode().should.be.rejected()
     })
 
     it('should resolve a JWS Compact Serialization', () => {
@@ -204,7 +204,7 @@ describe('JWT', () => {
         key: RsaPrivateCryptoKey
       })
 
-      return jwt.verify().should.be.rejected
+      return jwt.verify().should.be.rejected()
     })
 
     it('should resolve a boolean', () => {

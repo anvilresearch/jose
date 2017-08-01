@@ -9,6 +9,9 @@ const JWTSchema = require('../schemas/JWTSchema')
 const JWA = require('./JWA')
 const DataError = require('../errors/DataError')
 const TextEncoder = require('../text-encoder')
+const KeyManagement = require('../algorithms/KeyManagement')
+
+const keyManagement = new KeyManagement
 
 /**
  * Helper Functions
@@ -30,11 +33,12 @@ class JWT extends JSONDocument {
     options.filter = options.filter || false
     super(data, options)
 
-    let { type, serialization } = data
+    let { plaintext, type, serialization } = data
     // console.log(type)
     // console.log(serialization)
     // console.log(data)
 
+    Object.defineProperty(this, 'plaintext', { value: plaintext, configurable: true, enumerable: false })
     Object.defineProperty(this, 'type', { value: type, configurable: true, enumerable: false })
     Object.defineProperty(this, 'serialization', { value: serialization, configurable: true, enumerable: false })
   }
@@ -193,7 +197,7 @@ class JWT extends JSONDocument {
     }
 
     // decide if JWT is JWS(has payload) or JWE(has ciphertext)
-    if(data.payload) {
+    if (data.payload) {
       let protectedHeader, payload
 
       // Decode base64url
@@ -230,20 +234,24 @@ class JWT extends JSONDocument {
     } else {
       let protect, unprotect, iv, aad, ciphertext, tag, encrypted_key, header
 
+      if (data.recipients) {
+        throw new Error('Flattened JWE must not have recipients field')
+      }
+
       try {
-        if(data.protected) {
+        if (data.protected) {
           protect = JSON.parse(base64url.decode(data.protected))
         }
-        unprotect = data.unprotected
-        iv = data.iv
-        aad = data.aad
-        ciphertext = data.ciphertext
-        header = data.header;
-        encrypted_key = data.encrypted_key;
-        tag = data.tag
       } catch (err) {
         throw new Error('Invalid JWT')
       }
+      unprotect = data.unprotected
+      iv = data.iv
+      aad = data.aad
+      ciphertext = data.ciphertext
+      header = data.header
+      encrypted_key = data.encrypted_key
+      tag = data.tag
 
       return new ExtendedJWT(
         clean({
@@ -290,7 +298,7 @@ class JWT extends JSONDocument {
     }
 
     // decide if JWT is JWS(has payload) or JWE(has ciphertext)
-    if(data.payload) {
+    if (data.payload) {
       let payload, signatures
 
       // Signatures must be present and an array
@@ -344,17 +352,25 @@ class JWT extends JSONDocument {
       let protect, unprotect, iv, aad, ciphertext, tag, recipients
 
       try {
-        if(data.protected) {
+        if (data.protected) {
           protect = JSON.parse(base64url.decode(data.protected))
         }
-        unprotect = data.unprotected
-        iv = data.iv
-        aad = data.aad
-        ciphertext = data.ciphertext
-        tag = data.tag
       } catch (err) {
         throw new Error('Invalid JWT')
       }
+
+      if (data.unprotected && (typeof data.unprotected !== 'object'
+          || data.unprotected === null || Array.isArray(data.unprotected))) {
+        throw new DataError('JWE Unprotected Header must be an object')
+      }
+      unprotect = data.unprotected
+      iv = data.iv
+      aad = data.aad
+      if (!data.ciphertext) {
+        throw new DataError("Ciphertext member not present")
+      }
+      ciphertext = data.ciphertext
+      tag = data.tag
 
       if (!Array.isArray(data.recipients)) {
         throw new DataError('JWT recipients property must be an array')
@@ -368,8 +384,8 @@ class JWT extends JSONDocument {
         }
 
         return {
-          header: header,
-          encrypted_key: encrypted_key
+          header,
+          encrypted_key
         }
       })
 
@@ -411,7 +427,7 @@ class JWT extends JSONDocument {
     if (data.ciphertext || data.plaintext) {
 
       let {protected: protect, unprotected, iv, aad,
-        ciphertext, tag, recipients, serialization, filter} = data
+        plaintext, ciphertext, tag, recipients, serialization, filter} = data
 
       //filter the recipients
       if (recipients && Array.isArray(recipients)) {
@@ -441,6 +457,7 @@ class JWT extends JSONDocument {
           unprotected,
           iv,
           aad,
+          plaintext,
           ciphertext,
           tag,
           serialization,
@@ -936,31 +953,41 @@ class JWT extends JSONDocument {
       protected: protectedHeader,
       unprotected: unprotectedHeader,
       aad,
-      tag
+      tag,
+      recipients
     } = this
 
+    let alg, cek, encrypted_key
     // TODO Figure out the Key management mode for the alg and act accordingly
-    // header.alg
+    if (recipients) {
+      recipients.map(recipient => {
+        alg = recipient.header.alg
+        let result = keyManagement.normalize(alg, key)
+        recipent.encrypted_key = result.encrypted_key
+      })
+      // do the steps for each recipient
+    } else {
+      alg = protectedHeader.alg
+      let result = keyManagement.normalize(alg, key)
+      cek = result.cek
+      encrypted_key = base64url(result.encrypted_key)
+      // JWA.something(alg, key, data).then()
+    }
 
     // For now, implement direct encryption
-    let cek = key
-    let encrypted_key = new Uint8Array()
-    let encodedKey = base64url(encrypted_key)
-
-    // TODO this must be done for each recipent
 
     // iv is generated and encoded in the specific class
 
     // check and apply compression algorithm
-    if(protectedHeader.zip) {
+    if (protectedHeader.zip) {
 
     }
 
-    if(!protectedHeader) {
+    if (!protectedHeader) {
       protectedHeader = ""
     }
     let encodedHeader = base64url(JSON.stringify(protectedHeader))
-    if(aad) {
+    if (aad) {
       let encodedAad = base64url(aad)
       aad = `${encodedHeader}.${encodedAad}`
       aad = base64url(aad)
@@ -970,9 +997,10 @@ class JWT extends JSONDocument {
 
     // Normalize new encryption
     this.recipients = []
+    this.recipients.push({encrypted_key})
 
     return Promise.resolve(
-      JWA.encrypt(protectedHeader.enc, key, plaintext)
+      JWA.encrypt(protectedHeader.enc, cek, plaintext)
     ).then(({iv, ciphertext}) => {
       this.iv = iv
       this.ciphertext = ciphertext
@@ -1039,8 +1067,14 @@ class JWT extends JSONDocument {
       let encodedHeader = base64url(JSON.stringify(protectedHeader))
       let key = this.recipients[0].encrypted_key
 
+      let data = `${encodedHeader}.${key}.${iv}.${ciphertext}`
+
       // Return compact JWT
-      return `${encodedHeader}.${key}.${iv}.${ciphertext}.${tag}`
+      if (tag) {
+        return `${encodedHeader}.${key}.${iv}.${ciphertext}.${tag}`
+      } else {
+        return `${data}.`
+      }
     }
   }
 

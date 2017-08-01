@@ -16,7 +16,7 @@ let expect = chai.expect
  * Code under test
  */
 const JWT = require('../../src/jose/JWT')
-const JWTSchema = require('../../src/schemas/JWTSchema')
+const { JWTSchema } = require('../../src/schemas/index')
 const {RsaPrivateCryptoKey, RsaPublicCryptoKey} = require('../keys')
 
 /**
@@ -25,6 +25,8 @@ const {RsaPrivateCryptoKey, RsaPublicCryptoKey} = require('../keys')
 const compact = 'eyJhbGciOiJSUzI1NiIsImtpZCI6InI0bmQwbWJ5dDNzIn0.eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIn0.FMer-lRR4Q4BVivMc9sl-jF3c-QWEenlH2pcW9oXTsiPRSEzc7lgPEryuXTimoToSKwWFgVpnjXKnmBaTaPVLpuRUMwGUeIUdQu0bQC-XEo-TKlwlqtUgelQcF2viEQwxU04UQaXWBh9ZDTIOutfXcjyhEPiMfCFLxT_aotR0zipmAi825lF1qBmxKrCv4c_9_46ACuaeuET6t0XvcAMDf3fjkEdw_0KPN2wnAlp2AwPP05D8Nwn8NqDAlljdN7bjnO99uJvhNWbvZgBYfhNXkMeDVJcukv0j3Cz6LCgedbXdX0rzJv_4qkO6l-LU9QeK1s0kwHfRUIWoa0TLJ4FtQ'
 
 const signature = 'FMer-lRR4Q4BVivMc9sl-jF3c-QWEenlH2pcW9oXTsiPRSEzc7lgPEryuXTimoToSKwWFgVpnjXKnmBaTaPVLpuRUMwGUeIUdQu0bQC-XEo-TKlwlqtUgelQcF2viEQwxU04UQaXWBh9ZDTIOutfXcjyhEPiMfCFLxT_aotR0zipmAi825lF1qBmxKrCv4c_9_46ACuaeuET6t0XvcAMDf3fjkEdw_0KPN2wnAlp2AwPP05D8Nwn8NqDAlljdN7bjnO99uJvhNWbvZgBYfhNXkMeDVJcukv0j3Cz6LCgedbXdX0rzJv_4qkO6l-LU9QeK1s0kwHfRUIWoa0TLJ4FtQ'
+
+const compactUnsecured = 'eyJhbGciOiJub25lIn0.eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIn0.'
 
 /**
  * Tests
@@ -100,6 +102,26 @@ describe('JWT', () => {
       it('should set JWT serialization', () => {
         JWT.decode(compact).serialization
           .should.equal('compact')
+      })
+
+      describe('unsecured (alg: none)', () => {
+        let decoded
+
+        beforeEach(() => {
+          decoded = JWT.decode(compactUnsecured)
+        })
+
+        it('should have a header with alg: none', () => {
+          expect(decoded.header).to.eql({ alg: 'none' })
+        })
+
+        it('should have a payload', () => {
+          expect(decoded.payload).to.eql({ iss: 'https://forge.anvil.io' })
+        })
+
+        it('should have an empty signature', () => {
+          expect(decoded.signature).to.equal('')
+        })
       })
     })
   })
@@ -191,6 +213,20 @@ describe('JWT', () => {
 
       return jwt.encode().should.eventually.equal(compact)
     })
+
+    describe('unsecured (alg: none)', () => {
+      it('should resolve to a JWS compact serialization with no sig', () => {
+        let jwt = new JWT({
+          header: { alg: 'none' },
+          payload: { iss: 'https://forge.anvil.io' }
+        })
+
+        return jwt.encode()
+          .then(compact => {
+            expect(compact).to.equal(compactUnsecured)
+          })
+      })
+    })
   })
 
   /**
@@ -221,6 +257,70 @@ describe('JWT', () => {
       })
 
       return jwt.verify().should.eventually.equal(true)
+    })
+
+    describe('unsecured (alg: none)', () => {
+      const signature = ''
+
+      it('should verify when no key is given', () => {
+        let jwt = new JWT({
+          segments: [
+            'eyJhbGciOiJub25lIn0',
+            'eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIn0',
+            ''
+          ],
+          header: { alg: 'none' },
+          payload: { iss: 'https://forge.anvil.io' },
+          signature,
+          key: undefined
+        })
+
+        return jwt.verify()
+          .then(verified => {
+            expect(verified).to.be.true()
+          })
+      })
+
+      it('should throw an error when a key is given', done => {
+        let jwt = new JWT({
+          segments: [
+            'eyJhbGciOiJub25lIn0',
+            'eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIn0',
+            ''
+          ],
+          header: { alg: 'none' },
+          payload: { iss: 'https://forge.anvil.io' },
+          signature,
+          key: RsaPublicCryptoKey
+        })
+
+        jwt.verify()
+          .catch(err => {
+            expect(err).to.match(/Key provided to verify signature with alg: none/)
+            done()
+          })
+      })
+
+      it('should throw an error when a signature is present', done => {
+        let signature = 'whatever'
+        let jwt = new JWT({
+          segments: [
+            'eyJhbGciOiJub25lIn0',
+            'eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIn0',
+            signature
+          ],
+          header: { alg: 'none' },
+          payload: { iss: 'https://forge.anvil.io' },
+          signature,
+          key: RsaPublicCryptoKey
+        })
+
+        jwt.verify()
+          .catch(err => {
+            expect(err).to.match(/Signature provided to verify with alg: none/)
+            done()
+          })
+      })
     })
   })
 })

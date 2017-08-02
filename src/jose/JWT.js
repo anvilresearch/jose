@@ -429,6 +429,10 @@ class JWT extends JSONDocument {
       let {protected: protect, unprotected, iv, aad,
         plaintext, ciphertext, tag, recipients, serialization, filter} = data
 
+      if (!plaintext && !ciphertext) {
+        throw new DataError('Invalid JWT')
+      }
+
       //filter the recipients
       if (recipients && Array.isArray(recipients)) {
         recipients = recipients.filter(descriptor => descriptor.encrypted_key)
@@ -450,7 +454,6 @@ class JWT extends JSONDocument {
           recipients = [descriptor]
         }
       }
-
       return new ExtendedJWT(
         clean({
           protected: protect,
@@ -947,11 +950,11 @@ class JWT extends JSONDocument {
   encrypt (...data) {
     let params = Object.assign({}, ...data)
 
-    let { key, plaintext } = params
+    let { protected: protectedHeader, key } = params
 
     let {
-      protected: protectedHeader,
       unprotected: unprotectedHeader,
+      plaintext,
       aad,
       tag,
       recipients
@@ -974,8 +977,6 @@ class JWT extends JSONDocument {
       // JWA.something(alg, key, data).then()
     }
 
-    // For now, implement direct encryption
-
     // iv is generated and encoded in the specific class
 
     // check and apply compression algorithm
@@ -990,7 +991,6 @@ class JWT extends JSONDocument {
     if (aad) {
       let encodedAad = base64url(aad)
       aad = `${encodedHeader}.${encodedAad}`
-      aad = base64url(aad)
     } else {
       aad = encodedHeader
     }
@@ -998,7 +998,8 @@ class JWT extends JSONDocument {
     // Normalize new encryption
     this.recipients = []
     this.recipients.push({encrypted_key})
-
+    // console.log(cek)
+    // console.log(protectedHeader.enc)
     return Promise.resolve(
       JWA.encrypt(protectedHeader.enc, cek, plaintext)
     ).then(({iv, ciphertext}) => {
@@ -1019,7 +1020,26 @@ class JWT extends JSONDocument {
    * @returns {Promise<Object>}
    */
   decrypt (...data) {
-
+    // let params = Object.assign({}, ...data)
+    //
+    // let { key, ciphertext, iv } = params
+    //
+    // let {
+    //   protected: protectedHeader,
+    //   unprotected: unprotectedHeader,
+    //   aad,
+    //   tag,
+    //   recipients
+    // } = this
+    //
+    // return Promise.resolve(
+    //   JWA.decrypt(protectedHeader.enc, cek, plaintext)
+    // ).then(({iv, ciphertext}) => {
+    //   this.iv = iv
+    //   this.ciphertext = ciphertext
+    // }).then(() => {
+    //   return this.serialize()
+    // })
   }
 
   /**
@@ -1055,7 +1075,6 @@ class JWT extends JSONDocument {
       }
     } else {
       // TODO figure out key management mode + CEK
-
       let { protected: protectedHeader, iv, aad, ciphertext, tag } = this
 
       if(!protectedHeader) {

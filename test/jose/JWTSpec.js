@@ -38,10 +38,32 @@ const flattenedJwe = '{"protected":"eyJlbmMiOiJBMTI4Q0JDLUhTMjU2In0","unprotecte
 const jsonJwe = '{"protected":"eyJlbmMiOiJBMTI4Q0JDLUhTMjU2In0","unprotected":{"jku":"https://server.example.com/keys.jwks"},"recipients":[{"header":{"alg":"RSA1_5","kid":"2011-04-29"},"encrypted_key":"UGhIOguC7IuEvf_NPVaXsGMoLOmwvc1GyqlIKOK1nN94nHPoltGRhWhw7Zx0-kFm1NJn8LE9XShH59_i8J0PH5ZZyNfGy2xGdULU7sHNF6Gp2vPLgNZ__deLKxGHZ7PcHALUzoOegEI-8E66jX2E4zyJKx-YxzZIItRzC5hlRirb6Y5Cl_p-ko3YvkkysZIFNPccxRU7qve1WYPxqbb2Yw8kZqa2rMWI5ng8OtvzlV7elprCbuPhcCdZ6XDP0_F8rkXds2vE4X-ncOIM8hAYHHi29NX0mcKiRaD0-D-ljQTP-cFPgwCp6X-nZZd9OHBv-B3oWh2TbqmScqXMR4gp_A"},{"header":{"alg":"A128KW","kid":"7"},"encrypted_key":"6KB707dM9YTIgHtLvtgWQ8mKwboJW3of9locizkDTHzBC2IlrT1oOQ"}],"iv":"AxY8DCtDaGlsbGljb3RoZQ","ciphertext":"KDlTtXchhZTGufMYmOYGS4HffxPSUrfmqCHXaI9wOGY","tag":"Mz-VPPyU4RlcuYv1IwIvzw"}'
 
 const ciphertext = "KDlTtXchhZTGufMYmOYGS4HffxPSUrfmqCHXaI9wOGY"
+
 /**
  * Tests
  */
 describe('JWT', () => {
+  let testKey
+
+  before(() => {
+    crypto.subtle.importKey(
+      "jwk",
+      {
+        kty: "oct",
+        k: "Y0zt37HgOx-BY7SQjYVmrqhPkO44Ii2Jcb9yydUDPfE",
+        alg: "A256GCM",
+        ext: true,
+      },
+      {
+        name: "AES-GCM",
+      },
+      false,
+      ["encrypt", "decrypt"]
+    ).then(result => {
+      testKey = result
+      console.log(testKey)
+    })
+  })
 
   /**
    * schema
@@ -410,10 +432,18 @@ describe('JWT', () => {
 
       class ExtendedJWT extends JWT {}
 
-      it('should reject invalid JWT', (done) => {
+      it('should reject invalid JWS', (done) => {
         ExtendedJWT.encode(RsaPrivateCryptoKey, {
           header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
           payload: { iss: null }
+        }).should.be.rejected.and.notify(done)
+      })
+
+      it('should reject invalid JWE', (done) => {
+        ExtendedJWT.encode(testKey, {
+          protected: { alg: "dir", enc: "A256GCM" },
+          plaintext: null,
+          serialization: 'compact'
         }).should.be.rejected.and.notify(done)
       })
 
@@ -426,19 +456,30 @@ describe('JWT', () => {
         }).should.eventually.equal(compact).and.notify(done)
       })
 
-      it.skip('should resolve a JWE Compact Serialization', (done) => {
-        ExtendedJWT.encode({
+      it('should resolve a JWE Compact Serialization', () => {
+        return ExtendedJWT.encode({key: testKey}, {
+          protected: { alg: "dir", enc: "A256GCM" },
+          plaintext: "something",
           serialization: 'compact'
-        }).should.eventually.equal(compactJwe).and.notify(done)
+        }).should.eventually.contain('eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0')
       })
 
-      it('should filter unspecified properties', () => {
+      it('should filter JWS unspecified properties', () => {
         return ExtendedJWT.encode({
           cryptoKey: RsaPrivateCryptoKey,
           header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
           payload: { iss: 'https://forge.anvil.io', foo: 'bar' },
           serialization: 'general'
         }).should.eventually.contain('eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIn0')
+      })
+
+      it('should filter JWE unspecified properties', () => {
+        return ExtendedJWT.encode({
+          key: testKey,
+          protected: { alg: "dir", enc: "A256GCM", foo: 'bar' },
+          plaintext: "something",
+          serialization: 'general'
+        }).should.eventually.contain('eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0')
       })
 
       it('should not filter unspecified properties when filter is false', () => {
@@ -450,13 +491,31 @@ describe('JWT', () => {
           filter: false
         }).should.eventually.contain('eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIiwiZm9vIjoiYmFyIn0')
       })
+
+      it('should not filter JWE unspecified properties when filter is false', () => {
+        return JWT.encode({
+          key: testKey,
+          protected: { alg: "dir", enc: "A256GCM", foo: 'bar' },
+          plaintext: "something",
+          serialization: 'general',
+          filter: false
+        }).should.eventually.contain('eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIiwiZm9vIjoiYmFyIn0')
+      })
+
     })
 
     describe('with Base JWT', () => {
-      it('should reject invalid JWT', (done) => {
+      it('should reject invalid JWS', (done) => {
         JWT.encode(RsaPrivateCryptoKey, {
           header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
           payload: { iss: null }
+        }).should.be.rejected.and.notify(done)
+      })
+
+      it('should reject invalid JWE', (done) => {
+        JWT.encode({key: testKey}, {
+          protected: { alg: "dir", enc: "A256GCM" },
+          plaintext: null
         }).should.be.rejected.and.notify(done)
       })
 
@@ -469,7 +528,15 @@ describe('JWT', () => {
         }).should.eventually.equal(compact).and.notify(done)
       })
 
-      it('should not filter unspecified properties', () => {
+      it('should resolve a JWE Compact Serialization', () => {
+        JWT.encode({key: testKey}, {
+          protected: { alg: "dir", enc: "A256GCM" },
+          plaintext: "something",
+          serialization: 'compact'
+        }).should.eventually.contain('eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0')
+      })
+
+      it('should not filter JWS unspecified properties', () => {
         return JWT.encode({
           cryptoKey: RsaPrivateCryptoKey,
           header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
@@ -478,7 +545,16 @@ describe('JWT', () => {
         }).should.eventually.contain('eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIiwiZm9vIjoiYmFyIn0')
       })
 
-      it('should filter unspecified properties when filter is true', () => {
+      it('should not filter JWE unspecified properties', () => {
+        return JWT.encode({
+          key: testKey,
+          protected: { alg: "dir", enc: "A256GCM", foo: 'bar' },
+          plaintext: "something",
+          serialization: 'general'
+        }).should.eventually.contain('eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIiwiZm9vIjoiYmFyIn0')
+      })
+
+      it('should filter JWS unspecified properties when filter is true', () => {
         return JWT.encode({
           cryptoKey: RsaPrivateCryptoKey,
           header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
@@ -486,6 +562,16 @@ describe('JWT', () => {
           serialization: 'general',
           filter: true
         }).should.eventually.contain('eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIn0')
+      })
+
+      it('should filter JWE unspecified properties when filter is true', () => {
+        return JWT.encode({
+          key: testKey,
+          protected: { alg: "dir", enc: "A256GCM", foo: 'bar' },
+          plaintext: "something",
+          serialization: 'compact',
+          filter: true
+        }).should.eventually.contain('eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0')
       })
     })
   })

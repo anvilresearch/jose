@@ -18,6 +18,10 @@ const {JSONSchema} = require('@trust/json-document')
 const JWTSchema = new JSONSchema({
   type: 'object',
   properties: {
+    /**
+     * JWE protected header
+     */
+    protected: JOSEHeaderSchema,
 
     /**
      * iv

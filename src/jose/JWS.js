@@ -53,16 +53,33 @@ class JWS {
       // ...
     }
 
+    let {key, signature, header: {alg}} = jwt
+
     // one signature
     if (jwt.signature) {
       let [header, payload] = jwt.segments
       let data = `${header}.${payload}`
-      let {key, signature, header: {alg}} = jwt
+
+      if (alg === 'none') {
+        return Promise.reject(new DataError('Signature provided to verify with alg: none'))
+      }
 
       return JWA.verify(alg, key, signature, data).then(verified => {
         jwt.verified = verified
         return verified
       })
+    }
+
+    if (alg === 'none') {
+      if (!key && !signature) {
+        jwt.verified = true
+
+        return Promise.resolve(true)
+      }
+
+      if (key) {
+        return Promise.reject(new DataError('Key provided to verify signature with alg: none'))
+      }
     }
 
     // no signatures to verify

@@ -90,14 +90,14 @@ class JWA {
   /**
    * Decrypt
    */
-  static decrypt (alg, key, data, iv) {
+  static decrypt (alg, key, data, iv, tag) {
     let normalizedAlgorithm = supportedAlgorithms.normalize('decrypt', alg)
 
     if (normalizedAlgorithm instanceof Error) {
       return Promise.reject(new NotSupportedError(alg))
     }
     // validate key ?
-    return normalizedAlgorithm.decrypt(key, data, iv)
+    return normalizedAlgorithm.decrypt(key, data, iv, tag)
   }
 
   /**

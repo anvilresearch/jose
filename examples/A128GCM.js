@@ -26,9 +26,11 @@ crypto.subtle
   })
 
   // print the ciphertext
-  .then(({iv, ciphertext}) => {
+  .then(({iv, ciphertext, tag}) => {
       console.log(ciphertext)
-      return JWA.decrypt('A128GCM', key, ciphertext, iv)
+      console.log(tag)
+
+      return JWA.decrypt('A128GCM', key, ciphertext, iv, tag)
   })
 
   // get back the plaintext

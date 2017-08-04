@@ -36,16 +36,23 @@ class AES_GCM {
   encrypt (key, data) {
     // ensure each encryption has a new iv
     this.params.iv = crypto.getRandomValues(new Uint8Array(16))
+    // this.params.additionalData = aad
     let algorithm = this.params
 
     data = new TextEncoder().encode(data)
 
     return crypto.subtle
       .encrypt(algorithm, key, data)
-      .then(ciphertext => {
+      .then(result => {
+        // split the result into ciphertext and tag
+        let tagLength = (algorithm.tagLength / 8) || 16
+        let tag = result.slice(result.byteLength - tagLength)
+        let ciphertext = result.slice(0, -tagLength)
+
         return {
           iv: base64url(Buffer.from(algorithm.iv)),
-          ciphertext: base64url(Buffer.from(ciphertext))
+          ciphertext: base64url(Buffer.from(ciphertext)),
+          tag: base64url(Buffer.from(tag))
         }
       })
   }
@@ -62,11 +69,21 @@ class AES_GCM {
    *
    * @returns {Promise}
    */
-  decrypt (key, data, iv) {
+  decrypt (key, ciphertext, iv, tag) {
+
     let algorithm = this.params
+
     algorithm.iv = Uint8Array.from(base64url.toBuffer(iv))
 
-    data = base64url.toBuffer(data)
+    // Decode ciphertext and tag from base64
+    ciphertext = base64url.toBuffer(ciphertext)
+    tag = base64url.toBuffer(tag)
+
+    // Concatenate the two buffers
+    let data = new Uint8Array(ciphertext.length + tag.length)
+    data.set(new Uint8Array(ciphertext), 0)
+    data.set(new Uint8Array(tag), ciphertext.length)
+    data = data.buffer
 
     return crypto.subtle
       .decrypt(algorithm, key, data)

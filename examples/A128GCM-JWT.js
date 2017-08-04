@@ -28,12 +28,15 @@ crypto.subtle
       protected: protectedHeader,
       key,
       plaintext,
-      serialization: 'json'
+      serialization: 'compact'
     })
   })
 
   // print the ciphertext
-  .then(result => {
-      console.log(result)
-      // return JWA.decrypt('A128GCM', key, ciphertext, iv)
+  .then(jwe => {
+    console.log(jwe)
+    // JWT.decrypt('A128GCM', key, ciphertext, iv),
+    return JWT.decrypt({key, serialized: jwe })
   })
+
+  .then(console.log)

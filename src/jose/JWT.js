@@ -656,7 +656,7 @@ class JWT extends JSONDocument {
     // check if type is set to JWE
     // check if ciphertext member exists
     // check jose header for alg, enc field
-    // TODO: check alg
+    // TODO: check alg, check for enc in all headers
     return this.type === 'JWE' || this.ciphertext !== undefined ||
           (this.header !== undefined && this.header.enc !== undefined)
   }
@@ -975,6 +975,8 @@ class JWT extends JSONDocument {
       cek = result.cek
       encrypted_key = base64url(result.encrypted_key)
       // JWA.something(alg, key, data).then()
+      this.recipients = []
+      this.recipients.push({encrypted_key})
     }
 
     // iv is generated and encoded in the specific class
@@ -996,15 +998,16 @@ class JWT extends JSONDocument {
     }
 
     // Normalize new encryption
-    this.recipients = []
-    this.recipients.push({encrypted_key})
+    // this.recipients = []
+    // this.recipients.push({encrypted_key})
     // console.log(cek)
     // console.log(protectedHeader.enc)
     return Promise.resolve(
-      JWA.encrypt(protectedHeader.enc, cek, plaintext)
-    ).then(({iv, ciphertext}) => {
+      JWA.encrypt(protectedHeader.enc, cek, plaintext, aad)
+    ).then(({iv, ciphertext, tag}) => {
       this.iv = iv
       this.ciphertext = ciphertext
+      this.tag = tag
     }).then(() => {
       return this.serialize()
     })
@@ -1020,26 +1023,67 @@ class JWT extends JSONDocument {
    * @returns {Promise<Object>}
    */
   decrypt (...data) {
-    // let params = Object.assign({}, ...data)
-    //
-    // let { key, ciphertext, iv } = params
-    //
-    // let {
-    //   protected: protectedHeader,
-    //   unprotected: unprotectedHeader,
-    //   aad,
-    //   tag,
-    //   recipients
-    // } = this
-    //
-    // return Promise.resolve(
-    //   JWA.decrypt(protectedHeader.enc, cek, plaintext)
-    // ).then(({iv, ciphertext}) => {
-    //   this.iv = iv
-    //   this.ciphertext = ciphertext
-    // }).then(() => {
-    //   return this.serialize()
-    // })
+    let params = Object.assign({}, ...data)
+
+    let {
+      protected: protectedHeader,
+      unprotected,
+      iv,
+      aad = "",
+      ciphertext,
+      tag,
+      recipients,
+      serialization
+    } = this
+
+    let { key } = params
+    let encrypted_key = recipients[0].encrypted_key
+
+    encrypted_key = base64url.decode(encrypted_key)
+    aad = base64url.decode(aad)
+
+    // the fields are not base64 encoded anymore at this point
+    // the header was verified in from method
+
+    let joseHeader
+    if (serialization === 'compact') {
+      joseHeader = protectedHeader
+    } else {
+      // check this
+      try {
+        unprotectedHeader = JSON.parse(unprotectedHeader)
+        recipentHeader = JSON.parse(recipients[0].header)
+        joseHeader = Object.assign({}, protectedHeader,
+          unprotectedHeader, recipentHeader)
+        // TODO: the same Header Parameter name also MUST NOT occur in distinct JSON object
+        // values that together comprise the JOSE Header
+      } catch (err) {
+        throw new DataError('Protected header is not a valid object')
+      }
+    }
+
+    // 7. verify the key ? what does this mean ?
+
+    if (encrypted_key.length !== 0) {
+      throw new DataError("JWE encrypted key is not empty for a direct encryption")
+    }
+    let cek = key
+    // console.log(key)
+    if (!protectedHeader) {
+      protectedHeader = ""
+    }
+    let encodedHeader = base64url(JSON.stringify(protectedHeader))
+    if (aad) {
+      let encodedAad = base64url(aad)
+      aad = `${encodedHeader}.${encodedAad}`
+    } else {
+      aad = encodedHeader
+    }
+
+    return Promise.resolve(
+      JWA.decrypt('A128GCM', cek, ciphertext, iv, tag, aad)
+    )
+
   }
 
   /**

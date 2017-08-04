@@ -77,27 +77,27 @@ class JWA {
   /**
    * Encrypt
    */
-  static encrypt (alg, key, data) {
+  static encrypt (alg, key, data, aad) {
     let normalizedAlgorithm = supportedAlgorithms.normalize('encrypt', alg)
 
     if (normalizedAlgorithm instanceof Error) {
       return Promise.reject(new NotSupportedError(alg))
     }
     // validate key ?
-    return normalizedAlgorithm.encrypt(key, data)
+    return normalizedAlgorithm.encrypt(key, data, aad)
   }
 
   /**
    * Decrypt
    */
-  static decrypt (alg, key, data, iv, tag) {
+  static decrypt (alg, key, data, iv, tag, aad) {
     let normalizedAlgorithm = supportedAlgorithms.normalize('decrypt', alg)
 
     if (normalizedAlgorithm instanceof Error) {
       return Promise.reject(new NotSupportedError(alg))
     }
     // validate key ?
-    return normalizedAlgorithm.decrypt(key, data, iv, tag)
+    return normalizedAlgorithm.decrypt(key, data, iv, tag, aad)
   }
 
   /**

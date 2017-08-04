@@ -104,12 +104,14 @@ describe('AES-GCM', () => {
      })
 
      it('should return a promise', () => {
-       ec.decrypt(key, encryptedData.ciphertext, encryptedData.iv)
+       ec.decrypt(key, encryptedData.ciphertext,
+         encryptedData.iv, encryptedData.tag)
        .should.be.instanceof(Promise)
      })
 
      it('should recover plaintext', () => {
-       return ec.decrypt(key, encryptedData.ciphertext, encryptedData.iv)
+       return ec.decrypt(key, encryptedData.ciphertext,
+         encryptedData.iv, encryptedData.tag)
        .then(result => {
          result.should.eql(data)
        })

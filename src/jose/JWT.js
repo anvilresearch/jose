@@ -379,7 +379,8 @@ class JWT extends JSONDocument {
       recipients = data.recipients.map(descriptor => {
         let { header, encrypted_key } = descriptor
 
-        if (!header || typeof header !== 'object' || header === null || Array.isArray(header)) {
+        if (header && (typeof header !== 'object' ||
+              header === null || Array.isArray(header))) {
           throw new DataError('JWE Header must be an object')
         }
 
@@ -1047,18 +1048,23 @@ class JWT extends JSONDocument {
 
     let joseHeader
     if (serialization === 'compact') {
-      joseHeader = protectedHeader
+      joseHeader = Object.assign({}, protectedHeader)
     } else {
+      let recipentHeader
       // check this
       try {
-        unprotectedHeader = JSON.parse(unprotectedHeader)
-        recipentHeader = JSON.parse(recipients[0].header)
+        if (unprotected) {
+          unprotected = JSON.parse(unprotected)
+        }
+        if (recipients[0].header) {
+          recipentHeader = JSON.parse(recipients[0].header)
+        }
         joseHeader = Object.assign({}, protectedHeader,
-          unprotectedHeader, recipentHeader)
+          unprotected, recipentHeader)
         // TODO: the same Header Parameter name also MUST NOT occur in distinct JSON object
         // values that together comprise the JOSE Header
       } catch (err) {
-        throw new DataError('Protected header is not a valid object')
+        throw new DataError('Header is not a valid object')
       }
     }
 

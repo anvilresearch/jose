@@ -951,9 +951,10 @@ class JWT extends JSONDocument {
   encrypt (...data) {
     let params = Object.assign({}, ...data)
 
-    let { protected: protectedHeader, key } = params
+    let { key } = params
 
     let {
+      protected: protectedHeader,
       unprotected: unprotectedHeader,
       plaintext,
       aad,
@@ -1005,13 +1006,14 @@ class JWT extends JSONDocument {
     // console.log(protectedHeader.enc)
     return Promise.resolve(
       JWA.encrypt(protectedHeader.enc, cek, plaintext, aad)
-    ).then(({iv, ciphertext, tag}) => {
-      this.iv = iv
-      this.ciphertext = ciphertext
-      this.tag = tag
-    }).then(() => {
-      return this.serialize()
-    })
+      .then(({iv, ciphertext, tag}) => {
+        this.iv = iv
+        this.ciphertext = ciphertext
+        this.tag = tag
+      }).then(() => {
+        return this.serialize()
+      })
+    )
   }
 
   /**

@@ -34,10 +34,10 @@ class AES_GCM {
    * @returns {Promise}
    */
   encrypt (key, data, aad) {
+    let algorithm = Object.assign({}, this.params)
     // ensure each encryption has a new iv
-    this.params.iv = crypto.getRandomValues(new Uint8Array(16))
-    this.params.additionalData = aad
-    let algorithm = this.params
+    algorithm.iv = crypto.getRandomValues(new Uint8Array(16))
+    algorithm.additionalData = aad
 
     data = new TextEncoder().encode(data)
 

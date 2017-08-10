@@ -181,6 +181,8 @@ JWD inherits from JWT.
 
 #### Style guide
 
+* [Conventional Changelog](https://github.com/bcoe/conventional-changelog-standard/blob/master/convention.md)
+* [EditorConfig](http://editorconfig.org)
 * ES6
 * Standard JavaScript
 * jsdocs

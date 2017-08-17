@@ -8,7 +8,6 @@ const {JSONDocument} = require('@trust/json-document')
 const JWTSchema = require('../schemas/JWTSchema')
 const { JWA } = require('@trust/jwa')
 const DataError = require('../errors/DataError')
-const TextEncoder = require('../text-encoder')
 const KeyManagement = require('../KeyManagement')
 
 const keyManagement = new KeyManagement

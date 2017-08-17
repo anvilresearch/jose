@@ -3,7 +3,7 @@
  * Dependencies
  */
 const crypto = require('@trust/webcrypto')
-const NotSupportedError = require('../errors/NotSupportedError')
+const NotSupportedError = require('./errors/NotSupportedError')
 
 /**
  * SupportedAlgorithms

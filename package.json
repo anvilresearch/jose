@@ -48,10 +48,11 @@
   },
   "homepage": "https://github.com/anvilresearch/jose#README",
   "dependencies": {
-    "base64url": "^2.0.0",
     "@trust/json-document": "^0.1.4",
-    "text-encoding": "^0.6.1",
-    "@trust/webcrypto": ">=0.3.0"
+    "@trust/jwa": "^0.4.1",
+    "@trust/webcrypto": ">=0.3.0",
+    "base64url": "^2.0.0",
+    "text-encoding": "^0.6.1"
   },
   "devDependencies": {
     "@trust/keyto": "^0.3.0",

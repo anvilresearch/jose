@@ -6,10 +6,10 @@
 const base64url = require('base64url')
 const {JSONDocument} = require('@trust/json-document')
 const JWTSchema = require('../schemas/JWTSchema')
-const JWA = require('./JWA')
+const { JWA } = require('@trust/jwa')
 const DataError = require('../errors/DataError')
 const TextEncoder = require('../text-encoder')
-const KeyManagement = require('../algorithms/KeyManagement')
+const KeyManagement = require('../KeyManagement')
 
 const keyManagement = new KeyManagement
 
@@ -1045,7 +1045,6 @@ class JWT extends JSONDocument {
     encrypted_key = base64url.decode(encrypted_key)
     aad = base64url.decode(aad)
 
-    // the fields are not base64 encoded anymore at this point
     // the header was verified in from method
 
     let joseHeader

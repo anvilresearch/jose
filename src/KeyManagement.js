@@ -4,9 +4,10 @@
  */
 const crypto = require('@trust/webcrypto')
 const NotSupportedError = require('./errors/NotSupportedError')
+const { JWA } = require('@trust/jwa')
 
 /**
- * SupportedAlgorithms
+ * KeyManagement
  */
 class KeyManagement {
 
@@ -17,11 +18,11 @@ class KeyManagement {
     // Entries for key algorithms used to decide on
     // cek and compute the encrypted key
     this.keyAlgorithms = new Map([
-      ['dir', { mode: this.directEncryption }]
+      ['dir', { encrypt: this.direct, decrypt: this.direct }]
     ])
   }
 
-  directEncryption (alg, key) {
+  direct (alg, key) {
     return {
       cek: key,
       encrypted_key: new Uint8Array()
@@ -29,55 +30,70 @@ class KeyManagement {
   }
 
   keyWrapOrEncrypt (alg, key) {
-    let cek = new Uint8Array(this.keyAlgorithms.get(alg).cekLength)
+    let cek, encrypted_key
+    cek = new Uint8Array(this.keyAlgorithms.get(alg).cekLength)
     cek = crypto.getRandomValues(cek)
-    let encrypted_key = JWA.encrypt(alg, key, cek)
-    return {
-      cek,
-      encrypted_key
-    }
+    JWA.encryptKey(alg, cek, key)
+    .then(result => {
+      encrypted_key = result
+
+      return {
+        cek,
+        encrypted_key
+      }
+    })
   }
 
   keyAgreeAndWrap (alg, key) {
     let cek = new Uint8Array(this.keyAlgorithms.get(alg).cekLength)
     cek = crypto.getRandomValues(cek)
     // use alg to agree on the key
-    let agreedKey
-    // probably this is not encrypt, but wrap
-    // the spec is confusing
-    let encrypted_key = JWA.encrypt(alg, agreedKey, cek)
-    return {
-      cek,
-      encrypted_key
-    }
+    JWA.generateKey(alg)
+    .then(agreedKey => {
+      JWA.encryptKey(alg, cek, agreedKey)
+      .then(result => {
+        encrypted_key = result
+
+        return {
+          cek,
+          encrypted_key
+        }
+      })
+    })
   }
 
   directAgree (alg, key) {
-    let agreedKey
-    let cek = agreedKey
-    return {
-      cek,
-      encrypted_key: new Uint8Array()
-    }
+    JWA.generateKey(alg)
+    .then(agreedKey => {
+      return {
+        cek: agreedKey,
+        encrypted_key: new Uint8Array()
+      }
+    })
   }
 
   /**
-   * normalize
+   * determineCek
    *
    * @description
-   * Call the corresponding method for the
-   * algorithm type based on JWA alg name
+   * Call the corresponding method for the algorithm type
+   * based on JWA alg name
    *
+   * @param {Boolean} verify
    * @param {Object} alg
    * @param {Object} key
    *
-   * @returns {Object}
+   * @returns {Promise}
    */
-  normalize (alg, key) {
+  determineCek (verify, alg, key) {
     if (!this.keyAlgorithms.get(alg)) {
       throw new NotSupportedError("Key Algorithm is not supported")
     }
-    return (this.keyAlgorithms.get(alg).mode)(alg, key)
+    if (!verify) {
+      return (this.keyAlgorithms.get(alg).encrypt)(alg, key)
+    } else {
+      return (this.keyAlgorithms.get(alg).decrypt)(alg, key)
+    }
   }
 }
 

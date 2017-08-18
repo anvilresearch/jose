@@ -33,13 +33,22 @@ class JWT extends JSONDocument {
     super(data, options)
 
     let { plaintext, type, serialization } = data
-    // console.log(type)
-    // console.log(serialization)
-    // console.log(data)
 
-    Object.defineProperty(this, 'plaintext', { value: plaintext, configurable: true, enumerable: false })
-    Object.defineProperty(this, 'type', { value: type, configurable: true, enumerable: false })
-    Object.defineProperty(this, 'serialization', { value: serialization, configurable: true, enumerable: false })
+    Object.defineProperty(this, 'plaintext', {
+      value: plaintext,
+      configurable: true,
+      enumerable: false
+    })
+    Object.defineProperty(this, 'type', {
+      value: type,
+      configurable: true,
+      enumerable: false
+    })
+    Object.defineProperty(this, 'serialization', {
+      value: serialization,
+      configurable: true,
+      enumerable: false
+    })
   }
 
   /**
@@ -115,7 +124,8 @@ class JWT extends JSONDocument {
       }
 
       // Sanity Check
-      if (typeof protectedHeader !== 'object' || protectedHeader === null || Array.isArray(protectedHeader)) {
+      if (typeof protectedHeader !== 'object'
+          || protectedHeader === null || Array.isArray(protectedHeader)) {
         throw new DataError('JWT Header must be an object')
       }
 
@@ -211,11 +221,14 @@ class JWT extends JSONDocument {
       let { header: unprotectedHeader, signature } = data
 
       // Sanity Check
-      if (typeof protectedHeader !== 'object' || protectedHeader === null || Array.isArray(protectedHeader)) {
+      if (typeof protectedHeader !== 'object' || protectedHeader === null
+          || Array.isArray(protectedHeader)) {
         throw new DataError('JWT Header must be an object')
       }
 
-      if (unprotectedHeader && (typeof unprotectedHeader !== 'object' || unprotectedHeader === null || Array.isArray(unprotectedHeader))) {
+      if (unprotectedHeader &&
+          (typeof unprotectedHeader !== 'object'
+          || unprotectedHeader === null || Array.isArray(unprotectedHeader))) {
         throw new DataError('JWT Header must be an object')
       }
 
@@ -314,7 +327,11 @@ class JWT extends JSONDocument {
 
       // Decode signatures
       signatures = data.signatures.map(descriptor => {
-        let { protected: protectedHeader, header: unprotectedHeader, signature } = descriptor
+        let {
+          protected: protectedHeader,
+          header: unprotectedHeader,
+          signature
+        } = descriptor
         let decodedHeader
 
         try {
@@ -323,11 +340,15 @@ class JWT extends JSONDocument {
           throw new DataError('Invalid JWT')
         }
 
-        if (!decodedHeader || typeof decodedHeader !== 'object' || decodedHeader === null || Array.isArray(decodedHeader)) {
+        if (!decodedHeader || typeof decodedHeader !== 'object'
+            || decodedHeader === null || Array.isArray(decodedHeader)) {
           throw new DataError('JWT Protected Header must be an object')
         }
 
-        if (unprotectedHeader && (typeof unprotectedHeader !== 'object' || unprotectedHeader === null || Array.isArray(unprotectedHeader))) {
+        if (unprotectedHeader &&
+            (typeof unprotectedHeader !== 'object'
+            || unprotectedHeader === null
+            || Array.isArray(unprotectedHeader))) {
           throw new DataError('JWT Header must be an object')
         }
 
@@ -463,10 +484,14 @@ class JWT extends JSONDocument {
           plaintext,
           ciphertext,
           tag,
+          recipients,
           serialization,
           type: 'JWE'
         }),
-        { filter: filter || (ExtendedJWT.name !== 'JWT' && ExtendedJWT.name !== 'JWD') }
+        {
+          filter: filter ||
+            (ExtendedJWT.name !== 'JWT' && ExtendedJWT.name !== 'JWD')
+        }
       )
 
     } else {
@@ -479,14 +504,20 @@ class JWT extends JSONDocument {
 
       // Include complete signature descriptors only
       if (signatures && Array.isArray(signatures)) {
-        signatures = signatures.filter(descriptor => !descriptor.cryptoKey || descriptor.signature)
+        signatures = signatures.filter(
+          descriptor => !descriptor.cryptoKey || descriptor.signature
+        )
       } else {
         signatures = []
       }
 
       // Normalize existing flat signature
       if (!data.cryptoKey && data.signature) {
-        let { protected: protectedHeader, header: unprotectedHeader, signature } = data
+        let {
+          protected: protectedHeader,
+          header: unprotectedHeader,
+          signature
+        } = data
         let descriptor = {}
 
         if (!protectedHeader && unprotectedHeader) {
@@ -512,7 +543,10 @@ class JWT extends JSONDocument {
           serialization,
           type: 'JWS'
         }),
-        { filter: filter || (ExtendedJWT.name !== 'JWT' && ExtendedJWT.name !== 'JWD') }
+        {
+          filter: filter ||
+            (ExtendedJWT.name !== 'JWT' && ExtendedJWT.name !== 'JWD')
+        }
       )
     }
   }
@@ -816,7 +850,11 @@ class JWT extends JSONDocument {
         let data = `${encodedHeader}.${encodedPayload}`
 
         return JWA.sign(alg, cryptoKey, data).then(signature => {
-          return { protected: protectedHeader, header: unprotectedHeader, signature }
+          return {
+            protected: protectedHeader,
+            header: unprotectedHeader,
+            signature
+          }
         })
       })
     }
@@ -962,21 +1000,18 @@ class JWT extends JSONDocument {
     } = this
 
     let alg, cek, encrypted_key
-    // TODO Figure out the Key management mode for the alg and act accordingly
-    if (recipients) {
+    if (recipients.length > 0) {
       recipients.map(recipient => {
-        alg = recipient.header.alg
-        let result = keyManagement.normalize(alg, key)
-        recipent.encrypted_key = result.encrypted_key
+        alg = recipient.header.alg || protectedHeader.alg
+        let result = keyManagement.determineCek(false, alg, key)
+        recipient.encrypted_key = result.encrypted_key
       })
       // do the steps for each recipient
     } else {
       alg = protectedHeader.alg
-      let result = keyManagement.normalize(alg, key)
+      let result = keyManagement.determineCek(false, alg, key)
       cek = result.cek
       encrypted_key = base64url(result.encrypted_key)
-      // JWA.something(alg, key, data).then()
-      this.recipients = []
       this.recipients.push({encrypted_key})
     }
 
@@ -984,7 +1019,7 @@ class JWT extends JSONDocument {
 
     // check and apply compression algorithm
     if (protectedHeader.zip) {
-
+      // JWA.compress()
     }
 
     if (!protectedHeader) {
@@ -998,18 +1033,14 @@ class JWT extends JSONDocument {
       aad = encodedHeader
     }
 
-    // Normalize new encryption
-    // this.recipients = []
-    // this.recipients.push({encrypted_key})
-    // console.log(cek)
-    // console.log(protectedHeader.enc)
     return Promise.resolve(
       JWA.encrypt(protectedHeader.enc, cek, plaintext, aad)
-      .then(({iv, ciphertext, tag}) => {
+      .then(({ iv, ciphertext, tag }) => {
         this.iv = iv
         this.ciphertext = ciphertext
         this.tag = tag
-      }).then(() => {
+      })
+      .then(() => {
         return this.serialize()
       })
     )
@@ -1039,42 +1070,9 @@ class JWT extends JSONDocument {
     } = this
 
     let { key } = params
-    let encrypted_key = recipients[0].encrypted_key
 
-    encrypted_key = base64url.decode(encrypted_key)
     aad = base64url.decode(aad)
 
-    // the header was verified in from method
-
-    let joseHeader
-    if (serialization === 'compact') {
-      joseHeader = Object.assign({}, protectedHeader)
-    } else {
-      let recipentHeader
-      // check this
-      try {
-        if (unprotected) {
-          unprotected = JSON.parse(unprotected)
-        }
-        if (recipients[0].header) {
-          recipentHeader = JSON.parse(recipients[0].header)
-        }
-        joseHeader = Object.assign({}, protectedHeader,
-          unprotected, recipentHeader)
-        // TODO: the same Header Parameter name also MUST NOT occur in distinct JSON object
-        // values that together comprise the JOSE Header
-      } catch (err) {
-        throw new DataError('Header is not a valid object')
-      }
-    }
-
-    // 7. verify the key ? what does this mean ?
-
-    if (encrypted_key.length !== 0) {
-      throw new DataError("JWE encrypted key is not empty for a direct encryption")
-    }
-    let cek = key
-    // console.log(key)
     if (!protectedHeader) {
       protectedHeader = ""
     }
@@ -1086,9 +1084,112 @@ class JWT extends JSONDocument {
       aad = encodedHeader
     }
 
-    return Promise.resolve(
-      JWA.decrypt('A128GCM', cek, ciphertext, iv, tag, aad)
-    )
+    let decryptionSucceeded = false
+
+    let promises = recipients.map(recipient => {
+      let encrypted_key = recipient.encrypted_key
+      encrypted_key = base64url.decode(encrypted_key)
+
+      let joseHeader
+      if (serialization === 'compact') {
+        joseHeader = Object.assign({}, protectedHeader)
+      } else {
+        let recipientHeader
+        // the protected header was verified in from method
+        try {
+          if (unprotected) {
+            unprotected = JSON.parse(unprotected)
+          }
+          if (recipient.header) {
+            recipientHeader = JSON.parse(recipient.header)
+          }
+          joseHeader = Object.assign({}, protectedHeader,
+            unprotected, recipientHeader)
+          // the same Header Parameter name also
+          // MUST NOT occur in distinct JSON object
+          // values that together comprise the JOSE Header
+          let protectedKeys = protectedHeader ?
+                              new Set(Object.keys(protectedHeader)) :
+                              []
+          let unprotectedKeys = unprotected ?
+                              new Set(Object.keys(unprotected)) :
+                              []
+          let recipientKeys = recipientHeader ?
+                              new Set(Object.keys(recipientHeader)) :
+                              []
+          let intersection
+          intersection = new Set(
+            [...unprotectedKeys].filter(x => protectedKeys.has(x))
+          )
+          if (intersection.size !== 0) {
+            throw new Error('Duplicated header parameters')
+          }
+          intersection = new Set(
+            [...unprotectedKeys].filter(x => recipient.has(x))
+          )
+          if (intersection.size !== 0) {
+            throw new Error('Duplicated header parameters')
+          }
+          intersection = new Set(
+            [...recipientKeys].filter(x => protectedKeys.has(x))
+          )
+          if (intersection.size !== 0) {
+            throw new Error('Duplicated header parameters')
+          }
+        } catch (err) {
+          throw new DataError('Header is not a valid object')
+        }
+      }
+      // verify fields - schemas
+      // 6. determine the kmm
+      // 7. verify the key ? what does this mean ?
+      let alg = (recipient.header && recipient.header.alg || protectedHeader.alg)
+      try {
+        if (alg === 'dir' && encrypted_key.length !== 0) {
+          throw new DataError(
+            "JWE encrypted key is not empty for a direct encryption"
+          )
+        }
+        let { cek } = keyManagement.determineCek(true, alg, key)
+        Object.defineProperty(recipient, 'cekDetermined', {
+          value: true,
+          enumerable: false,
+          configurable: true
+        })
+        return JWA.decrypt(protectedHeader.enc, cek, ciphertext, iv, tag, aad)
+        .then(result => {
+          if (joseHeader.zip) {
+            // JWA.decompress()
+          }
+          Object.defineProperty(recipient, 'decrptedSuccessfully', {
+            value: true,
+            enumerable: true,
+            configurable: true
+          })
+          decryptionSucceeded = true
+          Object.defineProperty(recipient, 'result', {
+            value: result,
+            enumerable: true,
+            configurable: true
+          })
+          return recipient
+        })
+      } catch (err) {
+
+      }
+    })
+
+    // Await verification results
+    return Promise.all(promises).then(() => {
+      if (!decryptionSucceeded) {
+        return Promise.reject("Decryption failed for all recipients")
+      }
+      if (serialization === 'json') {
+        return recipients
+      } else {
+        return recipients[0].result
+      }
+    })
 
   }
 
@@ -1124,7 +1225,6 @@ class JWT extends JSONDocument {
         return `${data}.`
       }
     } else {
-      // TODO figure out key management mode + CEK
       let { protected: protectedHeader, iv, aad, ciphertext, tag } = this
 
       if(!protectedHeader) {
@@ -1253,7 +1353,11 @@ class JWT extends JSONDocument {
           // Encode protected header
           let encodedHeader = base64url(JSON.stringify(protectedHeader))
 
-          return { header: unprotectedHeader, protected: encodedHeader, signature }
+          return {
+            header: unprotectedHeader,
+            protected: encodedHeader,
+            signature
+          }
         })
 
         return JSON.stringify({

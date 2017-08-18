@@ -13,7 +13,7 @@ crypto.subtle
   .generateKey(
     {
       name: 'AES-GCM',
-      length: 128
+      length: 256
     },
     false,
     ['encrypt', 'decrypt']

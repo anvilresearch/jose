@@ -61,7 +61,6 @@ describe('JWT', () => {
       ["encrypt", "decrypt"]
     ).then(result => {
       testKey = result
-      console.log(testKey)
     })
   })
 

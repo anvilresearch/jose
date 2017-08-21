@@ -120,7 +120,7 @@ class JWT extends JSONDocument {
       try {
         protectedHeader = JSON.parse(base64url.decode(segments[0]))
       } catch (err) {
-        throw new DataError('Malformed JWS')
+        throw new DataError('Malformed JWT protected header')
       }
 
       // Sanity Check
@@ -223,13 +223,13 @@ class JWT extends JSONDocument {
       // Sanity Check
       if (typeof protectedHeader !== 'object' || protectedHeader === null
           || Array.isArray(protectedHeader)) {
-        throw new DataError('JWT Header must be an object')
+        throw new DataError('JWT Protected Header must be an object')
       }
 
       if (unprotectedHeader &&
           (typeof unprotectedHeader !== 'object'
           || unprotectedHeader === null || Array.isArray(unprotectedHeader))) {
-        throw new DataError('JWT Header must be an object')
+        throw new DataError('JWT Unprotected Header must be an object')
       }
 
       // Normalize and return instance
@@ -244,26 +244,28 @@ class JWT extends JSONDocument {
         })
       )
     } else {
-      let protect, unprotect, iv, aad, ciphertext, tag, encrypted_key, header
+      let {
+        protected: protect,
+        unprotected: unprotect,
+        iv,
+        aad,
+        ciphertext,
+        tag,
+        encrypted_key,
+        header
+      } = data
 
       if (data.recipients) {
         throw new Error('Flattened JWE must not have recipients field')
       }
 
       try {
-        if (data.protected) {
+        if (protect) {
           protect = JSON.parse(base64url.decode(data.protected))
         }
       } catch (err) {
         throw new Error('Invalid JWT')
       }
-      unprotect = data.unprotected
-      iv = data.iv
-      aad = data.aad
-      ciphertext = data.ciphertext
-      header = data.header
-      encrypted_key = data.encrypted_key
-      tag = data.tag
 
       return new ExtendedJWT(
         clean({
@@ -755,7 +757,6 @@ class JWT extends JSONDocument {
     let params = Object.assign({}, ...data)
 
     if (this.isJWE()) {
-      // TODO
       return this.encrypt(params)
     } else {
       return this.sign(params)

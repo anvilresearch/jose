@@ -19,7 +19,7 @@ let expect = chai.expect
 const crypto = require('@trust/webcrypto')
 const { JWT } = require('../../src')
 const JWTSchema = require('../../src/schemas/JWTSchema')
-const {RsaPrivateCryptoKey, RsaPublicCryptoKey} = require('../keys')
+const { RsaPrivateCryptoKey, RsaPublicCryptoKey } = require('../keys')
 
 /**
  * Test data
@@ -246,7 +246,8 @@ describe('JWT', () => {
       })
 
       it('should set JWE encrypted key', () => {
-        JWT.decode(flattenedJwe).recipients[0].should.have.property('encrypted_key')
+        JWT.decode(flattenedJwe).recipients[0]
+          .should.have.property('encrypted_key')
           .that.equals("6KB707dM9YTIgHtLvtgWQ8mKwboJW3of9locizkDTHzBC2IlrT1oOQ")
       })
 
@@ -323,7 +324,8 @@ describe('JWT', () => {
       })
 
       it('should set JWE encrypted key', () => {
-        JWT.decode(compactJwe).recipients[0].should.have.property('encrypted_key')
+        JWT.decode(compactJwe).recipients[0]
+          .should.have.property('encrypted_key')
           .that.equals("UGhIOguC7IuEvf_NPVaXsGMoLOmwvc1GyqlIKOK1nN9" +
                         "4nHPoltGRhWhw7Zx0-kFm1NJn8LE9XShH59_i8J0PH5" +
                         "ZZyNfGy2xGdULU7sHNF6Gp2vPLgNZ__deLKxGHZ7Pc" +
@@ -356,9 +358,154 @@ describe('JWT', () => {
     })
   })
 
-  describe('static encode', () => {})
-  describe('static sign', () => {})
-  describe('static verify', () => {})
+  describe('fromCompact', () => {
+    it('should reject malformed JWT with a DataError', () => {
+      expect(() => {
+        JWT.fromCompact('wrong.number.of.segments')
+      }).to.throw('Malformed JWT')
+
+    })
+
+    it('should reject malformed protected header with a DataError', () => {
+      expect(() => {
+        JWT.fromCompact('1.2.3.4.5')
+      }).to.throw('Malformed JWT protected header')
+
+    })
+
+    it('should reject protected header with a DataError', () => {
+      expect(() => {
+        JWT.fromCompact('Mg.2.3.4.5')
+      }).to.throw('JWT Header must be an object')
+
+    })
+
+    it('should reject malformed payload with a DataError', () => {
+      expect(() => {
+        JWT.fromCompact('eyJhIjoxfQ.eyJhIjoxf.3')
+      }).to.throw('Malformed JWS')
+
+    })
+  })
+
+  describe('fromFlattened', () => {
+    const wrongPayload = '{"payload":"eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIn","protected":"eyJhbGciOiJSUzI1NiIsImtpZCI6InI0bmQwbWJ5dDNzIn0","signature":"FMer-lRR4Q4BVivMc9sl-jF3c-QWEenlH2pcW9oXTsiPRSEzc7lgPEryuXTimoToSKwWFgVpnjXKnmBaTaPVLpuRUMwGUeIUdQu0bQC-XEo-TKlwlqtUgelQcF2viEQwxU04UQaXWBh9ZDTIOutfXcjyhEPiMfCFLxT_aotR0zipmAi825lF1qBmxKrCv4c_9_46ACuaeuET6t0XvcAMDf3fjkEdw_0KPN2wnAlp2AwPP05D8Nwn8NqDAlljdN7bjnO99uJvhNWbvZgBYfhNXkMeDVJcukv0j3Cz6LCgedbXdX0rzJv_4qkO6l-LU9QeK1s0kwHfRUIWoa0TLJ4FtQ"}'
+    const nonObjectProtectedHeader = '{"payload":"eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIn0","protected":"Mg","signature":"FMer-lRR4Q4BVivMc9sl-jF3c-QWEenlH2pcW9oXTsiPRSEzc7lgPEryuXTimoToSKwWFgVpnjXKnmBaTaPVLpuRUMwGUeIUdQu0bQC-XEo-TKlwlqtUgelQcF2viEQwxU04UQaXWBh9ZDTIOutfXcjyhEPiMfCFLxT_aotR0zipmAi825lF1qBmxKrCv4c_9_46ACuaeuET6t0XvcAMDf3fjkEdw_0KPN2wnAlp2AwPP05D8Nwn8NqDAlljdN7bjnO99uJvhNWbvZgBYfhNXkMeDVJcukv0j3Cz6LCgedbXdX0rzJv_4qkO6l-LU9QeK1s0kwHfRUIWoa0TLJ4FtQ"}'
+    const nonObjectUnprotectedHeader = '{"payload":"eyJpc3MiOiJodHRwczovL2ZvcmdlLmFudmlsLmlvIn0","protected":"eyJhbGciOiJSUzI1NiIsImtpZCI6InI0bmQwbWJ5dDNzIn0","signature":"FMer-lRR4Q4BVivMc9sl-jF3c-QWEenlH2pcW9oXTsiPRSEzc7lgPEryuXTimoToSKwWFgVpnjXKnmBaTaPVLpuRUMwGUeIUdQu0bQC-XEo-TKlwlqtUgelQcF2viEQwxU04UQaXWBh9ZDTIOutfXcjyhEPiMfCFLxT_aotR0zipmAi825lF1qBmxKrCv4c_9_46ACuaeuET6t0XvcAMDf3fjkEdw_0KPN2wnAlp2AwPP05D8Nwn8NqDAlljdN7bjnO99uJvhNWbvZgBYfhNXkMeDVJcukv0j3Cz6LCgedbXdX0rzJv_4qkO6l-LU9QeK1s0kwHfRUIWoa0TLJ4FtQ","header":"3"}'
+    const wrongFlattenedJwe = '{"protected":"eyJlbmMiOiJBMTI4Q0JDLUhTMjU2In","unprotected":{"jku":"https://server.example.com/keys.jwks"},"header":{"alg":"A128KW","kid":"7"},"encrypted_key":"6KB707dM9YTIgHtLvtgWQ8mKwboJW3of9locizkDTHzBC2IlrT1oOQ","iv":"AxY8DCtDaGlsbGljb3RoZQ","ciphertext":"KDlTtXchhZTGufMYmOYGS4HffxPSUrfmqCHXaI9wOGY","tag":"Mz-VPPyU4RlcuYv1IwIvzw"}'
+
+    it('should reject malformed JWT with a DataError', () => {
+      expect(() => {
+        JWT.fromFlattened('2-')
+      }).to.throw('Malformed JWT')
+    })
+
+    it('should reject non-object JWT with a DataError', () => {
+      expect(() => {
+        JWT.fromFlattened('false')
+      }).to.throw('Invalid JWT')
+    })
+
+    it('should reject protected header with an Error', () => {
+      expect(() => {
+        JWT.fromFlattened(wrongPayload)
+      }).to.throw('Invalid JWT')
+    })
+
+    it('should reject protected header with a DataError', () => {
+      expect(() => {
+        JWT.fromFlattened(nonObjectProtectedHeader)
+      }).to.throw('JWT Protected Header must be an object')
+    })
+
+    it('should reject unprotected header with a DataError', () => {
+      expect(() => {
+        JWT.fromFlattened(nonObjectUnprotectedHeader)
+      }).to.throw('JWT Unprotected Header must be an object')
+    })
+
+    it('should reject wrong flattened JWE with an Error', () => {
+      expect(() => {
+        JWT.fromFlattened(wrongFlattenedJwe)
+      }).to.throw('Invalid JWT')
+    })
+
+    it('should reject recipients on a flattened JWE with an Error', () => {
+      expect(() => {
+        JWT.fromFlattened(flattenedJwe.slice(0, -1) + ',"recipients":"1"}')
+      }).to.throw('Flattened JWE must not have recipients field')
+    })
+  })
+
+  describe('static sign', () => {
+    it('should reject invalid parameters', (done) => {
+      JWT.sign(RsaPrivateCryptoKey, {
+        header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
+        payload: { iss: null }
+      }).should.be.rejected.and.notify(done)
+    })
+
+    it('should reject without payload', (done) => {
+      JWT.sign(RsaPrivateCryptoKey, {
+        header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
+      }).should.be.rejected.and.notify(done)
+    })
+
+    it('should resolve a JWS', (done) => {
+      JWT.sign({
+        cryptoKey: RsaPrivateCryptoKey,
+        header: { alg: 'RS256', kid: 'r4nd0mbyt3s' },
+        payload: { iss: 'https://forge.anvil.io' },
+        serialization: 'compact'
+      }).should.eventually.equal(compact).and.notify(done)
+    })
+  })
+
+  describe('static verify', () => {
+    it('should reject without serialized input', () => {
+      expect(() => {
+        JWT.verify({})
+      }).to.throw('JWT input required')
+    })
+  })
+
+  describe('static encrypt', () => {
+    it('should reject invalid parameters', (done) => {
+      JWT.encrypt(RsaPublicCryptoKey, {
+        header: { enc: 'A128GCM' },
+        plaintext: null
+      }).should.be.rejected.and.notify(done)
+    })
+
+    it('should resolve a JWE', (done) => {
+      JWT.encrypt({
+        key: testKey,
+        protected: { alg: "dir", enc: 'A128GCM' },
+        plaintext: JSON.stringify({ iss: 'https://forge.anvil.io' }),
+        serialization: 'compact'
+      }).should.eventually.notify(done)
+    })
+  })
+
+  describe('static decrypt', () => {
+    it('should reject without serialized input', () => {
+      expect(() => {
+        JWT.decrypt({})
+      }).to.throw('JWT input required')
+    })
+
+    it('should reject invalid JWT', (done) => {
+      JWT.decrypt({ cryptoKey: RsaPublicCryptoKey, serialized: 'invalid' })
+        .should.be.rejectedWith('Malformed JWT')
+        .and.notify(done)
+    })
+
+    it('should resolve a boolean', (done) => {
+      JWT.decrypt({ key: testKey, serialized: compactJwe })
+        .should.be.rejectedWith('Decryption failed for all recipients')
+        .and.notify(done)
+    })
+  })
 
   describe('isJWE', () => {
     it('should return true with "enc" header', () => {

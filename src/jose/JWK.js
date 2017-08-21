@@ -6,7 +6,7 @@
  */
 const {JSONDocument} = require('@trust/json-document')
 const JWKSchema = require('../schemas/JWKSchema')
-const JWA = require('./JWA')
+const { JWA } = require('@trust/jwa')
 
 /**
  * JWK Class

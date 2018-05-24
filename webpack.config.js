@@ -1,6 +1,7 @@
-var path = require('path')
+const path = require('path')
 
 module.exports = {
+  mode: 'production',
   entry: [
     './lib/index.js'
   ],
@@ -11,13 +12,17 @@ module.exports = {
     libraryTarget: 'var'
   },
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.js$/,
-        loader: 'babel-loader',
-        query: {
-          presets: ['es2015']
-        }
+        use: [
+          {
+            loader: 'babel-loader',
+            query: {
+              presets: ['env']
+            }
+          }
+        ]
       }
     ]
   },
